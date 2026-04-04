@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core EDA — Food-101 | DL Hub</title>
+  <meta name="description" content="Core exploratory data analysis of the Food-101 dataset: image dimensions, file sizes, aspect ratios, color distributions, and quality metrics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <style>
+    .menu-actions { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 20px; }
+    .menu-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: 0.2s; color: #374151; }
+    .btn-tutorial { background: #F9B2D7; }
+    .btn-tutorial:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-code { background: #CFECF3; }
+    .btn-code:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-copy { background: #DAF9DE; }
+    .btn-copy:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .tutorial-panel, .code-panel { display: none; background: #F6FFDC; border-left: 5px solid #F9B2D7; border-radius: 8px; padding: 20px; margin: 20px 0px; }
+    .code-panel { border-left-color: #CFECF3; background: #fafff5; }
+    .tutorial-panel.active, .code-panel.active { display: block; }
+    .tutorial-explanation h3 { margin-top: 0; color: #7c3d5a; }
+    .explanation-item { margin-bottom: 12px; }
+    .explanation-item strong { color: #b8567a; font-size: 1.05rem; }
+    .code-actions-inline { text-align: right; margin-bottom: -10px; }
+    .copy-btn { background: #CFECF3; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; color: #374151; }
+    .copy-btn:hover { background: #b8dfe8; }
+    .code-tab-content pre { margin-top: 15px; background: #282c34; color: #abb2bf; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    .code-tab-content pre code { background: transparent !important; color: inherit !important; padding: 0 !important; font-family: monospace !important; border: none !important; }
+    .eda-core-stat .stat-card { background: #F6FFDC; border: 1px solid #DAF9DE; }
+    .eda-note-box { background: #CFECF3; border: 1px solid #b8dfe8; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1.5rem; color: #374151; }
+    .eda-insight-card { background: #DAF9DE; border: 1px solid #b8e8c8 !important; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../../../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Assignment 1</a></li>
+        <li><a href="index.html">EDA Home</a></li>
+        <li><a href="eda_core.html" class="active">Core</a></li>
+        <li><a href="eda_classification.html">Classification</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero-banner">
+    <h1>📊 Core Dataset Analysis</h1>
+    <p class="subtitle">Comprehensive analysis of image properties: dimensions, file sizes, aspect ratios, color distributions, and quality metrics for the Food-101 dataset.</p>
+  </header>
+
+  <!-- === Dataset Overview === -->
+  <section class="section">
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📊 Dataset Overview</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="stat-cards eda-core-stat" id="overview-stats">
+          <div class="stat-card"><span class="stat-value" id="ov-images">—</span><span class="stat-label">Total Images</span></div>
+          <div class="stat-card"><span class="stat-value" id="ov-classes">—</span><span class="stat-label">Classes</span></div>
+          <div class="stat-card"><span class="stat-value" id="ov-size">—</span><span class="stat-label">Total Size</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- === Image Size Distribution & Aspect Ratio === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📐 Image Size Distribution & Aspect Ratio</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('size_dist'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('size_dist'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('size_dist'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="size_dist-tutorial">
+          <div class="tutorial-explanation">
+            <h3>📚 Image Size Distribution Analysis</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Examines width, height, and aspect ratios of all images in the dataset.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Understanding size patterns helps optimize preprocessing, identify outliers, and plan model input requirements.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Calculate statistics for width/height/aspect ratios, visualize distributions with histograms and a scatter plot.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="size_dist-code">
+          <div class="code-tab-content active" id="size_dist-plotly">
+            <pre class="language-python"><code>from pathlib import Path
+
+import pandas as pd
+from PIL import Image
+import plotly.express as px
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+IMG_DIR = Path("data/food-101/images")
+
+
+def iter_image_paths(img_dir: Path):
+    for class_dir in sorted([path for path in img_dir.iterdir() if path.is_dir()]):
+        for path in sorted(class_dir.iterdir()):
+            if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+                yield class_dir.name, path
+
+
+rows = []
+for class_name, path in iter_image_paths(IMG_DIR):
+    with Image.open(path) as img:
+        rgb = img.convert("RGB")
+        width, height = rgb.size
+    rows.append(
+        {
+            "class_name": class_name,
+            "path": str(path),
+            "width": width,
+            "height": height,
+            "file_size_kb": path.stat().st_size / 1024.0,
+            "aspect_ratio": width / max(height, 1),
+        }
+    )
+
+records = pd.DataFrame(rows)
+
+px.scatter(
+    records.sample(min(3000, len(records)), random_state=42),
+    x="width",
+    y="height",
+    opacity=0.6,
+    title="Image Size Distribution (Width vs Height)",
+).show()
+
+px.histogram(
+    records,
+    x="file_size_kb",
+    nbins=40,
+    title="File Size Distribution (KB)",
+    labels={"file_size_kb": "File size (KB)"},
+).show()
+
+px.histogram(
+    records,
+    x="aspect_ratio",
+    nbins=40,
+    title="Aspect Ratio Distribution",
+    labels={"aspect_ratio": "Width / Height"},
+).show()</code></pre>
+          </div>
+        </div>
+        <h4>Size Marginal Distribution</h4>
+        <p>Width vs Height scatter plot with marginal histograms showing distribution along each axis</p>
+        <div class="chart-container" id="chart-size-scatter" style="height:500px;"></div>
+
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+          <div>
+            <h4>File Size Distribution</h4>
+            <p>Distribution of image file sizes in kilobytes</p>
+            <div class="chart-container" id="chart-file-size" style="height:350px;"></div>
+          </div>
+          <div>
+            <h4>Aspect Ratio Distribution</h4>
+            <p>Distribution of width/height ratios (wide, square, tall)</p>
+            <div class="chart-container" id="chart-aspect-ratio" style="height:350px;"></div>
+          </div>
+        </div>
+
+        <div class="insights-grid" style="margin-top:1.5rem;">
+          <div class="insight-card success eda-insight-card">
+            <h4>📊 Key Insights</h4>
+            <ul>
+              <li><strong>Image Dimensions:</strong> Shows the diversity of image sizes in the dataset</li>
+              <li><strong>File Sizes:</strong> Helps identify compression levels and storage requirements</li>
+              <li><strong>Aspect Ratios:</strong> Important for data augmentation and model input size planning</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Color Space Analysis & Quality Metrics === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>🎨 Color Space Analysis & Quality Metrics</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('color_dist'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('color_dist'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('color_dist'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="color_dist-tutorial">
+          <div class="tutorial-explanation">
+            <h3>📚 Color Quality Analysis</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Analysis of RGB distribution and sharpness/blur metrics.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Color biases can affect CNNs, while blur metrics guide data cleaning.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Plot 3D RGB scatter, calculate Laplacian variance for sharpness.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="color_dist-code">
+          <div class="code-tab-content active" id="color_dist-plotly">
+            <pre class="language-python"><code>from pathlib import Path
+
+import cv2
+import numpy as np
+import pandas as pd
+from PIL import Image
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+IMG_DIR = Path("data/food-101/images")
+
+
+def read_image_rgb_uint8(path: str, image_size: int | None = None) -> np.ndarray:
+    with Image.open(path) as img:
+        rgb = img.convert("RGB")
+        if image_size is not None:
+            rgb = rgb.resize((image_size, image_size))
+        return np.asarray(rgb, dtype=np.uint8)
+
+
+def iter_image_paths(img_dir: Path):
+    for class_dir in sorted([path for path in img_dir.iterdir() if path.is_dir()]):
+        for path in sorted(class_dir.iterdir()):
+            if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+                yield class_dir.name, path
+
+
+rows = []
+for class_name, path in iter_image_paths(IMG_DIR):
+    with Image.open(path) as img:
+        rgb = img.convert("RGB")
+        arr = np.asarray(rgb, dtype=np.float32) / 255.0
+    gray = cv2.cvtColor((arr * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
+    rows.append(
+        {
+            "class_name": class_name,
+            "path": str(path),
+            "brightness": float(arr.mean()),
+            "contrast": float(arr.std()),
+            "sharpness": float(cv2.Laplacian(gray, cv2.CV_64F).var()),
+        }
+    )
+
+records = pd.DataFrame(rows)
+
+rng = np.random.default_rng(42)
+sampled_records = records.sample(min(120, len(records)), random_state=42)
+rgb_frames = []
+for _, row in sampled_records.iterrows():
+    pixels = read_image_rgb_uint8(row["path"], image_size=128).reshape(-1, 3)
+    if len(pixels) > 256:
+        pixels = pixels[rng.choice(len(pixels), size=256, replace=False)]
+    pixel_frame = pd.DataFrame(pixels, columns=["red", "green", "blue"])
+    pixel_frame["brightness"] = pixel_frame[["red", "green", "blue"]].mean(axis=1).round(1)
+    pixel_frame["class_name"] = row["class_name"]
+    pixel_frame["rgb_color"] = pixel_frame.apply(
+        lambda px_row: f"rgb({px_row['red']},{px_row['green']},{px_row['blue']})",
+        axis=1,
+    )
+    rgb_frames.append(pixel_frame)
+
+rgb_plot = pd.concat(rgb_frames, ignore_index=True)
+go.Figure(
+    data=[
+        go.Scatter3d(
+            x=rgb_plot["red"],
+            y=rgb_plot["green"],
+            z=rgb_plot["blue"],
+            mode="markers",
+            marker=dict(size=3, opacity=0.5, color=rgb_plot["rgb_color"]),
+            customdata=np.stack([rgb_plot["class_name"], rgb_plot["brightness"]], axis=1),
+            hovertemplate="Class: %{customdata[0]}<br>R: %{x}<br>G: %{y}<br>B: %{z}<br>Brightness: %{customdata[1]}<extra></extra>",
+        )
+    ]
+).show()
+
+px.scatter(
+    records.sample(min(4000, len(records)), random_state=42),
+    x="sharpness",
+    y="contrast",
+    color="class_name",
+    opacity=0.65,
+    title="Image Quality Metrics",
+    hover_data={"brightness": ":.1f", "sharpness": ":.1f", "contrast": ":.1f", "path": False},
+).show()
+
+px.histogram(records, x="sharpness", nbins=40, title="Sharpness Distribution").show()
+
+blurry = records.sort_values("sharpness").head(5)
+sharp = records.sort_values("sharpness").tail(5)
+subplot_titles = []
+for label, frame in [("Blurriest", blurry), ("Sharpest", sharp)]:
+    for _, row in frame.iterrows():
+        subplot_titles.append(f"{label}<br>{row['class_name']}<br>sharp={row['sharpness']:.1f}")
+
+fig = make_subplots(rows=2, cols=5, subplot_titles=subplot_titles, vertical_spacing=0.08)
+for row_idx, frame in enumerate([blurry, sharp], start=1):
+    for col_idx, (_, row) in enumerate(frame.iterrows(), start=1):
+        fig.add_trace(go.Image(z=read_image_rgb_uint8(row["path"], image_size=256)), row=row_idx, col=col_idx)
+fig.update_layout(title="Blurriest vs Sharpest Samples", height=700, width=1300)
+fig.show()</code></pre>
+          </div>
+        </div>
+        <h4>RGB Color Space Distribution</h4>
+        <p>3D visualization of RGB color distribution sampled across the dataset</p>
+        <p style="margin-top:-0.2rem; margin-bottom:0.8rem; font-size:0.9rem; color:#4b5563;">Sample: 120 images, up to 256 pixels/image.</p>
+        <div class="chart-container" id="chart-rgb-3d" style="height:550px;"></div>
+
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+          <div>
+            <p style="margin:0 0 0.5rem 0; font-size:0.9rem; color:#4b5563;">Sample: all images.</p>
+            <div class="chart-container" id="chart-sharpness" style="height:350px;"></div>
+          </div>
+          <div>
+            <p style="margin:0 0 0.5rem 0; font-size:0.9rem; color:#4b5563;">Sample: 4,000 images.</p>
+            <div class="chart-container" id="chart-quality-scatter" style="height:350px;"></div>
+          </div>
+        </div>
+
+        <h4 style="margin-top:2rem;">Blur Extremes Analysis</h4>
+        <p>Top 5 blurriest and sharpest images measured by Laplacian variance.</p>
+        <p style="margin-top:-0.2rem; margin-bottom:0.8rem; font-size:0.9rem; color:#4b5563;">Sample: 10 images (5 blurriest + 5 sharpest).</p>
+        <div id="blur-extremes-container" style="margin-top:1rem;"></div>
+
+        <div class="insights-grid" style="margin-top:1.5rem;">
+          <div class="insight-card success eda-insight-card">
+            <h4>🎨 Color & Quality Insights</h4>
+            <ul>
+              <li><strong>RGB Distribution:</strong> Shows color diversity and potential color biases in the dataset</li>
+              <li><strong>Sharpness & Contrast:</strong> Indicates image quality and focus levels across the dataset</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Interactive Sample Gallery === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>🖼️ Interactive Sample Gallery</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <p>Sample images from the dataset. Select food classes below.</p>
+        <style>
+          .class-cb-label {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #b8dfe8;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #F6FFDC;
+            font-size: 0.95rem;
+            color: #374151;
+            user-select: none;
+          }
+          .class-cb-label:hover {
+            background: #edfadb;
+          }
+          .class-cb-label input {
+            margin-right: 0.8rem;
+            transform: scale(1.2);
+            cursor: pointer;
+          }
+          .class-cb-label.checked {
+            background: #CFECF3;
+            border-color: #7eb6c3;
+            color: #1e4d5c;
+            font-weight: 600;
+          }
+        </style>
+        
+        <div style="margin-bottom:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <label style="font-weight:600; font-size:1.1rem; color:#374151;">Select classes to display:</label>
+            <div style="display:flex; gap:1rem;">
+              <button onclick="selectAllClasses()" style="background:#DAF9DE; color:#374151; border:1px solid #b8e8c8; padding:0.5rem 1.2rem; border-radius:6px; cursor:pointer; font-weight:600;">Select All</button>
+              <button onclick="selectNoClasses()" style="background:#F9B2D7; color:#374151; border:1px solid #e8a0c4; padding:0.5rem 1.2rem; border-radius:6px; cursor:pointer; font-weight:600;">Select None</button>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 2rem; border:1px solid #b8dfe8; border-radius:6px; overflow:hidden;">
+            <div onclick="const b=this.nextElementSibling; b.style.display = b.style.display==='none' ? 'block' : 'none'; const s=this.querySelector('span'); s.textContent = b.style.display==='none' ? '▼' : '▲';" style="background:#CFECF3; color:#374151; padding:0.8rem 1rem; cursor:pointer; display:flex; align-items:center;">
+              <h3 style="margin:0; font-size:1rem; font-weight:600; flex:1;">Show/Hide Class Selection</h3>
+              <span style="font-size:0.85rem;">▲</span>
+            </div>
+            <div style="padding:1rem; display:block;">
+              <div id="class-checkboxes" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:0.8rem;">
+                <!-- JS will populate -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-grid" id="gallery-container" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem;"></div>
+      </div>
+    </div>
+
+  </section>
+  
+
+  <script>
+    function toggleTutorial(sectionId) {
+      const panel = document.getElementById(sectionId + '-tutorial');
+      const codePanel = document.getElementById(sectionId + '-code');
+      const isActive = panel.classList.toggle('active');
+      if (isActive && codePanel) codePanel.classList.remove('active');
+    }
+
+    function toggleCode(sectionId) {
+      const panel = document.getElementById(sectionId + '-code');
+      const tutorialPanel = document.getElementById(sectionId + '-tutorial');
+      const isActive = panel.classList.toggle('active');
+      if (isActive && tutorialPanel) tutorialPanel.classList.remove('active');
+    }
+
+    function copyCodeFromTab(sectionId) {
+      const codeBlock = document.querySelector('#' + sectionId + '-plotly code');
+      if (codeBlock) {
+        navigator.clipboard.writeText(codeBlock.innerText);
+        alert('Code copied to clipboard!');
+      }
+    }
+    
+    function copyAllCode(sectionId) {
+       copyCodeFromTab(sectionId);
+    }
+
+    const PLOTLY_LAYOUT = {
+      font: { family: 'Inter, sans-serif', size: 12 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { l: 50, r: 20, t: 45, b: 50 },
+    };
+    const PL_CFG = { responsive: true, displayModeBar: true, displaylogo: false };
+
+    let DATA = null;
+    let allGalleryClasses = [];
+
+    async function loadData() {
+      try {
+        const resp = await fetch('data/core_eda_data.json');
+        DATA = await resp.json();
+        renderAll();
+      } catch (err) { console.error('Failed to load core EDA data:', err); }
+    }
+
+    function renderAll() {
+      if (!DATA) return;
+      const ov = DATA.overview;
+
+      // Overview stats
+      document.getElementById('ov-images').textContent = ov.total_images.toLocaleString();
+      document.getElementById('ov-classes').textContent = ov.num_classes;
+      document.getElementById('ov-size').textContent = (ov.total_size_mb / 1024).toFixed(1) + ' GB';
+
+      renderSizeCharts();
+      renderColorCharts();
+      renderGallery();
+    }
+
+    function renderSizeCharts() {
+      const s = DATA.image_sizes;
+
+      // Size scatter with marginals
+      Plotly.newPlot('chart-size-scatter', [{
+        x: s.widths, y: s.heights,
+        mode: 'markers',
+        type: 'scatter',
+        marker: { size: 3, color: '#6B9BD1', opacity: 0.45 },
+        name: 'Images',
+        hovertemplate: 'Width: %{x}<br>Height: %{y}<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT,
+        title: 'Image Size Distribution (Width × Height)',
+        xaxis: { title: 'Width (px)', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Height (px)', gridcolor: '#f0f0f0' },
+      }, PL_CFG);
+
+      // File size histogram
+      Plotly.newPlot('chart-file-size', [{
+        x: s.file_sizes_kb, type: 'histogram', nbinsx: 50,
+        marker: { color: '#89B8E8', opacity: 0.8 },
+        hovertemplate: 'Size: %{x} KB<br>Count: %{y}<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT, title: 'File Size Distribution',
+        xaxis: { title: 'File Size (KB)', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Count', gridcolor: '#f0f0f0' },
+      }, PL_CFG);
+
+      // Aspect ratio histogram
+      Plotly.newPlot('chart-aspect-ratio', [{
+        x: s.aspect_ratios, type: 'histogram', nbinsx: 50,
+        marker: { color: '#E8C49A', opacity: 0.85 },
+        hovertemplate: 'Ratio: %{x}<br>Count: %{y}<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT, title: 'Aspect Ratio Distribution',
+        xaxis: { title: 'Aspect Ratio (W/H)', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Count', gridcolor: '#f0f0f0' },
+        shapes: [{
+          type: 'line', x0: 1.0, x1: 1.0,
+          y0: 0, y1: 1, yref: 'paper',
+          line: { color: '#E8A4C4', width: 2, dash: 'dash' },
+        }],
+      }, PL_CFG);
+    }
+
+    function renderColorCharts() {
+      const rgb = DATA.rgb_distribution;
+      const q = DATA.quality;
+      const hsv = DATA.hsv;
+
+      // RGB 3D scatter
+      Plotly.newPlot('chart-rgb-3d', [{
+        x: rgb.r, y: rgb.g, z: rgb.b,
+        mode: 'markers', type: 'scatter3d',
+        marker: {
+          size: 2, opacity: 0.5,
+          color: rgb.brightness,
+          colorscale: 'Viridis',
+          colorbar: { title: 'Brightness' },
+        },
+        text: rgb.class_name,
+        hovertemplate: 'R: %{x}<br>G: %{y}<br>B: %{z}<br>Class: %{text}<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT, title: 'Color Space Distribution (RGB)',
+        scene: {
+          xaxis: { title: 'Red', range: [0, 255], backgroundcolor: 'rgb(245,245,245)' },
+          yaxis: { title: 'Green', range: [0, 255], backgroundcolor: 'rgb(245,245,245)' },
+          zaxis: { title: 'Blue', range: [0, 255], backgroundcolor: 'rgb(245,245,245)' },
+        },
+      }, PL_CFG);
+
+      const sharpnessForHist = (DATA.sharpness_histogram && DATA.sharpness_histogram.length)
+        ? DATA.sharpness_histogram
+        : q.sharpness;
+
+      Plotly.newPlot('chart-sharpness', [{
+        x: sharpnessForHist, type: 'histogram', nbinsx: 50,
+        marker: { color: '#9BCDD4', opacity: 0.75 },
+      }], { ...PLOTLY_LAYOUT, title: 'Sharpness Distribution', xaxis: { title: 'Sharpness (Laplacian Variance)', gridcolor: '#f0f0f0' }, yaxis: { title: 'Count', gridcolor: '#f0f0f0' } }, PL_CFG);
+
+      // Quality scatter (sharpness vs contrast)
+      Plotly.newPlot('chart-quality-scatter', [{
+        x: q.sharpness, y: q.contrast,
+        mode: 'markers', type: 'scatter',
+        marker: {
+          size: 4, opacity: 0.4,
+          color: q.brightness,
+          colorscale: 'YlOrRd',
+          colorbar: { title: 'Brightness' },
+        },
+        text: q.class_names,
+        hovertemplate: 'Sharpness: %{x:.4f}<br>Contrast: %{y:.4f}<br>Class: %{text}<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT, title: 'Sharpness vs Contrast',
+        xaxis: { title: 'Sharpness', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Contrast', gridcolor: '#f0f0f0' },
+      }, PL_CFG);
+
+      // Blur extremes
+      const extremes = DATA.blur_extremes;
+      if (extremes) {
+        let html = '<div style="display:flex; flex-direction:column; gap:1.5rem;">';
+        
+        // Blurriest
+        html += '<div><h5 style="margin-bottom:0.5rem; color:#ef4444;">Top 5 Blurriest</h5><div style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem;">';
+        extremes.blurriest.forEach(img => {
+          html += `<div style="min-width:120px; flex:1;">
+            <div style="aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid var(--border); margin-bottom:0.25rem;">
+              <img src="../../../${img.path}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+            <div style="font-size:0.7rem; color:var(--text-secondary); text-align:center;">
+              <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${img.class}">${img.class.replace(/_/g, ' ')}</div>
+              <div>Sharp: ${img.sharpness.toFixed(1)}</div>
+            </div>
+          </div>`;
+        });
+        html += '</div></div>';
+
+        // Sharpest
+        html += '<div><h5 style="margin-bottom:0.5rem; color:#10b981;">Top 5 Sharpest</h5><div style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem;">';
+        extremes.sharpest.forEach(img => {
+          html += `<div style="min-width:120px; flex:1;">
+            <div style="aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid var(--border); margin-bottom:0.25rem;">
+              <img src="../../../${img.path}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+            <div style="font-size:0.7rem; color:var(--text-secondary); text-align:center;">
+              <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${img.class}">${img.class.replace(/_/g, ' ')}</div>
+              <div>Sharp: ${img.sharpness.toFixed(1)}</div>
+            </div>
+          </div>`;
+        });
+        html += '</div></div>';
+
+        html += '</div>';
+        document.getElementById('blur-extremes-container').innerHTML = html;
+      }
+    }
+
+    function renderGallery() {
+      const gallery = DATA.gallery_samples;
+      allGalleryClasses = Object.keys(gallery).sort();
+      
+      const cbContainer = document.getElementById('class-checkboxes');
+      cbContainer.innerHTML = '';
+      allGalleryClasses.forEach(cls => {
+        const label = document.createElement('label');
+        label.className = 'class-cb-label';
+        
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = cls;
+        cb.onchange = (e) => {
+          if (e.target.checked) label.classList.add('checked');
+          else label.classList.remove('checked');
+          renderSelectedClassGallery();
+        };
+        
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(' ' + cls.replace(/_/g, ' ')));
+        cbContainer.appendChild(label);
+      });
+
+      // Default selection
+      if (allGalleryClasses.length > 0) {
+        const defaultCls = ['apple_pie', 'baklava', 'cannoli'];
+        let foundAny = false;
+        document.querySelectorAll('#class-checkboxes input[type="checkbox"]').forEach(cb => {
+          if (defaultCls.includes(cb.value) || (!foundAny && cb.value === 'apple_pie')) {
+            cb.checked = true;
+            cb.parentElement.classList.add('checked');
+            foundAny = true;
+          }
+        });
+        if (!foundAny) {
+           const first = document.querySelector('#class-checkboxes input[type="checkbox"]');
+           if (first) {
+             first.checked = true;
+             first.parentElement.classList.add('checked');
+           }
+        }
+        renderSelectedClassGallery();
+      }
+    }
+
+    window.selectAllClasses = function() {
+      document.querySelectorAll('#class-checkboxes input[type="checkbox"]').forEach(cb => {
+        cb.checked = true;
+        cb.parentElement.classList.add('checked');
+      });
+      renderSelectedClassGallery();
+    }
+  
+    window.selectNoClasses = function() {
+      document.querySelectorAll('#class-checkboxes input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        cb.parentElement.classList.remove('checked');
+      });
+      renderSelectedClassGallery();
+    }
+
+    function renderSelectedClassGallery() {
+      const checkedBoxes = Array.from(document.querySelectorAll('#class-checkboxes input:checked')).map(cb => cb.value);
+      const container = document.getElementById('gallery-container');
+      container.innerHTML = '';
+
+      if (checkedBoxes.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1; padding:2rem; text-align:center; color:#ef4444; font-weight:600; font-size:1.1rem;">Please select at least one class to display samples.</div>';
+        return;
+      }
+
+      checkedBoxes.forEach(cls => {
+        const images = DATA.gallery_samples[cls];
+        if (!images) return;
+        
+        images.forEach(imgPath => {
+          const card = document.createElement('div');
+          card.style.cssText = 'background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden; border:1px solid var(--border);';
+          card.innerHTML = `
+            <div style="position:relative; padding-top:100%; overflow:hidden; background:#f3f4f6;">
+              <img src="../../../${imgPath}" loading="lazy"
+                style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;"
+                onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;position:absolute;top:0;left:0;width:100%;height:100%;color:#aaa;font-size:0.8rem;\\'>Image unavailable</div>';">
+            </div>
+            <div style="padding:0.6rem; text-align:center; font-weight:600; text-transform:capitalize; background:#f8fafc; font-size:0.85rem; color:#374151; border-top:1px solid var(--border);">
+              ${cls.replace(/_/g, ' ')}
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      });
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>

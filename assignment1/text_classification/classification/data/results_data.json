@@ -1,0 +1,9 @@
+{
+  "status": "template",
+  "assignment": "assignment1",
+  "pipeline": "text_classification",
+  "message": "TODO: replace this template with text classification experiment summaries.",
+  "experiments": {},
+  "learning_curves": {},
+  "evaluation": {}
+}

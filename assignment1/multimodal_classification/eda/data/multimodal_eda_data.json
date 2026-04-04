@@ -1,0 +1,10 @@
+{
+  "status": "template",
+  "assignment": "assignment1",
+  "pipeline": "multimodal_classification",
+  "message": "TODO: replace this template with multimodal EDA outputs.",
+  "overview": {},
+  "alignment": {},
+  "embeddings": {},
+  "samples": []
+}

@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classification EDA — Food-101 | DL Hub</title>
+  <meta name="description" content="Classification EDA for Food-101: class distribution, train/val/test splits, feature visualization, and similarity analysis.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <style>
+    .menu-actions { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 20px; }
+    .menu-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: 0.2s; color: #374151; }
+    .btn-tutorial { background: #F9B2D7; }
+    .btn-tutorial:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-code { background: #CFECF3; }
+    .btn-code:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-copy { background: #DAF9DE; }
+    .btn-copy:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .tutorial-panel, .code-panel { display: none; background: #F6FFDC; border-left: 5px solid #F9B2D7; border-radius: 8px; padding: 20px; margin: 20px 0px; }
+    .code-panel { border-left-color: #CFECF3; background: #fafff5; }
+    .tutorial-panel.active, .code-panel.active { display: block; }
+    .tutorial-explanation h3 { margin-top: 0; color: #7c3d5a; }
+    .explanation-item { margin-bottom: 12px; }
+    .explanation-item strong { color: #b8567a; font-size: 1.05rem; }
+    .code-tab-content pre { margin-top: 15px; background: #282c34; color: #abb2bf; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    .code-tab-content pre code { background: transparent !important; color: inherit !important; padding: 0 !important; font-family: monospace !important; border: none !important; }
+    .eda-cls-stat .stat-card { background: #F6FFDC; border: 1px solid #DAF9DE; }
+    .eda-cls-note { background: #CFECF3; border: 1px solid #b8dfe8; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; color: #374151; }
+    .eda-cls-insight { background: #DAF9DE; border: 1px solid #b8e8c8 !important; }
+    .eda-cls-split .stat-card-color.blue { background: #CFECF3 !important; border: 1px solid #b8dfe8; }
+    .eda-cls-split .stat-card-color.teal { background: #DAF9DE !important; border: 1px solid #b8e8c8; }
+    .eda-cls-split .stat-card-color.purple { background: #F6FFDC !important; border: 1px solid #dce8a8; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../../../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Assignment 1</a></li>
+        <li><a href="index.html">EDA Home</a></li>
+        <li><a href="eda_core.html">Core</a></li>
+        <li><a href="eda_classification.html" class="active">Classification</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero-banner">
+    <h1>📊 Classification Analysis</h1>
+    <p class="subtitle">101-class fine-grained food classification task — class distribution, splits, hierarchy, and feature analysis</p>
+  </header>
+
+  <section class="section">
+
+    <div class="eda-cls-note" id="note-classification-sampling" style="margin-bottom:1.25rem;"></div>
+
+    <!-- === Classification Overview === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📊 Classification Overview</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('cls_overview'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('cls_overview'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('cls_overview'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="cls_overview-tutorial">
+          <div class="tutorial-explanation">
+            <h3>Classification overview</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Total images, class count, balance ratio, and min/max images per class.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Confirms scale and whether classes are balanced before modeling.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Aggregate <code>records</code> with <code>build_classification_summary</code> (see notebook).</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="cls_overview-code">
+          <div class="code-tab-content active" id="cls_overview-plotly">
+            <pre class="language-python"><code>from pathlib import Path
+
+import cv2
+import numpy as np
+import pandas as pd
+from PIL import Image
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+IMG_DIR = Path("data/food-101/images")
+
+
+def iter_image_paths(img_dir: Path):
+    for class_dir in sorted([path for path in img_dir.iterdir() if path.is_dir()]):
+        for path in sorted(class_dir.iterdir()):
+            if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+                yield class_dir.name, path
+
+
+rows = []
+for class_name, path in iter_image_paths(IMG_DIR):
+    with Image.open(path) as img:
+        rgb = img.convert("RGB")
+        arr = np.asarray(rgb, dtype=np.float32) / 255.0
+    gray = cv2.cvtColor((arr * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
+    rows.append(
+        {
+            "class_name": class_name,
+            "path": str(path),
+            "file_size_kb": path.stat().st_size / 1024.0,
+            "brightness": float(arr.mean()),
+            "contrast": float(arr.std()),
+            "sharpness": float(cv2.Laplacian(gray, cv2.CV_64F).var()),
+        }
+    )
+
+records = pd.DataFrame(rows)
+class_counts = records.groupby("class_name").size().sort_values(ascending=False)
+summary = {
+    "total_images": int(len(records)),
+    "num_classes": int(records["class_name"].nunique()),
+    "max_count": int(class_counts.max()),
+    "min_count": int(class_counts.min()),
+    "imbalance_ratio": float(class_counts.max() / max(class_counts.min(), 1)),
+}
+
+print("CLASSIFICATION EDA REPORT")
+print(f"Total images for classification: {summary['total_images']}")
+print(f"Classes: {summary['num_classes']}")
+print(f"Max count: {summary['max_count']}")
+print(f"Min count: {summary['min_count']}")
+print(f"Imbalance ratio: {summary['imbalance_ratio']:.2f}x")</code></pre>
+          </div>
+        </div>
+        <div class="stat-cards eda-cls-stat" id="cls-overview">
+          <div class="stat-card"><span class="stat-value" id="cls-total">—</span><span class="stat-label">Total Images</span></div>
+          <div class="stat-card"><span class="stat-value" id="cls-classes">—</span><span class="stat-label">Food Classes</span></div>
+          <div class="stat-card"><span class="stat-value" id="cls-balance">—</span><span class="stat-label">Imbalance Ratio</span></div>
+          <div class="stat-card"><span class="stat-value" id="cls-max">—</span><span class="stat-label">Max per Class</span></div>
+          <div class="stat-card"><span class="stat-value" id="cls-min">—</span><span class="stat-label">Min per Class</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Class Distribution === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📊 Class Distribution</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('class_dist'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('class_dist'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('class_dist'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="class_dist-tutorial">
+          <div class="tutorial-explanation">
+            <h3>Class distribution</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Per-class image counts and a rank curve for balance.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Detect imbalance and plan sampling or loss weighting.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p><code>plot_classification_distribution(records)</code> builds the bar chart and balance curve from grouped class counts.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="class_dist-code">
+          <div class="code-tab-content active" id="class_dist-plotly">
+            <pre class="language-python"><code>from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import plotly.express as px
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+IMG_DIR = Path("data/food-101/images")
+
+
+def iter_image_paths(img_dir: Path):
+    for class_dir in sorted([path for path in img_dir.iterdir() if path.is_dir()]):
+        for path in sorted(class_dir.iterdir()):
+            if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+                yield class_dir.name, path
+
+
+records = pd.DataFrame(
+    [{"class_name": class_name, "path": str(path)} for class_name, path in iter_image_paths(IMG_DIR)]
+)
+class_counts = records.groupby("class_name").size().sort_values(ascending=False)
+
+px.bar(
+    x=class_counts.index,
+    y=class_counts.values,
+    title="Class Distribution",
+    labels={"x": "Class", "y": "Image count"},
+).update_layout(xaxis_tickangle=-45).show()
+
+imbalance = class_counts.to_frame(name="image_count")
+imbalance["rank"] = np.arange(1, len(imbalance) + 1)
+px.line(
+    imbalance,
+    x="rank",
+    y="image_count",
+    markers=True,
+    title="Class Balance Curve",
+    labels={"rank": "Class rank", "image_count": "Image count"},
+).show()</code></pre>
+          </div>
+        </div>
+        <p>Analysis of food class distribution and class balance</p>
+
+        <h4>Class Distribution</h4>
+        <div class="chart-container" id="chart-class-dist" style="height:500px;"></div>
+
+        <h4 style="margin-top:2rem;">Class Balance Curve</h4>
+        <p>Shows how evenly distributed images are across classes</p>
+        <div class="chart-container" id="chart-balance-curve" style="height:350px;"></div>
+      </div>
+    </div>
+
+    <!-- === Train/Val/Test Split === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📊 Train/Val/Test Split Distribution</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('split_dist'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('split_dist'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('split_dist'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="split_dist-tutorial">
+          <div class="tutorial-explanation">
+            <h3>Train / validation / test splits</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Stratified 70% / 15% / 15% split at the image level (same as this site).</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Hold out data for unbiased metrics and match the training pipeline.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p><code>make_stratified_splits</code> then <code>plot_split_distribution</code>.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="split_dist-code">
+          <div class="code-tab-content active" id="split_dist-plotly">
+            <pre class="language-python"><code>from pathlib import Path
+
+import pandas as pd
+import plotly.express as px
+from sklearn.model_selection import train_test_split
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+IMG_DIR = Path("data/food-101/images")
+
+
+def iter_image_paths(img_dir: Path):
+    for class_dir in sorted([path for path in img_dir.iterdir() if path.is_dir()]):
+        for path in sorted(class_dir.iterdir()):
+            if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+                yield class_dir.name, path
+
+
+records = pd.DataFrame(
+    [{"class_name": class_name, "path": str(path)} for class_name, path in iter_image_paths(IMG_DIR)]
+)
+
+train_df, temp_df = train_test_split(
+    records,
+    train_size=0.7,
+    random_state=42,
+    stratify=records["class_name"],
+)
+val_df, test_df = train_test_split(
+    temp_df,
+    train_size=0.5,
+    random_state=42,
+    stratify=temp_df["class_name"],
+)
+
+split_df = records.copy()
+split_df["split"] = "unassigned"
+split_df.loc[train_df.index, "split"] = "train"
+split_df.loc[val_df.index, "split"] = "val"
+split_df.loc[test_df.index, "split"] = "test"
+
+overall = split_df["split"].value_counts().reindex(["train", "val", "test"])
+px.bar(
+    x=overall.index,
+    y=overall.values,
+    title="Overall Split Distribution",
+    labels={"x": "Split", "y": "Image count"},
+).show()
+
+top_classes = split_df["class_name"].value_counts().head(10).index
+class_split_counts = (
+    split_df.loc[split_df["class_name"].isin(top_classes)]
+    .groupby(["class_name", "split"])
+    .size()
+    .reset_index(name="count")
+)
+px.bar(
+    class_split_counts,
+    x="class_name",
+    y="count",
+    color="split",
+    barmode="group",
+    title="Top Class Split Distribution",
+    labels={"class_name": "Class", "count": "Image count"},
+).update_layout(xaxis_tickangle=-45).show()</code></pre>
+          </div>
+        </div>
+        <p>Distribution of images across train, validation, and test splits</p>
+
+        <div class="stat-cards-colored eda-cls-split">
+          <div class="stat-card-color blue"><span class="stat-value" id="split-train">—</span><span class="stat-label">Train Images</span></div>
+          <div class="stat-card-color teal"><span class="stat-value" id="split-val">—</span><span class="stat-label">Val Images</span></div>
+          <div class="stat-card-color purple"><span class="stat-value" id="split-test">—</span><span class="stat-label">Test Images</span></div>
+        </div>
+
+        <h4 style="margin-top:2rem;">Overall Split Distribution</h4>
+        <div class="chart-container" id="chart-split-overall" style="height:350px;"></div>
+
+        <h4 style="margin-top:2rem;">Per-Class Split Distribution (Top 15)</h4>
+        <p>Stacked bar chart showing train/val/test distribution for each class</p>
+        <div class="chart-container" id="chart-class-split" style="height:450px;"></div>
+
+        <div class="insights-grid" style="margin-top:1.5rem;">
+          <div class="insight-card success eda-cls-insight">
+            <h4>Split Quality</h4>
+            <ul>
+              <li><strong>Good split:</strong> Each class has ~70% train, ~15% val, ~15% test</li>
+              <li><strong>Stratified:</strong> Class proportions maintained across all splits</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- === Feature Visualization === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>🔬 Feature Visualization</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('feature_viz'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('feature_viz'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('feature_viz'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="feature_viz-tutorial">
+          <div class="tutorial-explanation">
+            <h3>Feature visualization</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>ResNet50 (ImageNet) embeddings, PCA variance curve, PCA / t-SNE / UMAP 2D plots.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>See whether classes separate in feature space before training a head.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p><code>extract_image_features</code> computes embeddings, then <code>plot_feature_embeddings</code> renders PCA, t-SNE, and UMAP views.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="feature_viz-code">
+          <div class="code-tab-content active" id="feature_viz-plotly">
+            <pre class="language-python"><code>from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from PIL import Image
+import plotly.express as px
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+import torch
+from torchvision import models, transforms
+
+try:
+    import umap
+except ImportError:
+    umap = None
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+IMG_DIR = Path("data/food-101/images")
+
+
+def iter_image_paths(img_dir: Path):
+    for class_dir in sorted([path for path in img_dir.iterdir() if path.is_dir()]):
+        for path in sorted(class_dir.iterdir()):
+            if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+                yield class_dir.name, path
+
+
+records = pd.DataFrame(
+    [{"class_name": class_name, "path": str(path)} for class_name, path in iter_image_paths(IMG_DIR)]
+)
+
+sampled_frames = []
+for _, group in records.groupby("class_name"):
+    sampled_frames.append(group.sample(n=min(120, len(group)), random_state=42))
+feature_records = (
+    pd.concat(sampled_frames, ignore_index=False)
+    .sample(frac=1.0, random_state=42)
+    .head(1200)
+    .reset_index(drop=True)
+)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+weights = models.ResNet50_Weights.DEFAULT
+model = models.resnet50(weights=weights)
+model.fc = torch.nn.Identity()
+model.eval().to(device)
+
+transform = transforms.Compose(
+    [
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
+
+features = []
+with torch.no_grad():
+    for start_idx in range(0, len(feature_records), 16):
+        batch_paths = feature_records["path"].iloc[start_idx : start_idx + 16].tolist()
+        batch_tensors = []
+        for path in batch_paths:
+            with Image.open(path) as img:
+                batch_tensors.append(transform(img.convert("RGB")))
+        batch = torch.stack(batch_tensors).to(device)
+        features.append(model(batch).detach().cpu().numpy())
+features = np.vstack(features)
+
+pca_2d = PCA(n_components=2, random_state=42)
+pca_points = pca_2d.fit_transform(features)
+tsne = TSNE(n_components=2, random_state=42, init="pca", perplexity=min(30, max(2, len(features) // 4), len(features) - 1))
+tsne_points = tsne.fit_transform(features)
+
+emb_df = pd.DataFrame(
+    {
+        "pca_x": pca_points[:, 0],
+        "pca_y": pca_points[:, 1],
+        "tsne_x": tsne_points[:, 0],
+        "tsne_y": tsne_points[:, 1],
+        "label": feature_records["class_name"].tolist(),
+    }
+)
+px.scatter(emb_df, x="pca_x", y="pca_y", color="label", title="PCA 2D Projection").show()
+px.scatter(emb_df, x="tsne_x", y="tsne_y", color="label", title="t-SNE 2D Projection").show()
+
+if umap is not None:
+    umap_points = umap.UMAP(random_state=42).fit_transform(features)
+    umap_df = pd.DataFrame({"umap_x": umap_points[:, 0], "umap_y": umap_points[:, 1], "label": feature_records["class_name"].tolist()})
+    px.scatter(umap_df, x="umap_x", y="umap_y", color="label", title="UMAP 2D Projection").show()
+
+pca_full = PCA().fit(features)
+ev_df = pd.DataFrame(
+    {
+        "components": np.arange(1, len(pca_full.explained_variance_ratio_) + 1),
+        "cum_explained_variance": np.cumsum(pca_full.explained_variance_ratio_),
+    }
+)
+px.line(
+    ev_df,
+    x="components",
+    y="cum_explained_variance",
+    markers=True,
+    title="PCA Explained Variance",
+    labels={"components": "Number of components", "cum_explained_variance": "Cumulative explained variance"},
+).show()</code></pre>
+          </div>
+        </div>
+        <p>Dimensionality reduction for feature space visualization</p>
+
+        <h4>PCA Explained Variance</h4>
+        <p>Cumulative variance explained by principal components — shows feature space complexity</p>
+        <div class="chart-container" id="chart-pca-variance" style="height:400px; margin-bottom: 2rem;"></div>
+
+        <h4>PCA 2D Projection</h4>
+        <p>First two principal components showing the global structure of the dataset representations.</p>
+        <div class="chart-container" id="chart-pca-2d" style="height:500px; margin-bottom: 2rem;"></div>
+
+        <h4>t-SNE 2D Projection</h4>
+        <p>t-Distributed Stochastic Neighbor Embedding emphasizing local neighborhoods.</p>
+        <div class="chart-container" id="chart-tsne-2d" style="height:500px; margin-bottom: 2rem;"></div>
+
+        <h4>UMAP 2D Projection</h4>
+        <p>Uniform Manifold Approximation and Projection preserving global and local structure.</p>
+        <div class="chart-container" id="chart-umap-2d" style="height:500px;"></div>
+      </div>
+    </div>
+
+    <!-- === Similarity Matrix === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>🔗 Class Similarity & Clustering</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('similarity'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('similarity'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('similarity'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="similarity-tutorial">
+          <div class="tutorial-explanation">
+            <h3>Similarity and clustering</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Cosine similarity between class centroids, top pairs, and agglomerative clusters.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Find easily confused classes and structure for multi-task or hierarchical ideas.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p><code>build_similarity_outputs</code> + <code>plot_similarity_outputs</code> (<code>px.imshow</code> heatmap).</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="similarity-code">
+          <div class="code-tab-content active" id="similarity-plotly">
+            <pre class="language-python"><code>from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from PIL import Image
+import plotly.express as px
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics.pairwise import cosine_similarity
+import torch
+from torchvision import models, transforms
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+IMG_DIR = Path("data/food-101/images")
+
+
+def iter_image_paths(img_dir: Path):
+    for class_dir in sorted([path for path in img_dir.iterdir() if path.is_dir()]):
+        for path in sorted(class_dir.iterdir()):
+            if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+                yield class_dir.name, path
+
+
+records = pd.DataFrame(
+    [{"class_name": class_name, "path": str(path)} for class_name, path in iter_image_paths(IMG_DIR)]
+)
+
+sampled_frames = []
+for _, group in records.groupby("class_name"):
+    sampled_frames.append(group.sample(n=min(120, len(group)), random_state=42))
+feature_records = (
+    pd.concat(sampled_frames, ignore_index=False)
+    .sample(frac=1.0, random_state=42)
+    .head(1200)
+    .reset_index(drop=True)
+)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+weights = models.ResNet50_Weights.DEFAULT
+model = models.resnet50(weights=weights)
+model.fc = torch.nn.Identity()
+model.eval().to(device)
+
+transform = transforms.Compose(
+    [
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
+
+features = []
+with torch.no_grad():
+    for start_idx in range(0, len(feature_records), 16):
+        batch_paths = feature_records["path"].iloc[start_idx : start_idx + 16].tolist()
+        batch_tensors = []
+        for path in batch_paths:
+            with Image.open(path) as img:
+                batch_tensors.append(transform(img.convert("RGB")))
+        batch = torch.stack(batch_tensors).to(device)
+        features.append(model(batch).detach().cpu().numpy())
+features = np.vstack(features)
+
+class_centroids = (
+    pd.DataFrame(features)
+    .assign(class_name=feature_records["class_name"].values)
+    .groupby("class_name")
+    .mean()
+)
+sim = cosine_similarity(class_centroids.values)
+sim_df = pd.DataFrame(sim, index=class_centroids.index, columns=class_centroids.index)
+
+pairs = []
+for i, row_name in enumerate(sim_df.index):
+    for j, col_name in enumerate(sim_df.columns):
+        if j <= i:
+            continue
+        pairs.append((row_name, col_name, float(sim_df.iloc[i, j])))
+top_pairs = (
+    pd.DataFrame(pairs, columns=["class_1", "class_2", "similarity"])
+    .sort_values("similarity", ascending=False)
+    .reset_index(drop=True)
+)
+
+cluster_labels = AgglomerativeClustering(n_clusters=min(5, len(class_centroids))).fit_predict(class_centroids.values)
+cluster_df = pd.DataFrame({"class_name": class_centroids.index, "cluster": cluster_labels + 1})
+
+px.imshow(
+    sim_df.values,
+    x=sim_df.columns.tolist(),
+    y=sim_df.index.tolist(),
+    color_continuous_scale="Viridis",
+    title="Class Similarity Matrix",
+    aspect="auto",
+).show()
+
+print(top_pairs.head(10))
+print(cluster_df.groupby("cluster")["class_name"].apply(list).reset_index(name="classes"))</code></pre>
+          </div>
+        </div>
+        <p>Visualizing cosine similarities between class centroids using ResNet50 features.</p>
+        
+        <h4>Class Similarity Matrix</h4>
+        <div class="chart-container" id="chart-similarity" style="height:800px; margin-bottom: 2rem;"></div>
+
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div>
+            <h4>Top Confusing Class Pairs</h4>
+            <table class="data-table" style="width:100%; text-align:left; border-collapse:collapse; font-size:0.9rem;">
+              <thead>
+                <tr style="border-bottom:2px solid var(--border);">
+                  <th style="padding:0.5rem;">Class 1</th>
+                  <th style="padding:0.5rem;">Class 2</th>
+                  <th style="padding:0.5rem;">Similarity</th>
+                </tr>
+              </thead>
+              <tbody id="top-pairs-tbody">
+                <!-- Javascript will insert pairs here -->
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h4>Agglomerative Clustering Groups</h4>
+            <div id="clustering-groups" style="display:flex; flex-direction:column; gap:0.5rem;">
+               <!-- Javascript will insert clusters here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Key Insights & Recommendations === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📋 Key Insights & Recommendations</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('key_insights'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('key_insights'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('key_insights'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="key_insights-tutorial">
+          <div class="tutorial-explanation">
+            <h3>Key insights</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Summary of dataset traits and practical modeling recommendations.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Connect EDA conclusions to architecture and augmentation choices.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Summarize the EDA findings, compare backbone families, and use those observations to choose augmentation and model capacity.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="key_insights-code">
+          <div class="code-tab-content active" id="key_insights-plotly">
+            <pre class="language-python"><code>import pandas as pd
+import plotly.express as px
+
+backbone_df = pd.DataFrame(
+    [
+        {"backbone": "resnet50", "display_name": "ResNet50", "family": "cnn", "pretrained_source": "BiT / ImageNet-21k"},
+        {"backbone": "mobilenet_v3", "display_name": "MobileNetV3 Large 100", "family": "cnn", "pretrained_source": "MIIL / ImageNet-21k"},
+        {"backbone": "vit_b16", "display_name": "ViT-B/16", "family": "transformer", "pretrained_source": "ImageNet-21k"},
+        {"backbone": "swin_b", "display_name": "Swin-B", "family": "transformer", "pretrained_source": "ImageNet-22k"},
+    ]
+)
+
+family_counts = backbone_df.groupby("family").size().reset_index(name="num_backbones")
+px.bar(
+    family_counts,
+    x="family",
+    y="num_backbones",
+    color="family",
+    title="Backbone Families Used in This Project",
+    labels={"family": "Model family", "num_backbones": "Number of backbones"},
+).show()
+
+print(backbone_df)</code></pre>
+          </div>
+        </div>
+        <div class="insights-grid">
+          <div class="insight-card success eda-cls-insight">
+            <h4>Dataset Characteristics</h4>
+            <ul>
+              <li><strong>Balanced:</strong> Food-101 has exactly 1,000 images per class — perfectly balanced</li>
+              <li><strong>Fine-grained:</strong> 101 classes of food dishes with visually similar classes</li>
+              <li><strong>Challenging:</strong> High intra-class variance and inter-class similarity</li>
+            </ul>
+          </div>
+          <div class="insight-card warning eda-cls-insight">
+            <h4>Recommendations</h4>
+            <ul>
+              <li><strong>Transfer Learning:</strong> Use pre-trained CNNs (ResNet50, MobileNetV3) or ViTs (ViT, Swin)</li>
+              <li><strong>Data Augmentation:</strong> RandomCrop, HFlip, ColorJitter for robustness</li>
+              <li><strong>Expected Accuracy:</strong> ResNet50: ~80%, ViT/Swin: ~85-88%</li>
+              <li><strong>Fine-tuning:</strong> Frozen backbone + trainable head is effective for this dataset size</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+
+
+  <script>
+    function toggleTutorial(sectionId) {
+      const panel = document.getElementById(sectionId + '-tutorial');
+      const codePanel = document.getElementById(sectionId + '-code');
+      if (!panel) return;
+      const isActive = panel.classList.toggle('active');
+      if (isActive && codePanel) codePanel.classList.remove('active');
+    }
+    function toggleCode(sectionId) {
+      const panel = document.getElementById(sectionId + '-code');
+      const tutorialPanel = document.getElementById(sectionId + '-tutorial');
+      if (!panel) return;
+      const isActive = panel.classList.toggle('active');
+      if (isActive && tutorialPanel) tutorialPanel.classList.remove('active');
+    }
+    function copyAllCode(sectionId) {
+      const codeBlock = document.querySelector('#' + sectionId + '-plotly code');
+      if (codeBlock) {
+        navigator.clipboard.writeText(codeBlock.innerText);
+        alert('Code copied to clipboard!');
+      }
+    }
+
+    const PLOTLY_LAYOUT = {
+      font: { family: 'Inter, sans-serif', size: 12 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { l: 50, r: 20, t: 45, b: 50 },
+    };
+    const PL_CFG = { responsive: true, displayModeBar: true, displaylogo: false };
+    const COLORS = { train: '#6B9BD1', val: '#E8C49A', test: '#E8A4C4' };
+
+    let DATA = null;
+
+    async function loadData() {
+      try {
+        const resp = await fetch('data/classification_eda_data.json');
+        DATA = await resp.json();
+        renderAll();
+      } catch (err) { console.error('Failed to load classification EDA data:', err); }
+    }
+
+    function renderSamplingNotes() {
+      const el = document.getElementById('note-classification-sampling');
+      if (!el) return;
+      const sn = DATA.sampling_notes;
+      if (!sn || !sn.sections || !sn.sections.length) {
+        el.style.display = 'none';
+        return;
+      }
+      el.style.display = '';
+      el.innerHTML = '<strong>Data scope &amp; sampling</strong>' + sn.sections.map(function (sec) {
+        return '<div style="margin-top:0.65rem;"><strong style="display:block; margin-bottom:0.35rem;">' + sec.title + '</strong><ul style="margin:0.25rem 0 0 1.1rem;">' +
+          sec.lines.map(function (l) { return '<li style="margin-bottom:0.2rem;">' + l + '</li>'; }).join('') + '</ul></div>';
+      }).join('');
+    }
+
+    function renderAll() {
+      if (!DATA) return;
+      renderSamplingNotes();
+      renderOverview();
+      renderDistribution();
+      renderSplits();
+      renderFeatures();
+    }
+
+    function renderOverview() {
+      const ov = DATA.overview;
+      document.getElementById('cls-total').textContent = ov.total_images.toLocaleString();
+      document.getElementById('cls-classes').textContent = ov.num_classes;
+      document.getElementById('cls-balance').textContent = ov.imbalance_ratio.toFixed(2) + '×';
+      document.getElementById('cls-max').textContent = ov.max_count.toLocaleString();
+      document.getElementById('cls-min').textContent = ov.min_count.toLocaleString();
+    }
+
+    function renderDistribution() {
+      const cd = DATA.class_distribution;
+
+      // Class distribution bar
+      Plotly.newPlot('chart-class-dist', [{
+        x: cd.classes.map(c => c.replace(/_/g, ' ')),
+        y: cd.counts,
+        type: 'bar',
+        marker: { color: '#89B8E8', opacity: 0.85 },
+        hovertemplate: '%{x}: %{y} images<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT, title: 'Food Class Distribution',
+        xaxis: { title: 'Food Class', tickangle: -45, gridcolor: '#f0f0f0', dtick: 2 },
+        yaxis: { title: 'Image Count', gridcolor: '#f0f0f0' },
+        margin: { l: 50, r: 20, t: 45, b: 120 },
+      }, PL_CFG);
+
+      // Balance curve
+      Plotly.newPlot('chart-balance-curve', [{
+        x: Array.from({ length: cd.counts.length }, (_, i) => i + 1),
+        y: cd.counts,
+        mode: 'lines+markers',
+        marker: { size: 4, color: '#6B9BD1' },
+        line: { color: '#6B9BD1' },
+        hovertemplate: 'Rank %{x}: %{y} images<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT, title: 'Class Balance Curve',
+        xaxis: { title: 'Class Rank', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Image Count', gridcolor: '#f0f0f0' },
+      }, PL_CFG);
+    }
+
+    function renderSplits() {
+      const sp = DATA.split;
+
+      document.getElementById('split-train').textContent = sp.train.toLocaleString() + ` (${sp.train_pct}%)`;
+      document.getElementById('split-val').textContent = sp.val.toLocaleString() + ` (${sp.val_pct}%)`;
+      document.getElementById('split-test').textContent = sp.test.toLocaleString() + ` (${sp.test_pct}%)`;
+
+      // Split overall bar
+      Plotly.newPlot('chart-split-overall', [{
+        x: ['Train', 'Validation', 'Test'],
+        y: [sp.train, sp.val, sp.test],
+        type: 'bar',
+        marker: { color: [COLORS.train, COLORS.val, COLORS.test] },
+        hovertemplate: '%{x}: %{y} images<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT, title: 'Overall Split Distribution',
+        xaxis: { title: 'Split', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Image Count', gridcolor: '#f0f0f0' },
+      }, PL_CFG);
+
+      // Per-class split bar (top 15)
+      const cs = DATA.class_splits;
+      const topClasses = DATA.class_distribution.classes.slice(0, 15);
+
+      Plotly.newPlot('chart-class-split', [
+        { name: 'Train', x: topClasses.map(c => c.replace(/_/g, ' ')), y: topClasses.map(c => cs[c].train), type: 'bar', marker: { color: COLORS.train } },
+        { name: 'Val', x: topClasses.map(c => c.replace(/_/g, ' ')), y: topClasses.map(c => cs[c].val), type: 'bar', marker: { color: COLORS.val } },
+        { name: 'Test', x: topClasses.map(c => c.replace(/_/g, ' ')), y: topClasses.map(c => cs[c].test), type: 'bar', marker: { color: COLORS.test } },
+      ], {
+        ...PLOTLY_LAYOUT, title: 'Per-Class Split Distribution (Top 15)',
+        barmode: 'stack',
+        xaxis: { title: 'Class', tickangle: -45, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Images', gridcolor: '#f0f0f0' },
+        margin: { l: 50, r: 20, t: 45, b: 100 },
+      }, PL_CFG);
+    }
+
+
+    function renderFeatures() {
+      const pca = DATA.pca;
+
+      Plotly.newPlot('chart-pca-variance', [{
+        x: pca.components,
+        y: pca.cumulative_variance,
+        mode: 'lines+markers',
+        marker: { size: 5, color: '#6B9BD1' },
+        line: { color: '#6B9BD1' },
+        hovertemplate: 'Component %{x}: %{y:.1%} variance explained<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT, title: 'PCA Cumulative Explained Variance',
+        xaxis: { title: 'Number of Components', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Cumulative Explained Variance', gridcolor: '#f0f0f0', tickformat: '.0%' },
+        shapes: [{
+          type: 'line', x0: 0, x1: pca.components.length,
+          y0: 0.95, y1: 0.95, yref: 'y',
+          line: { color: '#E8A4C4', width: 2, dash: 'dash' },
+        }],
+        annotations: [{
+          x: pca.components.length * 0.75, y: 0.96,
+          text: '95% variance threshold',
+          showarrow: false, font: { color: '#b8567a', size: 11 },
+        }],
+      }, PL_CFG);
+      
+      const emb = DATA.embeddings;
+      if (emb) {
+        const scatterConfig = (x, y, title) => ({
+          x: x, y: y, text: emb.labels,
+          mode: 'markers', type: 'scatter',
+          marker: { size: 5, opacity: 0.7, color: emb.labels.map(l => l.length), colorscale: 'Viridis' },
+          hovertemplate: 'Class: %{text}<extra></extra>'
+        });
+        
+        Plotly.newPlot('chart-pca-2d', [scatterConfig(emb.pca_x, emb.pca_y, 'PCA 2D Projection')], { ...PLOTLY_LAYOUT, title: 'PCA 2D Projection' }, PL_CFG);
+        Plotly.newPlot('chart-tsne-2d', [scatterConfig(emb.tsne_x, emb.tsne_y, 't-SNE 2D Projection')], { ...PLOTLY_LAYOUT, title: 't-SNE 2D Projection' }, PL_CFG);
+        if (emb.umap_x && emb.umap_x.length > 0) {
+          Plotly.newPlot('chart-umap-2d', [scatterConfig(emb.umap_x, emb.umap_y, 'UMAP 2D Projection')], { ...PLOTLY_LAYOUT, title: 'UMAP 2D Projection' }, PL_CFG);
+        }
+      }
+
+      const sim = DATA.similarity;
+      if (sim && sim.matrix) {
+        Plotly.newPlot('chart-similarity', [{
+          z: sim.matrix,
+          x: sim.classes, y: sim.classes,
+          type: 'heatmap', colorscale: 'Viridis',
+          hovertemplate: 'Class 1: %{x}<br>Class 2: %{y}<br>Similarity: %{z:.3f}<extra></extra>'
+        }], {
+          ...PLOTLY_LAYOUT, title: 'Class Similarity Matrix',
+          xaxis: { tickangle: -45, title: 'Class 1' },
+          yaxis: { title: 'Class 2' },
+          margin: { l: 150, r: 20, t: 45, b: 150 },
+        }, PL_CFG);
+
+        const tbody = document.getElementById('top-pairs-tbody');
+        tbody.innerHTML = sim.top_pairs.map(p => `
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:0.5rem; text-transform:capitalize;">${p.class_1.replace(/_/g, ' ')}</td>
+            <td style="padding:0.5rem; text-transform:capitalize;">${p.class_2.replace(/_/g, ' ')}</td>
+            <td style="padding:0.5rem; font-weight:600; color:#b8567a;">${p.similarity.toFixed(3)}</td>
+          </tr>
+        `).join('');
+
+        const clGroups = document.getElementById('clustering-groups');
+        let clHtml = '';
+        const clusters = sim.clusters;
+        for (const [clId, classes] of Object.entries(clusters)) {
+          clHtml += `<div style="background:#f3f4f6; border-radius:8px; padding:0.8rem; border:1px solid #e5e7eb;">
+            <h5 style="margin-bottom:0.5rem;">Cluster ${clId}</h5>
+            <div style="display:flex; flex-wrap:wrap; gap:0.4rem;">
+               ${classes.map(c => `<span style="background:white; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; border:1px solid #ddd;">${c.replace(/_/g, ' ')}</span>`).join('')}
+            </div>
+          </div>`;
+        }
+        clGroups.innerHTML = clHtml;
+      }
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>

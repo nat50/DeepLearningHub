@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment 1 — Deep Learning Classification</title>
+  <meta name="description" content="Assignment 1: Classification on images, text, and multimodal data using pretrained deep learning models.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="index.html" class="active">Assignment 1</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Banner -->
+  <header class="hero-banner">
+    <h1>Classification with Deep Learning</h1>
+    <p class="subtitle">
+      Image, text, and multimodal classification using pretrained CNN, ViT, RNN, Transformer, and multimodal models.
+    </p>
+    <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
+      <span class="tag image" style="background:rgba(255,255,255,0.2); color:#fff;">Image Classification</span>
+      <span class="tag text" style="background:rgba(255,255,255,0.2); color:#fff;">Text Classification</span>
+      <span class="tag multimodal" style="background:rgba(255,255,255,0.2); color:#fff;">Multimodal Classification</span>
+    </div>
+  </header>
+
+  <!-- Overview -->
+  <section class="section">
+    <h2 class="section-title">Overview</h2>
+    <p class="section-subtitle">Assignment details and team information</p>
+
+    <table class="info-table" style="max-width: 600px; margin-bottom: 2rem;">
+      <tbody>
+        <tr>
+          <td style="font-weight:600;">Assignment</td>
+          <td>Assignment 1 — Classification on Image, Text &amp; Multimodal Data</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">Members</td>
+          <td>Vo Nhat Tan, Tran Bao Phuc Long, Huynh Nguyen Quoc Viet, Nguyen Manh Tri Minh</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">Instructor</td>
+          <td>Le Thanh Sach</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">Report 1 Deadline</td>
+          <td>23:59, 26 March 2026</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">Final Report Deadline</td>
+          <td>23:59, 06 April 2026</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Resources -->
+  <section class="section">
+    <h2 class="section-title">Resources &amp; Links</h2>
+    <p class="section-subtitle">All deliverables for this assignment</p>
+
+    <div class="link-grid">
+      <a href="#" class="link-item" title="Demo video">
+        <div class="link-icon video">🎬</div>
+        <div>
+          <div class="link-label">Demo Video</div>
+          <div class="link-desc">Watch the live demonstration</div>
+        </div>
+      </a>
+
+      <a href="#" class="link-item" title="Presentation video on YouTube">
+        <div class="link-icon video">📺</div>
+        <div>
+          <div class="link-label">Presentation Video</div>
+          <div class="link-desc">YouTube — used for grading</div>
+        </div>
+      </a>
+
+      <a href="#" class="link-item" title="Source code repository">
+        <div class="link-icon code">💻</div>
+        <div>
+          <div class="link-label">Source Code</div>
+          <div class="link-desc">GitHub repository</div>
+        </div>
+      </a>
+
+      <a href="#" class="link-item" title="Presentation slides">
+        <div class="link-icon slides">📊</div>
+        <div>
+          <div class="link-label">Presentation Slides</div>
+          <div class="link-desc">Summary of all work</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Dataset Cards -->
+  <section class="section">
+    <h2 class="section-title">Datasets &amp; Reports</h2>
+    <p class="section-subtitle">Each dataset has its own dedicated page with EDA, model training, and results</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Image Classification</h3>
+        <p>CNN vs. Vision Transformer (ViT) comparison on the Food-101 image dataset with pretrained models.</p>
+        <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+          <span class="tag image">CNN</span>
+          <span class="tag image">ViT</span>
+        </div>
+        <a href="image_classification/eda/index.html" class="card-link">View EDA <span>→</span></a>
+        <a href="image_classification/classification/index.html" class="card-link" style="margin-left:1rem;">View Models <span>→</span></a>
+      </div>
+
+      <div class="card" style="opacity:0.5; pointer-events:none;">
+        <h3>Text Classification</h3>
+        <p>RNN (LSTM) vs. Transformer comparison on text data with pretrained models.</p>
+        <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+          <span class="tag text">RNN</span>
+          <span class="tag text">Transformer</span>
+        </div>
+        <a href="#" class="card-link" style="color:var(--text-muted);">Coming soon</a>
+      </div>
+
+      <div class="card" style="opacity:0.5; pointer-events:none;">
+        <h3>Multimodal Classification</h3>
+        <p>Zero-shot vs. few-shot classification on image + text multimodal data.</p>
+        <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+          <span class="tag multimodal">Zero-shot</span>
+          <span class="tag multimodal">Few-shot</span>
+        </div>
+        <a href="#" class="card-link" style="color:var(--text-muted);">Coming soon</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025–2026 Deep Learning &amp; Its Applications (CO3133) — <a href="https://hcmut.edu.vn" target="_blank">HCMUT – VNUHCM</a></p>
+  </footer>
+
+</body>
+</html>

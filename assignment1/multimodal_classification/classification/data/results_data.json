@@ -1,0 +1,9 @@
+{
+  "status": "template",
+  "assignment": "assignment1",
+  "pipeline": "multimodal_classification",
+  "message": "TODO: replace this template with multimodal experiment summaries.",
+  "experiments": {},
+  "learning_curves": {},
+  "retrieval": {}
+}

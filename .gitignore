@@ -1,0 +1,21 @@
+# MyST build outputs
+_build
+/assignment1/image_classification/data/food-101
+
+# Python cache and local environments
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+.python-version
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Training artifacts (large binaries)
+/assignment1/image_classification/results/food101_classification/**/best_model.pth
+
+# Logs and OS noise
+*.log
+.DS_Store
+Thumbs.db

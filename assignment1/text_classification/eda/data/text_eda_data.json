@@ -1,0 +1,10 @@
+{
+  "status": "template",
+  "assignment": "assignment1",
+  "pipeline": "text_classification",
+  "message": "TODO: replace this template with text EDA outputs.",
+  "overview": {},
+  "distributions": {},
+  "embeddings": {},
+  "samples": []
+}

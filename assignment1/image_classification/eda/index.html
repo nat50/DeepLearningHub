@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EDA — Food-101 | DL Hub</title>
+  <meta name="description" content="Exploratory Data Analysis for the Food-101 dataset: image properties, class distributions, and quality metrics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../../../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Assignment 1</a></li>
+        <li><a href="index.html" class="active">EDA</a></li>
+        <li><a href="../classification/index.html">Classification</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero-banner">
+    <h1>🔍 Food-101 EDA</h1>
+    <p class="subtitle">Comprehensive Exploratory Data Analysis of the Food-101 image classification dataset</p>
+    <div class="stat-cards">
+      <div class="stat-card"><span class="stat-value">101,000</span><span class="stat-label">Total Images</span></div>
+      <div class="stat-card"><span class="stat-value">101</span><span class="stat-label">Food Classes</span></div>
+
+      <div class="stat-card"><span class="stat-value">1,000</span><span class="stat-label">Images/Class</span></div>
+    </div>
+  </header>
+
+  <section class="section">
+
+    <!-- Report Cards -->
+    <h2 class="section-title">EDA Reports</h2>
+    <p class="section-subtitle">Click each card to explore detailed analysis</p>
+
+    <div class="model-info-grid" style="margin-top:1.5rem;">
+
+      <!-- Core EDA Card -->
+      <a href="eda_core.html" class="model-info-card" style="text-decoration:none; cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+        <h5 style="font-size:1.1rem; margin-bottom:0.8rem;">📊 Core Dataset Analysis</h5>
+        <p style="margin-bottom:0.5rem;">Comprehensive analysis of fundamental image properties</p>
+        <ul style="font-size:0.82rem; text-align:left; margin-top:0.5rem;">
+          <li>Image dimensions & aspect ratios</li>
+          <li>File size distribution</li>
+          <li>RGB & HSV color space analysis</li>
+          <li>Brightness, contrast & sharpness metrics</li>
+          <li>Interactive sample gallery (101 classes)</li>
+        </ul>
+        <span style="display:inline-block; margin-top:0.8rem; color:var(--primary); font-weight:600; font-size:0.85rem;">View Report →</span>
+      </a>
+
+      <!-- Classification EDA Card -->
+      <a href="eda_classification.html" class="model-info-card" style="text-decoration:none; cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+        <h5 style="font-size:1.1rem; margin-bottom:0.8rem;">📊 Classification Analysis</h5>
+        <p style="margin-bottom:0.5rem;">Class distribution, splits, and feature analysis</p>
+        <ul style="font-size:0.82rem; text-align:left; margin-top:0.5rem;">
+          <li>101-class distribution & balance curve</li>
+          <li>Train/Val/Test split analysis</li>
+          <li>Class-level splits</li>
+          <li>PCA variance & Embeddings (t-SNE/UMAP)</li>
+          <li>Class Similarity and Clustering analysis</li>
+        </ul>
+        <span style="display:inline-block; margin-top:0.8rem; color:var(--primary); font-weight:600; font-size:0.85rem;">View Report →</span>
+      </a>
+
+    </div>
+
+    <!-- Dataset Quick Facts -->
+    <div class="accordion open" style="margin-top:2.5rem;">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📋 Dataset Quick Facts</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="model-info-grid">
+          <div class="model-info-card">
+            <h5>Dataset Source</h5>
+            <p>Food-101 (ETH Zurich)</p>
+            <p style="font-size:0.75rem;">101 food classes, 1000 images each</p>
+            <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/" target="_blank" style="font-size:0.8rem;">🔗 Official Page</a>
+          </div>
+          <div class="model-info-card">
+            <h5>Image Format</h5>
+            <p>JPEG, Variable Size</p>
+            <p style="font-size:0.75rem;">Resized to 224×224 for model input</p>
+          </div>
+          <div class="model-info-card">
+            <h5>Split Strategy</h5>
+            <p>70/15/15 Stratified</p>
+            <p style="font-size:0.75rem;">class-balanced across splits</p>
+          </div>
+          <div class="model-info-card">
+            <h5>Challenge Level</h5>
+            <p>Fine-grained</p>
+            <p style="font-size:0.75rem;">High intra-class variance, visual similarity between classes</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+
+
+</body>
+</html>

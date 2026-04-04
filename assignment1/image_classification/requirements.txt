@@ -1,0 +1,33 @@
+# PyTorch CUDA 11.8: pin +cu118 so pip cannot pick newer CPU-only torch from PyPI.
+--index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://pypi.org/simple
+
+# Deep learning (versions must match PyTorch compatibility table for cu118)
+torch==2.7.1+cu118
+torchvision==0.22.1+cu118
+torchaudio==2.7.1+cu118
+timm
+thop
+
+# Core scientific stack
+numpy
+pandas
+pyarrow
+matplotlib
+seaborn
+scikit-learn
+plotly
+
+# Image processing
+pillow
+opencv-python
+
+# Notebook environment
+notebook
+ipykernel
+ipython
+ipywidgets
+tqdm
+
+# Optional but used by the notebook when enabled
+umap-learn
