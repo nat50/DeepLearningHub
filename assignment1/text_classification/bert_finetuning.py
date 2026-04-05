@@ -37,6 +37,7 @@ from sklearn.metrics import (
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import OneCycleLR
+from torch.amp import autocast, GradScaler
 
 from dataset import (
     create_dataloaders,
@@ -77,9 +78,9 @@ POOLING_STRATEGIES = {
 
 TRAINING_CONFIG = {
     "max_length": 128,
-    "batch_size": 16,
-    "eval_batch_size": 32,
-    "learning_rate": 2e-5,
+    "batch_size": 128,           # H100 80GB: BERT-base fits easily at 128
+    "eval_batch_size": 256,      # No gradients stored → even larger batch
+    "learning_rate": 5e-5,       # Linear scaling rule for larger batch
     "num_epochs": 3,
     "weight_decay": 0.01,
     "warmup_ratio": 0.1,
@@ -89,9 +90,11 @@ TRAINING_CONFIG = {
     "train_size": 0.7,
     "val_size": 0.15,
     "test_size": 0.15,
-    "num_workers": 0,
+    "num_workers": 4,            # Parallel data loading to keep GPU fed
     "benchmark_runs": 50,
     "warmup_runs": 5,
+    "use_amp": True,             # BF16 mixed precision (~2x speedup)
+    "use_compile": True,         # torch.compile (~20-30% speedup)
 }
 
 
@@ -218,6 +221,19 @@ class BERTFineTuner:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"\n🖥️  Device: {self.device}")
 
+        # H100 optimization: enable TF32 for matmuls
+        if self.device.type == "cuda":
+            torch.set_float32_matmul_precision("high")
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
+            print("⚡ TF32 enabled for matmul and cuDNN")
+
+        # Mixed precision scaler
+        self.use_amp = TRAINING_CONFIG.get("use_amp", False) and self.device.type == "cuda"
+        self.scaler = GradScaler() if self.use_amp else None
+        if self.use_amp:
+            print("⚡ BF16 mixed precision enabled")
+
         set_seed(TRAINING_CONFIG["seed"])
 
     def _run_epoch(
@@ -228,7 +244,7 @@ class BERTFineTuner:
         optimizer=None,
         desc: str = "",
     ) -> dict:
-        """Run one training or evaluation epoch."""
+        """Run one training or evaluation epoch with optional BF16 mixed precision."""
         is_training = optimizer is not None
         model.train(is_training)
 
@@ -246,12 +262,22 @@ class BERTFineTuner:
                 optimizer.zero_grad(set_to_none=True)
 
             with torch.set_grad_enabled(is_training):
-                logits = model(input_ids, attention_mask)
-                loss = criterion(logits, labels)
+                # BF16 mixed precision forward pass
+                with autocast(device_type=self.device.type, dtype=torch.bfloat16, enabled=self.use_amp):
+                    logits = model(input_ids, attention_mask)
+                    loss = criterion(logits, labels)
+
                 if is_training:
-                    loss.backward()
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                    optimizer.step()
+                    if self.scaler is not None:
+                        self.scaler.scale(loss).backward()
+                        self.scaler.unscale_(optimizer)
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                        self.scaler.step(optimizer)
+                        self.scaler.update()
+                    else:
+                        loss.backward()
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                        optimizer.step()
 
             preds = torch.argmax(logits.detach(), dim=1)
             batch_size = labels.size(0)
@@ -330,6 +356,11 @@ class BERTFineTuner:
         ).to(self.device)
 
         resource_metrics = profile_model(model)
+
+        # H100 optimization: torch.compile for fused kernels
+        if TRAINING_CONFIG.get("use_compile", False) and hasattr(torch, "compile"):
+            print(f"   ⚡ Compiling model with torch.compile...")
+            model = torch.compile(model)
 
         # Optimizer
         optimizer = AdamW(
@@ -509,7 +540,7 @@ class BERTFineTuner:
 
         for model_key, model_info in BERT_MODELS.items():
             # Load tokenizer for this model
-            tokenizer = AutoTokenizer.from_pretrained(model_info["model_name"])
+            tokenizer = AutoTokenizer.from_pretrained(model_info["model_name"], use_fast=False)
 
             print(f"\n📦 Loading data with {model_info['name']} tokenizer...")
 
@@ -665,7 +696,7 @@ def main():
         all_results = []
         for model_key in args.model:
             model_info = BERT_MODELS[model_key]
-            tokenizer = AutoTokenizer.from_pretrained(model_info["model_name"])
+            tokenizer = AutoTokenizer.from_pretrained(model_info["model_name"], use_fast=False)
 
             dataloaders = create_dataloaders(
                 model_type="transformer",

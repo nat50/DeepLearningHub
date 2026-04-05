@@ -1,0 +1,229 @@
+{
+  "experiment_name": "DistilBERT + [CLS] Token",
+  "experiment_slug": "distilbert_cls_token",
+  "model_base": "distilbert",
+  "model_base_name": "DistilBERT",
+  "model_checkpoint": "distilbert-base-uncased",
+  "pooling_strategy": "cls_token",
+  "pooling_display": "[CLS] Token",
+  "display_name": "DistilBERT + [CLS] Token",
+  "best_epoch": 2,
+  "training_time_seconds": 520.0482171460003,
+  "training_time_minutes": 8.667470285766672,
+  "test_metrics": {
+    "loss": 0.7265009063735943,
+    "accuracy": 0.7623773220127523,
+    "precision": 0.7585167069864681,
+    "recall": 0.7623773220127523,
+    "f1": 0.7591193144498228
+  },
+  "val_metrics": {
+    "loss": 0.7265386800175622,
+    "accuracy": 0.7618,
+    "precision": 0.7578164763707956,
+    "recall": 0.7618,
+    "f1": 0.7584475019509581
+  },
+  "resource_metrics": {
+    "parameters": 66370570.0,
+    "trainable_parameters": 66370570.0,
+    "model_size_mb": 253.2240514755249,
+    "inference_time_ms": 1.6515236799932609
+  },
+  "confusion_matrix": [
+    [
+      13354,
+      397,
+      617,
+      1194,
+      122,
+      173,
+      1082,
+      1033,
+      1796,
+      1232
+    ],
+    [
+      435,
+      16876,
+      1177,
+      1126,
+      230,
+      137,
+      535,
+      207,
+      96,
+      181
+    ],
+    [
+      403,
+      546,
+      17761,
+      286,
+      55,
+      137,
+      434,
+      230,
+      1006,
+      142
+    ],
+    [
+      1417,
+      3273,
+      559,
+      11364,
+      504,
+      243,
+      1533,
+      661,
+      369,
+      1077
+    ],
+    [
+      128,
+      152,
+      58,
+      306,
+      18568,
+      85,
+      918,
+      459,
+      213,
+      113
+    ],
+    [
+      131,
+      153,
+      304,
+      151,
+      77,
+      19284,
+      261,
+      357,
+      147,
+      135
+    ],
+    [
+      1220,
+      738,
+      871,
+      1275,
+      1051,
+      324,
+      11819,
+      1061,
+      1456,
+      1186
+    ],
+    [
+      812,
+      243,
+      318,
+      424,
+      567,
+      371,
+      822,
+      16343,
+      833,
+      267
+    ],
+    [
+      901,
+      47,
+      765,
+      251,
+      149,
+      109,
+      568,
+      609,
+      17252,
+      349
+    ],
+    [
+      828,
+      169,
+      153,
+      802,
+      81,
+      115,
+      998,
+      197,
+      178,
+      17479
+    ]
+  ],
+  "per_class_metrics": [
+    {
+      "class": "Society & Culture",
+      "precision": 0.6803199347903612,
+      "recall": 0.6359047619047619,
+      "f1": 0.6573629673386006
+    },
+    {
+      "class": "Science & Mathematics",
+      "precision": 0.7469239621138355,
+      "recall": 0.8036190476190476,
+      "f1": 0.7742349864660274
+    },
+    {
+      "class": "Health",
+      "precision": 0.7864765531594562,
+      "recall": 0.8457619047619047,
+      "f1": 0.815042562467017
+    },
+    {
+      "class": "Education & Reference",
+      "precision": 0.6615053262704464,
+      "recall": 0.5411428571428571,
+      "f1": 0.5953010817465099
+    },
+    {
+      "class": "Computers & Internet",
+      "precision": 0.8675014016071763,
+      "recall": 0.8841904761904762,
+      "f1": 0.8757664371285728
+    },
+    {
+      "class": "Sports",
+      "precision": 0.9192487367718563,
+      "recall": 0.9182857142857143,
+      "f1": 0.9187669731764257
+    },
+    {
+      "class": "Business & Finance",
+      "precision": 0.623036373220875,
+      "recall": 0.5627827246321604,
+      "f1": 0.5913787495934553
+    },
+    {
+      "class": "Entertainment & Music",
+      "precision": 0.7724630146050953,
+      "recall": 0.7782380952380953,
+      "f1": 0.7753398012192518
+    },
+    {
+      "class": "Family & Relationships",
+      "precision": 0.7389702732802194,
+      "recall": 0.8215238095238095,
+      "f1": 0.778063410454156
+    },
+    {
+      "class": "Politics & Government",
+      "precision": 0.7887279454898245,
+      "recall": 0.8323333333333334,
+      "f1": 0.8099441625541577
+    }
+  ],
+  "class_names": [
+    "Society & Culture",
+    "Science & Mathematics",
+    "Health",
+    "Education & Reference",
+    "Computers & Internet",
+    "Sports",
+    "Business & Finance",
+    "Entertainment & Music",
+    "Family & Relationships",
+    "Politics & Government"
+  ]
+}
