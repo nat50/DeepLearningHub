@@ -1439,6 +1439,412 @@
       font-style: italic;
     }
 
+    .viz-section {
+      border: 1px solid #d7deec;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      padding: 1rem 1rem 1.05rem;
+      margin-bottom: 1rem;
+    }
+
+    .viz-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .viz-header h3 {
+      margin: 0;
+      color: #10233f;
+      font-size: 1.06rem;
+      font-weight: 800;
+    }
+
+    .viz-header p {
+      margin: 0.35rem 0 0.75rem;
+      color: #4f5f78;
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .viz-control label {
+      display: block;
+      margin-bottom: 0.32rem;
+      color: #243b5a;
+      font-size: 0.79rem;
+      font-weight: 700;
+    }
+
+    .viz-control select,
+    .viz-control input[type="range"] {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.48rem 0.55rem;
+      font-size: 0.84rem;
+      font-family: var(--font);
+      background: #ffffff;
+      color: #1f2937;
+    }
+
+    .viz-control input[type="range"] {
+      padding: 0;
+      accent-color: #3b82f6;
+    }
+
+    .viz-btn {
+      border: 1px solid #c8d4ea;
+      border-radius: 8px;
+      background: #1d4ed8;
+      color: #ffffff;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+      font-family: var(--font);
+    }
+
+    .viz-btn.secondary {
+      background: #ffffff;
+      color: #1f4b79;
+    }
+
+    .viz-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(30, 64, 175, 0.2);
+    }
+
+    .fm-controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.68rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .fm-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .fm-status {
+      color: #475569;
+      font-size: 0.82rem;
+      font-style: italic;
+    }
+
+    .fm-board {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .fm-pane {
+      border: 1px solid #d8dfec;
+      border-radius: 10px;
+      background: #ffffff;
+      padding: 0.72rem;
+    }
+
+    .fm-pane h4 {
+      margin: 0 0 0.42rem;
+      color: #1d3557;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .fm-frame {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #fm-source-image,
+    #fm-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .fm-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+    }
+
+    .fm-stat-card {
+      border: 1px solid #d6e1f4;
+      border-radius: 9px;
+      background: #f5f9ff;
+      padding: 0.55rem 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .fm-stat-label {
+      color: #496080;
+      font-size: 0.73rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .fm-stat-value {
+      color: #12365e;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .lc-control-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.72rem;
+    }
+
+    .lc-control-card {
+      border: 1px solid #d6deec;
+      border-radius: 10px;
+      background: #ffffff;
+      padding: 0.68rem;
+    }
+
+    .lc-control-card h4 {
+      margin: 0 0 0.45rem;
+      font-size: 0.84rem;
+      color: #1e3a5f;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lc-model-list {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      max-height: 176px;
+      overflow-y: auto;
+      padding: 0.4rem;
+      background: #f8fafd;
+    }
+
+    .lc-model-item {
+      display: flex;
+      align-items: center;
+      gap: 0.42rem;
+      border-radius: 6px;
+      padding: 0.32rem 0.38rem;
+      font-size: 0.82rem;
+      color: #1f2f46;
+    }
+
+    .lc-model-item:hover {
+      background: #eef4ff;
+    }
+
+    .lc-model-item input {
+      accent-color: #2563eb;
+    }
+
+    .lc-toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin: 0.5rem 0;
+    }
+
+    .lc-toggle-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.34rem;
+      color: #334155;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .lc-toggle-row input {
+      accent-color: #2563eb;
+    }
+
+    .lc-playback-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.74rem;
+    }
+
+    .lc-epoch-label {
+      color: #334155;
+      font-size: 0.82rem;
+      font-weight: 700;
+      min-width: 102px;
+    }
+
+    .lc-epoch-slider {
+      flex: 1;
+      min-width: 220px;
+      accent-color: #2563eb;
+    }
+
+    .lc-live-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+    }
+
+    .lc-live-card {
+      border: 1px solid #d8e2f2;
+      border-radius: 10px;
+      background: #f8fbff;
+      padding: 0.55rem 0.62rem;
+    }
+
+    .lc-live-card h5 {
+      margin: 0 0 0.4rem;
+      color: #17375f;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .lc-live-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.45rem;
+      font-size: 0.79rem;
+      color: #3f4f68;
+      margin-bottom: 0.22rem;
+    }
+
+    .lc-live-row strong {
+      color: #0f2743;
+      font-weight: 800;
+    }
+
+    .arch-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-bottom: 0.72rem;
+    }
+
+    .arch-overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.72rem;
+    }
+
+    .arch-overview-card {
+      border: 1px solid #d8e1f2;
+      border-radius: 9px;
+      background: #ffffff;
+      padding: 0.56rem 0.62rem;
+    }
+
+    .arch-overview-label {
+      color: #4a607f;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.2rem;
+    }
+
+    .arch-overview-value {
+      color: #102744;
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .arch-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .arch-node {
+      min-width: 170px;
+      border: 1px solid #d5ddeb;
+      border-top-width: 4px;
+      border-radius: 10px;
+      background: #ffffff;
+      padding: 0.52rem 0.58rem;
+      flex-shrink: 0;
+    }
+
+    .arch-node h5 {
+      margin: 0 0 0.24rem;
+      color: #0f2743;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .arch-node p {
+      margin: 0;
+      color: #475569;
+      font-size: 0.77rem;
+      line-height: 1.4;
+    }
+
+    .arch-arrow {
+      align-self: center;
+      color: #64748b;
+      font-size: 1.15rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .arch-stage-table-wrap {
+      margin-top: 0.75rem;
+      overflow-x: auto;
+    }
+
+    .arch-stage-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+      font-size: 0.8rem;
+    }
+
+    .arch-stage-table th,
+    .arch-stage-table td {
+      border: 1px solid #d5ddea;
+      padding: 0.4rem 0.48rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .arch-stage-table th {
+      background: #eaf1ff;
+      color: #1a365d;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .arch-stage-table tbody tr:nth-child(even) {
+      background: #f8fbff;
+    }
+
+    .viz-hint {
+      color: #55657f;
+      font-size: 0.82rem;
+      margin-top: 0.55rem;
+    }
+
     .info-table td strong {
       color: #0f172a;
     }
@@ -1522,6 +1928,20 @@
 
       .results-summary-grid,
       .results-detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .fm-controls,
+      .arch-overview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .lc-control-grid,
+      .fm-board {
+        grid-template-columns: 1fr;
+      }
+
+      .fm-stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
@@ -1667,6 +2087,28 @@
 
       .config-intro {
         font-size: 0.9rem;
+      }
+
+      .viz-section {
+        padding: 0.85rem 0.85rem 0.92rem;
+      }
+
+      .fm-controls,
+      .arch-overview-grid,
+      .fm-stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .lc-playback-bar {
+        align-items: stretch;
+      }
+
+      .lc-epoch-slider {
+        min-width: 100%;
+      }
+
+      .arch-node {
+        min-width: 148px;
       }
     }
   </style>
@@ -2865,14 +3307,147 @@ val_result = run_epoch(
 
     <div id="compare-visualizations" class="compare-pane">
       <div class="panel-block">
-        <h3>Learning Curves</h3>
-        <p>Select a model to inspect train and validation dynamics over epochs.</p>
-        <select id="lc-model-select" onchange="renderSelectedLC()" style="padding:0.4rem 0.8rem; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:0.875rem; margin-bottom:0.9rem;">
-          <option value="">- Select Model -</option>
-        </select>
-        <div class="chart-container" id="chart-lc-loss"></div>
-        <div class="chart-container" id="chart-lc-accuracy"></div>
-        <div class="chart-container" id="chart-lc-f1"></div>
+        <div class="viz-section">
+          <div class="viz-header">
+            <h3>Feature Maps Explorer</h3>
+            <p>Observe one Food-101 image through different layers and filters for each backbone.</p>
+          </div>
+
+          <div class="fm-controls">
+            <div class="viz-control">
+              <label for="fm-model-select">Model</label>
+              <select id="fm-model-select" onchange="handleFeatureMapModelChange()">
+                <option value="">- Select Model -</option>
+              </select>
+            </div>
+            <div class="viz-control">
+              <label for="fm-layer-select">Layer</label>
+              <select id="fm-layer-select" onchange="handleFeatureMapLayerChange()">
+                <option value="">- Select Layer -</option>
+              </select>
+            </div>
+            <div class="viz-control">
+              <label for="fm-image-select">Image Sample</label>
+              <select id="fm-image-select" onchange="handleFeatureMapImageChange()">
+                <option value="">- Loading samples -</option>
+              </select>
+            </div>
+            <div class="viz-control">
+              <label for="fm-filter-slider">Filter Index <span id="fm-filter-label">1</span>/<span id="fm-filter-total">16</span></label>
+              <input id="fm-filter-slider" type="range" min="1" max="16" step="1" value="1" oninput="handleFeatureMapFilterInput(event)">
+            </div>
+          </div>
+
+          <div class="fm-toolbar">
+            <button type="button" class="viz-btn" onclick="selectRandomFeatureMapImage()">Random Image</button>
+            <button type="button" class="viz-btn secondary" id="fm-play-btn" onclick="toggleFeatureMapPlayback()">Play Filters</button>
+            <span class="fm-status" id="fm-status-line">Preparing feature maps...</span>
+          </div>
+
+          <div class="fm-board">
+            <div class="fm-pane">
+              <h4>Input Image</h4>
+              <div class="fm-frame">
+                <img id="fm-source-image" src="" alt="Food sample for feature map exploration">
+              </div>
+            </div>
+            <div class="fm-pane">
+              <h4 id="fm-map-title">Activation Map</h4>
+              <div class="fm-frame">
+                <canvas id="fm-canvas" width="224" height="224"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="fm-stats-grid">
+            <div class="fm-stat-card"><span class="fm-stat-label">Mean Activation</span><span class="fm-stat-value" id="fm-stat-mean">-</span></div>
+            <div class="fm-stat-card"><span class="fm-stat-label">Peak Activation</span><span class="fm-stat-value" id="fm-stat-max">-</span></div>
+            <div class="fm-stat-card"><span class="fm-stat-label">Sparsity (&lt; 0.2)</span><span class="fm-stat-value" id="fm-stat-sparsity">-</span></div>
+            <div class="fm-stat-card"><span class="fm-stat-label">Attention Focus</span><span class="fm-stat-value" id="fm-stat-focus">-</span></div>
+          </div>
+
+          <p class="viz-hint">Feature maps are exported from real checkpoint inference on key layers (NoAug models), with all filters available through the slider.</p>
+        </div>
+
+        <div class="viz-section">
+          <div class="viz-header">
+            <h3>Learning Curves</h3>
+            <p>Replay training history per epoch and compare convergence of multiple models in real time.</p>
+          </div>
+
+          <div class="lc-control-grid">
+            <div class="lc-control-card">
+              <h4>Models</h4>
+              <div id="lc-model-list" class="lc-model-list"></div>
+            </div>
+
+            <div class="lc-control-card">
+              <h4>Playback Controls</h4>
+              <div class="viz-control">
+                <label for="lc-metric-select">Metric</label>
+                <select id="lc-metric-select" onchange="handleLearningMetricChange()">
+                  <option value="loss">Loss</option>
+                  <option value="accuracy">Accuracy</option>
+                  <option value="f1">F1-Score</option>
+                </select>
+              </div>
+
+              <div class="lc-toggle-row">
+                <label><input type="checkbox" id="lc-show-train" checked onchange="handleLearningSplitToggle()"> Train</label>
+                <label><input type="checkbox" id="lc-show-val" checked onchange="handleLearningSplitToggle()"> Validation</label>
+              </div>
+
+              <div class="viz-control">
+                <label for="lc-speed-slider">Speed <span id="lc-speed-label">1.0x</span></label>
+                <input id="lc-speed-slider" type="range" min="1" max="5" step="1" value="3" oninput="handleLearningSpeedChange(event)">
+              </div>
+            </div>
+          </div>
+
+          <div class="lc-playback-bar">
+            <button type="button" class="viz-btn" id="lc-play-btn" onclick="toggleLearningCurvePlayback()">Start Replay</button>
+            <button type="button" class="viz-btn secondary" onclick="resetLearningCurvePlayback()">Reset</button>
+            <span class="lc-epoch-label" id="lc-epoch-label">Epoch 1/1</span>
+            <input id="lc-epoch-slider" class="lc-epoch-slider" type="range" min="1" max="1" step="1" value="1" oninput="handleLearningEpochScrub(event)">
+          </div>
+
+          <div class="chart-container" id="chart-lc-realtime"></div>
+          <div class="lc-live-grid" id="lc-live-metrics"></div>
+        </div>
+
+        <div class="viz-section">
+          <div class="viz-header">
+            <h3>Model Architecture</h3>
+            <p>Visualize stage-by-stage architecture and capacity profile for each trained backbone.</p>
+          </div>
+
+          <div class="arch-controls">
+            <div class="viz-control" style="min-width:280px;">
+              <label for="arch-model-select">Model</label>
+              <select id="arch-model-select" onchange="renderArchitectureVisualizer()">
+                <option value="">- Select Model -</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="arch-overview-grid" id="arch-overview-grid"></div>
+          <div class="arch-flow" id="arch-flow"></div>
+
+          <div class="arch-stage-table-wrap">
+            <table class="arch-stage-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Stage</th>
+                  <th>Operation</th>
+                  <th>Output</th>
+                  <th>Purpose</th>
+                </tr>
+              </thead>
+              <tbody id="arch-stage-tbody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -3049,6 +3624,34 @@ val_result = run_epoch(
     let FALLBACK_RESULTS = null;
     let NOTEBOOK_CONFIG = { ...DEFAULT_NOTEBOOK_CONFIG };
     let SELECTED_CONFUSION_MODEL = '';
+    let FEATURE_MAP_DATA = null;
+    let FEATURE_MAP_SAMPLES = [];
+    let FEATURE_MAP_RENDER_TOKEN = 0;
+
+    const FEATURE_MAP_IMAGE_CACHE = {};
+
+    const FEATURE_MAP_STATE = {
+      modelName: '',
+      layerKey: '',
+      imagePath: '',
+      filterIndex: 1,
+      sourceImage: null,
+      playbackTimer: null,
+      playbackActive: false,
+    };
+
+    const LEARNING_CURVE_STATE = {
+      selectedModels: [],
+      metricKey: 'loss',
+      showTrain: true,
+      showVal: true,
+      currentEpoch: 1,
+      maxEpoch: 1,
+      speedLevel: 3,
+      intervalMs: 700,
+      playbackTimer: null,
+      playbackActive: false,
+    };
 
     const EXPERIMENT_SLUGS = [
       'resnet50_no_aug', 'resnet50_aug',
@@ -3100,6 +3703,117 @@ val_result = run_epoch(
       mobilenet_v3: 'Mobile and edge deployment',
       vit_b16: 'Strong global context modeling',
       swin_b: 'Highest-accuracy deployment in this project',
+    };
+
+    const MODEL_COLOR_PALETTE = [
+      '#1d4ed8', '#f97316', '#16a34a', '#db2777',
+      '#0f766e', '#9333ea', '#b45309', '#0ea5e9',
+    ];
+
+    const LEARNING_METRIC_CONFIG = {
+      loss: {
+        label: 'Loss',
+        axisTitle: 'Loss',
+        trainKey: 'train_loss',
+        valKey: 'val_loss',
+        lowerIsBetter: true,
+      },
+      accuracy: {
+        label: 'Accuracy',
+        axisTitle: 'Accuracy',
+        trainKey: 'train_accuracy',
+        valKey: 'val_accuracy',
+        lowerIsBetter: false,
+      },
+      f1: {
+        label: 'F1-Score',
+        axisTitle: 'F1-Score',
+        trainKey: 'train_f1',
+        valKey: 'val_f1',
+        lowerIsBetter: false,
+      },
+    };
+
+    const FEATURE_MAP_LAYER_LIBRARY = {
+      resnet50: [
+        { key: 'stem', label: 'Stem Conv 7x7 (56x56)', mode: 'edge', filters: 32 },
+        { key: 'layer2', label: 'Layer2 Bottleneck Stack', mode: 'texture', filters: 48 },
+        { key: 'layer4', label: 'Layer4 Deep Features', mode: 'semantic', filters: 64 },
+      ],
+      mobilenet_v3: [
+        { key: 'early_dw', label: 'Early Depthwise Blocks', mode: 'edge', filters: 24 },
+        { key: 'mid_ir', label: 'Inverted Residual Bottlenecks', mode: 'texture', filters: 40 },
+        { key: 'late_expand', label: 'Late Expansion Features', mode: 'semantic', filters: 56 },
+      ],
+      vit_b16: [
+        { key: 'patch_embed', label: 'Patch Embedding (14x14 tokens)', mode: 'token', filters: 24 },
+        { key: 'encoder_mid', label: 'Transformer Block 6 Attention', mode: 'token', filters: 36 },
+        { key: 'encoder_last', label: 'Transformer Block 12 Semantic', mode: 'semantic', filters: 48 },
+      ],
+      swin_b: [
+        { key: 'stage1', label: 'Window Stage 1 (56x56)', mode: 'token', filters: 28 },
+        { key: 'stage3', label: 'Window Stage 3 (14x14)', mode: 'texture', filters: 44 },
+        { key: 'stage4', label: 'Window Stage 4 (7x7)', mode: 'semantic', filters: 56 },
+      ],
+    };
+
+    const FEATURE_MAP_PALETTES = {
+      resnet50: [[13, 27, 57], [41, 98, 255], [179, 218, 255]],
+      mobilenet_v3: [[30, 41, 59], [253, 126, 20], [255, 220, 179]],
+      vit_b16: [[40, 17, 73], [168, 85, 247], [238, 221, 255]],
+      swin_b: [[14, 45, 58], [5, 150, 105], [192, 255, 232]],
+      default: [[17, 24, 39], [59, 130, 246], [224, 242, 254]],
+    };
+
+    const ARCHITECTURE_TYPE_COLORS = {
+      input: '#0ea5e9',
+      stem: '#2563eb',
+      stage: '#4f46e5',
+      token: '#7c3aed',
+      merge: '#0f766e',
+      head: '#dc2626',
+    };
+
+    const ARCHITECTURE_BLUEPRINTS = {
+      resnet50: [
+        { name: 'Input', operation: 'RGB image', output: '224x224x3', purpose: 'Raw food image', type: 'input' },
+        { name: 'Stem', operation: '7x7 Conv + MaxPool', output: '56x56x64', purpose: 'Low-level edges', type: 'stem' },
+        { name: 'Layer1', operation: 'Bottleneck x3', output: '56x56x256', purpose: 'Local motifs', type: 'stage' },
+        { name: 'Layer2', operation: 'Bottleneck x4', output: '28x28x512', purpose: 'Mid-level textures', type: 'stage' },
+        { name: 'Layer3', operation: 'Bottleneck x6', output: '14x14x1024', purpose: 'Object parts', type: 'stage' },
+        { name: 'Layer4', operation: 'Bottleneck x3', output: '7x7x2048', purpose: 'Semantic descriptors', type: 'stage' },
+        { name: 'Head', operation: 'Global Pool + MLP', output: '101 classes', purpose: 'Food classifier', type: 'head' },
+      ],
+      mobilenet_v3: [
+        { name: 'Input', operation: 'RGB image', output: '224x224x3', purpose: 'Raw food image', type: 'input' },
+        { name: 'Stem', operation: '3x3 Conv + h-swish', output: '112x112x16', purpose: 'Initial encoding', type: 'stem' },
+        { name: 'IR Stack 1', operation: 'Depthwise bottlenecks', output: '56x56x24', purpose: 'Efficient local features', type: 'stage' },
+        { name: 'IR Stack 2', operation: 'SE + bottlenecks', output: '28x28x40', purpose: 'Context-aware channels', type: 'stage' },
+        { name: 'IR Stack 3', operation: 'Expanded bottlenecks', output: '14x14x112', purpose: 'High-level textures', type: 'stage' },
+        { name: 'Final Expand', operation: '1x1 Conv', output: '7x7x960', purpose: 'Compact semantic map', type: 'stage' },
+        { name: 'Head', operation: 'Global Pool + MLP', output: '101 classes', purpose: 'Food classifier', type: 'head' },
+      ],
+      vit_b16: [
+        { name: 'Input', operation: 'RGB image', output: '224x224x3', purpose: 'Raw food image', type: 'input' },
+        { name: 'Patch Embed', operation: '16x16 patch projection', output: '196 tokens x 768', purpose: 'Tokenization', type: 'token' },
+        { name: 'Positional Fusion', operation: 'Add position + CLS token', output: '197 tokens x 768', purpose: 'Sequence setup', type: 'token' },
+        { name: 'Encoder 1-4', operation: 'MHSA + MLP blocks', output: '197 tokens x 768', purpose: 'Early global context', type: 'stage' },
+        { name: 'Encoder 5-8', operation: 'MHSA + MLP blocks', output: '197 tokens x 768', purpose: 'Mid semantic mixing', type: 'stage' },
+        { name: 'Encoder 9-12', operation: 'MHSA + MLP blocks', output: '197 tokens x 768', purpose: 'Deep representation', type: 'stage' },
+        { name: 'Head', operation: 'CLS projection + MLP', output: '101 classes', purpose: 'Food classifier', type: 'head' },
+      ],
+      swin_b: [
+        { name: 'Input', operation: 'RGB image', output: '224x224x3', purpose: 'Raw food image', type: 'input' },
+        { name: 'Patch Partition', operation: '4x4 linear embedding', output: '56x56 tokens x 128', purpose: 'Local token grid', type: 'token' },
+        { name: 'Stage 1', operation: 'Shifted window blocks x2', output: '56x56 tokens x 128', purpose: 'Fine details', type: 'stage' },
+        { name: 'Merge 1', operation: 'Patch merging', output: '28x28 tokens x 256', purpose: 'Downsample + widen', type: 'merge' },
+        { name: 'Stage 2', operation: 'Shifted window blocks x2', output: '28x28 tokens x 256', purpose: 'Mid-level structure', type: 'stage' },
+        { name: 'Merge 2', operation: 'Patch merging', output: '14x14 tokens x 512', purpose: 'Hierarchy growth', type: 'merge' },
+        { name: 'Stage 3', operation: 'Shifted window blocks x18', output: '14x14 tokens x 512', purpose: 'Deep context learning', type: 'stage' },
+        { name: 'Merge 3', operation: 'Patch merging', output: '7x7 tokens x 1024', purpose: 'Global abstraction', type: 'merge' },
+        { name: 'Stage 4', operation: 'Shifted window blocks x2', output: '7x7 tokens x 1024', purpose: 'Semantic map', type: 'stage' },
+        { name: 'Head', operation: 'Global Pool + MLP', output: '101 classes', purpose: 'Food classifier', type: 'head' },
+      ],
     };
 
     function escapeHtml(value) {
@@ -3160,6 +3874,10 @@ val_result = run_epoch(
       return 2;
     }
 
+    function getModelUiLabel(modelName) {
+      return String(modelName || '').replace(/\s+\((?:NoAug|Aug)\)$/i, '').trim();
+    }
+
     function sortModelsByReleaseDate(modelNames) {
       return [...modelNames].sort((left, right) => {
         const leftKey = normalizeModelBackboneKey(left);
@@ -3175,6 +3893,42 @@ val_result = run_epoch(
 
         return left.localeCompare(right);
       });
+    }
+
+    function getVisualizationDefaultModels(modelNames) {
+      const sorted = sortModelsByReleaseDate(modelNames);
+      const preferredBackboneOrder = ['resnet50', 'mobilenet_v3', 'vit_b16', 'swin_b'];
+      const groupedByBackbone = new Map();
+
+      sorted.forEach((name) => {
+        const backboneKey = normalizeModelBackboneKey(name);
+        if (!groupedByBackbone.has(backboneKey)) groupedByBackbone.set(backboneKey, []);
+        groupedByBackbone.get(backboneKey).push(name);
+      });
+
+      const pickNoAugOrFirst = (candidates) => {
+        if (!candidates || !candidates.length) return '';
+        const noAug = candidates.find((name) => /\(NoAug\)/i.test(name));
+        return noAug || candidates[0];
+      };
+
+      const selected = [];
+      preferredBackboneOrder.forEach((backboneKey) => {
+        const choice = pickNoAugOrFirst(groupedByBackbone.get(backboneKey));
+        if (choice) selected.push(choice);
+      });
+
+      if (selected.length) return selected;
+
+      const fallback = [];
+      const seenBackbones = new Set();
+      sorted.forEach((name) => {
+        const backboneKey = normalizeModelBackboneKey(name);
+        if (seenBackbones.has(backboneKey)) return;
+        seenBackbones.add(backboneKey);
+        fallback.push(name);
+      });
+      return fallback.slice(0, 4);
     }
 
     function applyEditorStyleHighlighting() {
@@ -3200,6 +3954,18 @@ val_result = run_epoch(
       });
       const pane = document.getElementById('compare-' + tabName);
       if (pane) pane.classList.add('active');
+
+      if (tabName === 'visualizations') {
+        renderSelectedLC();
+        renderArchitectureVisualizer();
+        renderFeatureMapExplorer();
+        setTimeout(() => {
+          const chart = document.getElementById('chart-lc-realtime');
+          if (chart && typeof Plotly !== 'undefined' && Plotly.Plots && Plotly.Plots.resize) {
+            Plotly.Plots.resize(chart);
+          }
+        }, 100);
+      }
     }
 
     function setActiveTutorialNode(stepKey) {
@@ -3731,19 +4497,1167 @@ val_result = run_epoch(
       }
     }
 
-    function populateSelectors(modelNames) {
-      const lcSelect = document.getElementById('lc-model-select');
-      lcSelect.innerHTML = '<option value="">- Select Model -</option>';
+    function formatFoodClassLabel(value) {
+      return String(value || '')
+        .split('_')
+        .map((part) => (part ? part[0].toUpperCase() + part.slice(1) : part))
+        .join(' ');
+    }
 
-      const sorted = sortModelsByReleaseDate(modelNames);
-      sorted.forEach((name) => {
-        lcSelect.add(new Option(name, name));
+    function clampNumber(value, minValue, maxValue) {
+      return Math.max(minValue, Math.min(maxValue, Number(value)));
+    }
+
+    function hexToRgb(hexColor) {
+      const normalized = String(hexColor || '').replace('#', '');
+      if (normalized.length !== 6) return { r: 59, g: 130, b: 246 };
+      return {
+        r: Number.parseInt(normalized.slice(0, 2), 16),
+        g: Number.parseInt(normalized.slice(2, 4), 16),
+        b: Number.parseInt(normalized.slice(4, 6), 16),
+      };
+    }
+
+    function rgbaFromHex(hexColor, alpha) {
+      const rgb = hexToRgb(hexColor);
+      return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+    }
+
+    function getModelSeriesColor(modelName) {
+      const sorted = sortModelsByReleaseDate(Object.keys(MODEL_METRICS));
+      const index = Math.max(0, sorted.indexOf(modelName));
+      return MODEL_COLOR_PALETTE[index % MODEL_COLOR_PALETTE.length];
+    }
+
+    function formatMetricValue(metricKey, value) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) return '-';
+      if (metricKey === 'loss') return numeric.toFixed(4);
+      return `${(numeric * 100).toFixed(2)}%`;
+    }
+
+    function getFeatureMapModelPayload(modelName) {
+      if (!FEATURE_MAP_DATA || !FEATURE_MAP_DATA.models) return null;
+      return FEATURE_MAP_DATA.models[modelName] || null;
+    }
+
+    function getFeatureMapSampleByImagePath(imagePath) {
+      if (!FEATURE_MAP_DATA || !Array.isArray(FEATURE_MAP_DATA.samples)) return null;
+      return FEATURE_MAP_DATA.samples.find((sample) => sample.image_path === imagePath) || null;
+    }
+
+    function getRealFeatureActivationBundle(modelName, layerKey, imagePath) {
+      const modelPayload = getFeatureMapModelPayload(modelName);
+      const sample = getFeatureMapSampleByImagePath(imagePath);
+      if (!modelPayload || !sample) return null;
+
+      const samplePayload = modelPayload.activations && modelPayload.activations[sample.id];
+      if (!samplePayload) return null;
+      return samplePayload[layerKey] || null;
+    }
+
+    function getRealFeatureFilters(realBundle) {
+      if (!realBundle) return [];
+      if (Array.isArray(realBundle.filters) && realBundle.filters.length) {
+        return realBundle.filters;
+      }
+      if (Array.isArray(realBundle.selected_filters) && realBundle.selected_filters.length) {
+        return realBundle.selected_filters;
+      }
+      return [];
+    }
+
+    function getFeatureLayerSet(modelName) {
+      const modelPayload = getFeatureMapModelPayload(modelName);
+      if (modelPayload && Array.isArray(modelPayload.layers) && modelPayload.layers.length) {
+        const activationMap = modelPayload.activations || {};
+        const firstSampleId = Object.keys(activationMap)[0];
+        const firstSampleActivation = firstSampleId ? activationMap[firstSampleId] : null;
+        return modelPayload.layers.map((layer) => ({
+          key: layer.key,
+          label: layer.label,
+          mode: 'real',
+          filters: Math.max(
+            1,
+            Number(
+              firstSampleActivation
+              && firstSampleActivation[layer.key]
+              && firstSampleActivation[layer.key].total_filters
+            ) || 16
+          ),
+        }));
+      }
+
+      const backboneKey = normalizeModelBackboneKey(modelName);
+      return FEATURE_MAP_LAYER_LIBRARY[backboneKey] || FEATURE_MAP_LAYER_LIBRARY.resnet50;
+    }
+
+    function getSelectedFeatureLayerConfig() {
+      const layers = getFeatureLayerSet(FEATURE_MAP_STATE.modelName);
+      return layers.find((layer) => layer.key === FEATURE_MAP_STATE.layerKey) || layers[0] || null;
+    }
+
+    function createSyntheticSourceImage() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 320;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, '#1e3a8a');
+      gradient.addColorStop(1, '#f97316');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let index = 0; index < 26; index += 1) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.08 + (index * 0.01)})`;
+        ctx.beginPath();
+        ctx.arc(
+          (index * 29) % canvas.width,
+          (index * 41) % canvas.height,
+          8 + ((index * 7) % 24),
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+      return canvas.toDataURL('image/png');
+    }
+
+    function loadImageElement(path) {
+      if (FEATURE_MAP_IMAGE_CACHE[path]) return FEATURE_MAP_IMAGE_CACHE[path];
+
+      FEATURE_MAP_IMAGE_CACHE[path] = new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => {
+          delete FEATURE_MAP_IMAGE_CACHE[path];
+          reject(new Error(`Failed to load image: ${path}`));
+        };
+        image.src = path;
       });
 
-      const best = [...modelNames].sort((a, b) => MODEL_METRICS[b].accuracy - MODEL_METRICS[a].accuracy)[0];
-      if (best) {
-        lcSelect.value = best;
+      return FEATURE_MAP_IMAGE_CACHE[path];
+    }
+
+    async function loadFeatureMapSamples() {
+      if (FEATURE_MAP_DATA && Array.isArray(FEATURE_MAP_DATA.samples) && FEATURE_MAP_DATA.samples.length) {
+        return FEATURE_MAP_DATA.samples.map((sample) => ({
+          label: sample.label,
+          value: sample.image_path,
+        }));
       }
+
+      const candidates = [
+        '../data/food-101/meta/test.txt',
+        '../data/food-101/meta/train.txt',
+      ];
+
+      let sourceText = null;
+      for (const candidate of candidates) {
+        sourceText = await safeFetchText(candidate);
+        if (sourceText) break;
+      }
+
+      if (!sourceText) return [];
+
+      const classBuckets = new Map();
+      sourceText
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .forEach((line) => {
+          const slash = line.indexOf('/');
+          if (slash <= 0) return;
+          const className = line.slice(0, slash);
+          const imageId = line.slice(slash + 1);
+          if (!className || !imageId) return;
+          if (!classBuckets.has(className)) classBuckets.set(className, []);
+          const bucket = classBuckets.get(className);
+          if (bucket.length < 4) bucket.push(imageId);
+        });
+
+      const classes = Array.from(classBuckets.keys()).sort();
+      const samples = [];
+      for (let round = 0; round < 3; round += 1) {
+        for (const className of classes) {
+          const bucket = classBuckets.get(className) || [];
+          if (!bucket[round]) continue;
+          const imageId = bucket[round];
+          samples.push({
+            label: `${formatFoodClassLabel(className)} - ${imageId}`,
+            value: `../data/food-101/images/${className}/${imageId}.jpg`,
+          });
+          if (samples.length >= 36) return samples;
+        }
+      }
+
+      return samples;
+    }
+
+    function populateFeatureMapImageSelect(samples) {
+      const select = document.getElementById('fm-image-select');
+      if (!select) return;
+
+      select.innerHTML = '';
+      if (!samples.length) {
+        select.add(new Option('Synthetic demo image', '__synthetic__'));
+        FEATURE_MAP_STATE.imagePath = '__synthetic__';
+        return;
+      }
+
+      samples.forEach((sample) => {
+        select.add(new Option(sample.label, sample.value));
+      });
+
+      FEATURE_MAP_STATE.imagePath = samples[0].value;
+      select.value = FEATURE_MAP_STATE.imagePath;
+    }
+
+    function updateFeatureLayerSelect() {
+      const layerSelect = document.getElementById('fm-layer-select');
+      if (!layerSelect) return;
+
+      const layers = getFeatureLayerSet(FEATURE_MAP_STATE.modelName);
+      layerSelect.innerHTML = '';
+      layers.forEach((layer) => {
+        layerSelect.add(new Option(layer.label, layer.key));
+      });
+
+      FEATURE_MAP_STATE.layerKey = layers[0] ? layers[0].key : '';
+      if (FEATURE_MAP_STATE.layerKey) layerSelect.value = FEATURE_MAP_STATE.layerKey;
+    }
+
+    function updateFeatureFilterLabel(currentValue, totalFilters) {
+      const label = document.getElementById('fm-filter-label');
+      if (label) label.textContent = String(currentValue);
+
+      const total = document.getElementById('fm-filter-total');
+      if (total) total.textContent = String(totalFilters);
+    }
+
+    function updateFeatureFilterLimits() {
+      const slider = document.getElementById('fm-filter-slider');
+      if (!slider) return;
+
+      const layer = getSelectedFeatureLayerConfig();
+      const realBundle = layer
+        ? getRealFeatureActivationBundle(FEATURE_MAP_STATE.modelName, layer.key, FEATURE_MAP_STATE.imagePath)
+        : null;
+      const realFilters = getRealFeatureFilters(realBundle);
+      const maxFilters = realFilters.length
+        ? Math.max(1, realFilters.length)
+        : Math.max(1, Number(layer && layer.filters ? layer.filters : 16));
+      slider.min = '1';
+      slider.max = String(maxFilters);
+      FEATURE_MAP_STATE.filterIndex = clampNumber(FEATURE_MAP_STATE.filterIndex, 1, maxFilters);
+      slider.value = String(FEATURE_MAP_STATE.filterIndex);
+      updateFeatureFilterLabel(FEATURE_MAP_STATE.filterIndex, maxFilters);
+    }
+
+    function setFeatureMapStatus(message) {
+      const statusLine = document.getElementById('fm-status-line');
+      if (statusLine) statusLine.textContent = message;
+    }
+
+    function setFeatureMapFilter(filterIndex) {
+      FEATURE_MAP_STATE.filterIndex = Number(filterIndex);
+      const slider = document.getElementById('fm-filter-slider');
+      if (slider) slider.value = String(FEATURE_MAP_STATE.filterIndex);
+      updateFeatureFilterLabel(FEATURE_MAP_STATE.filterIndex, Number((slider && slider.max) || 1));
+      renderFeatureMapExplorer();
+    }
+
+    function stopFeatureMapPlayback() {
+      if (FEATURE_MAP_STATE.playbackTimer) {
+        clearInterval(FEATURE_MAP_STATE.playbackTimer);
+        FEATURE_MAP_STATE.playbackTimer = null;
+      }
+      FEATURE_MAP_STATE.playbackActive = false;
+      const playBtn = document.getElementById('fm-play-btn');
+      if (playBtn) playBtn.textContent = 'Play Filters';
+    }
+
+    function toggleFeatureMapPlayback() {
+      const slider = document.getElementById('fm-filter-slider');
+      if (!slider) return;
+
+      if (FEATURE_MAP_STATE.playbackActive) {
+        stopFeatureMapPlayback();
+        return;
+      }
+
+      FEATURE_MAP_STATE.playbackActive = true;
+      const playBtn = document.getElementById('fm-play-btn');
+      if (playBtn) playBtn.textContent = 'Pause Filters';
+
+      FEATURE_MAP_STATE.playbackTimer = setInterval(() => {
+        const maxFilters = Number(slider.max || 16);
+        const nextValue = FEATURE_MAP_STATE.filterIndex >= maxFilters ? 1 : FEATURE_MAP_STATE.filterIndex + 1;
+        setFeatureMapFilter(nextValue);
+      }, 680);
+    }
+
+    function selectRandomFeatureMapImage() {
+      const select = document.getElementById('fm-image-select');
+      if (!select || !select.options.length) return;
+
+      const randomIndex = Math.floor(Math.random() * select.options.length);
+      select.selectedIndex = randomIndex;
+      FEATURE_MAP_STATE.imagePath = select.value;
+      renderFeatureMapExplorer();
+    }
+
+    function handleFeatureMapModelChange() {
+      const select = document.getElementById('fm-model-select');
+      if (!select) return;
+      FEATURE_MAP_STATE.modelName = select.value;
+      stopFeatureMapPlayback();
+      updateFeatureLayerSelect();
+      updateFeatureFilterLimits();
+      renderFeatureMapExplorer();
+    }
+
+    function handleFeatureMapLayerChange() {
+      const select = document.getElementById('fm-layer-select');
+      if (!select) return;
+      FEATURE_MAP_STATE.layerKey = select.value;
+      stopFeatureMapPlayback();
+      updateFeatureFilterLimits();
+      renderFeatureMapExplorer();
+    }
+
+    function handleFeatureMapImageChange() {
+      const select = document.getElementById('fm-image-select');
+      if (!select) return;
+      FEATURE_MAP_STATE.imagePath = select.value;
+      renderFeatureMapExplorer();
+    }
+
+    function handleFeatureMapFilterInput(event) {
+      FEATURE_MAP_STATE.filterIndex = Number(event.target.value || 1);
+      updateFeatureFilterLabel(
+        FEATURE_MAP_STATE.filterIndex,
+        Number((event && event.target && event.target.max) || 1)
+      );
+      renderFeatureMapExplorer();
+    }
+
+    function interpolateChannel(startValue, endValue, ratio) {
+      return Math.round(startValue + ((endValue - startValue) * ratio));
+    }
+
+    function samplePaletteColor(palette, value) {
+      const normalized = clampNumber(value, 0, 1);
+      if (!Array.isArray(palette) || !palette.length) return [0, 0, 0];
+      if (palette.length === 1) return palette[0];
+
+      const scaled = normalized * (palette.length - 1);
+      const low = Math.floor(scaled);
+      const high = Math.min(low + 1, palette.length - 1);
+      const ratio = scaled - low;
+
+      const left = palette[low];
+      const right = palette[high];
+      return [
+        interpolateChannel(left[0], right[0], ratio),
+        interpolateChannel(left[1], right[1], ratio),
+        interpolateChannel(left[2], right[2], ratio),
+      ];
+    }
+
+    function mapCentroidToRegion(x, y) {
+      const horizontal = x < 0.33 ? 'left' : x > 0.66 ? 'right' : 'center';
+      const vertical = y < 0.33 ? 'top' : y > 0.66 ? 'bottom' : 'middle';
+      if (horizontal === 'center' && vertical === 'middle') return 'center';
+      return `${vertical}-${horizontal}`;
+    }
+
+    function generateFeatureActivationMap(imageElement, modelName, layerConfig, filterIndex, mapSize = 128) {
+      const sourceCanvas = document.createElement('canvas');
+      sourceCanvas.width = mapSize;
+      sourceCanvas.height = mapSize;
+      const sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true });
+      sourceCtx.drawImage(imageElement, 0, 0, mapSize, mapSize);
+
+      const sourcePixels = sourceCtx.getImageData(0, 0, mapSize, mapSize).data;
+      const luminance = new Float32Array(mapSize * mapSize);
+
+      for (let i = 0; i < luminance.length; i += 1) {
+        const offset = i * 4;
+        const r = sourcePixels[offset] / 255;
+        const g = sourcePixels[offset + 1] / 255;
+        const b = sourcePixels[offset + 2] / 255;
+        luminance[i] = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+      }
+
+      const activations = new Float32Array(mapSize * mapSize);
+      const theta = ((filterIndex - 1) / Math.max(1, (layerConfig.filters || 16) - 1)) * Math.PI * 2;
+      const frequency = 1 + ((filterIndex - 1) % 6);
+
+      if (layerConfig.mode === 'token') {
+        const patch = 8;
+        const patchCols = Math.floor(mapSize / patch);
+        const patchRows = Math.floor(mapSize / patch);
+        for (let py = 0; py < patchRows; py += 1) {
+          for (let px = 0; px < patchCols; px += 1) {
+            let sum = 0;
+            for (let y = 0; y < patch; y += 1) {
+              for (let x = 0; x < patch; x += 1) {
+                const index = ((py * patch + y) * mapSize) + (px * patch + x);
+                sum += luminance[index];
+              }
+            }
+            const avg = sum / (patch * patch);
+            const wave = 0.5 + (0.5 * Math.sin((px * 0.5 * frequency) + (py * 0.37) + theta));
+            const tokenValue = (avg * 0.68) + (wave * 0.32);
+            for (let y = 0; y < patch; y += 1) {
+              for (let x = 0; x < patch; x += 1) {
+                const index = ((py * patch + y) * mapSize) + (px * patch + x);
+                activations[index] = tokenValue;
+              }
+            }
+          }
+        }
+      } else {
+        for (let y = 1; y < mapSize - 1; y += 1) {
+          for (let x = 1; x < mapSize - 1; x += 1) {
+            const index = (y * mapSize) + x;
+            const left = luminance[index - 1];
+            const right = luminance[index + 1];
+            const up = luminance[index - mapSize];
+            const down = luminance[index + mapSize];
+            const center = luminance[index];
+
+            const gradientX = right - left;
+            const gradientY = down - up;
+            const laplacian = (4 * center) - left - right - up - down;
+
+            let value = 0;
+            if (layerConfig.mode === 'edge') {
+              value = Math.abs((Math.cos(theta) * gradientX) + (Math.sin(theta) * gradientY));
+              value += 0.1 * Math.abs(laplacian);
+            } else if (layerConfig.mode === 'texture') {
+              value = (0.55 * Math.abs(laplacian)) + (0.35 * Math.abs(gradientX * gradientY));
+              value += 0.1 * (0.5 + (0.5 * Math.sin((x + y) * 0.08 * frequency)));
+            } else {
+              const nx = (x / mapSize) - 0.5;
+              const ny = (y / mapSize) - 0.5;
+              const centerBias = Math.exp(-(nx * nx + ny * ny) * (2.4 + ((filterIndex % 4) * 0.3)));
+              value = (0.3 * Math.abs(laplacian)) + (0.35 * center) + (0.35 * centerBias);
+            }
+            activations[index] = value;
+          }
+        }
+      }
+
+      if (layerConfig.mode === 'semantic') {
+        const smoothed = new Float32Array(activations.length);
+        for (let y = 1; y < mapSize - 1; y += 1) {
+          for (let x = 1; x < mapSize - 1; x += 1) {
+            const index = (y * mapSize) + x;
+            smoothed[index] = (
+              activations[index] +
+              activations[index - 1] +
+              activations[index + 1] +
+              activations[index - mapSize] +
+              activations[index + mapSize]
+            ) / 5;
+          }
+        }
+        activations.set(smoothed);
+      }
+
+      let min = Number.POSITIVE_INFINITY;
+      let max = Number.NEGATIVE_INFINITY;
+      for (let i = 0; i < activations.length; i += 1) {
+        const value = activations[i];
+        if (value < min) min = value;
+        if (value > max) max = value;
+      }
+
+      const normalized = new Float32Array(activations.length);
+      const denominator = Math.max(1e-7, max - min);
+      let sum = 0;
+      let peak = 0;
+      let sparseCount = 0;
+      let weightedX = 0;
+      let weightedY = 0;
+      let weightSum = 0;
+
+      for (let i = 0; i < activations.length; i += 1) {
+        const normalizedValue = clampNumber((activations[i] - min) / denominator, 0, 1);
+        normalized[i] = normalizedValue;
+        sum += normalizedValue;
+        if (normalizedValue > peak) peak = normalizedValue;
+        if (normalizedValue < 0.2) sparseCount += 1;
+
+        const x = i % mapSize;
+        const y = (i - x) / mapSize;
+        weightedX += x * normalizedValue;
+        weightedY += y * normalizedValue;
+        weightSum += normalizedValue;
+      }
+
+      const centroidX = weightSum > 0 ? (weightedX / weightSum) / mapSize : 0.5;
+      const centroidY = weightSum > 0 ? (weightedY / weightSum) / mapSize : 0.5;
+
+      const backboneKey = normalizeModelBackboneKey(modelName);
+      const palette = FEATURE_MAP_PALETTES[backboneKey] || FEATURE_MAP_PALETTES.default;
+      const imageData = new ImageData(mapSize, mapSize);
+
+      for (let i = 0; i < normalized.length; i += 1) {
+        const offset = i * 4;
+        const [r, g, b] = samplePaletteColor(palette, normalized[i]);
+        imageData.data[offset] = r;
+        imageData.data[offset + 1] = g;
+        imageData.data[offset + 2] = b;
+        imageData.data[offset + 3] = 255;
+      }
+
+      return {
+        imageData,
+        stats: {
+          mean: sum / normalized.length,
+          peak,
+          sparsity: sparseCount / normalized.length,
+          focus: mapCentroidToRegion(centroidX, centroidY),
+        },
+      };
+    }
+
+    function renderFeatureMapToCanvas(target, imageData) {
+      const canvas = typeof target === 'string' ? document.getElementById(target) : target;
+      if (!canvas) return;
+      const context = canvas.getContext('2d');
+      const stagingCanvas = document.createElement('canvas');
+      stagingCanvas.width = imageData.width;
+      stagingCanvas.height = imageData.height;
+      stagingCanvas.getContext('2d').putImageData(imageData, 0, 0);
+      context.imageSmoothingEnabled = false;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(stagingCanvas, 0, 0, canvas.width, canvas.height);
+    }
+
+    function renderFeatureMapStats(stats) {
+      setText('fm-stat-mean', stats ? stats.mean.toFixed(3) : '-');
+      setText('fm-stat-max', stats ? stats.peak.toFixed(3) : '-');
+      setText('fm-stat-sparsity', stats ? `${(stats.sparsity * 100).toFixed(1)}%` : '-');
+      setText('fm-stat-focus', stats ? stats.focus : '-');
+    }
+
+    function decodeFeatureFilterValues(filterRecord) {
+      if (!filterRecord) return [];
+
+      if (Array.isArray(filterRecord.data) && filterRecord.data.length) {
+        return filterRecord.data;
+      }
+
+      if (filterRecord.__decodedData && filterRecord.__decodedData.length) {
+        return filterRecord.__decodedData;
+      }
+
+      if (typeof filterRecord.data_b64 !== 'string' || !filterRecord.data_b64.length) {
+        return [];
+      }
+
+      try {
+        const binary = atob(filterRecord.data_b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index += 1) {
+          bytes[index] = binary.charCodeAt(index);
+        }
+        filterRecord.__decodedData = bytes;
+        return bytes;
+      } catch (error) {
+        console.error('Unable to decode filter map payload:', error);
+        return [];
+      }
+    }
+
+    function buildImageDataFromFilterRecord(filterRecord, modelName) {
+      if (!filterRecord) return null;
+      const width = Number(filterRecord.width || 0);
+      const height = Number(filterRecord.height || 0);
+      const data = decodeFeatureFilterValues(filterRecord);
+      if (!width || !height || !data.length) return null;
+
+      const backboneKey = normalizeModelBackboneKey(modelName);
+      const palette = FEATURE_MAP_PALETTES[backboneKey] || FEATURE_MAP_PALETTES.default;
+      const imageData = new ImageData(width, height);
+
+      for (let idx = 0; idx < width * height; idx += 1) {
+        const offset = idx * 4;
+        const normalized = clampNumber(Number(data[idx] || 0) / 255, 0, 1);
+        const [r, g, b] = samplePaletteColor(palette, normalized);
+        imageData.data[offset] = r;
+        imageData.data[offset + 1] = g;
+        imageData.data[offset + 2] = b;
+        imageData.data[offset + 3] = 255;
+      }
+
+      return imageData;
+    }
+
+    function computeFeatureStatsFromFilterRecord(filterRecord) {
+      const width = Number(filterRecord && filterRecord.width ? filterRecord.width : 0);
+      const height = Number(filterRecord && filterRecord.height ? filterRecord.height : 0);
+      const data = decodeFeatureFilterValues(filterRecord);
+      if (!width || !height || !data.length) return null;
+
+      let sum = 0;
+      let peak = 0;
+      let sparseCount = 0;
+      let weightedX = 0;
+      let weightedY = 0;
+      let weightSum = 0;
+
+      for (let idx = 0; idx < width * height; idx += 1) {
+        const value = clampNumber(Number(data[idx] || 0) / 255, 0, 1);
+        sum += value;
+        if (value > peak) peak = value;
+        if (value < 0.2) sparseCount += 1;
+
+        const x = idx % width;
+        const y = (idx - x) / width;
+        weightedX += x * value;
+        weightedY += y * value;
+        weightSum += value;
+      }
+
+      const centroidX = weightSum > 0 ? (weightedX / weightSum) / width : 0.5;
+      const centroidY = weightSum > 0 ? (weightedY / weightSum) / height : 0.5;
+
+      return {
+        mean: sum / (width * height),
+        peak,
+        sparsity: sparseCount / (width * height),
+        focus: mapCentroidToRegion(centroidX, centroidY),
+      };
+    }
+
+    async function renderFeatureMapExplorer() {
+      if (!FEATURE_MAP_STATE.modelName) return;
+      const layerConfig = getSelectedFeatureLayerConfig();
+      if (!layerConfig) return;
+
+      const imageSelect = document.getElementById('fm-image-select');
+      if (imageSelect && imageSelect.value) FEATURE_MAP_STATE.imagePath = imageSelect.value;
+      if (!FEATURE_MAP_STATE.imagePath) return;
+
+      const requestToken = ++FEATURE_MAP_RENDER_TOKEN;
+      setFeatureMapStatus('Rendering feature map...');
+
+      try {
+        const imagePath = FEATURE_MAP_STATE.imagePath === '__synthetic__'
+          ? createSyntheticSourceImage()
+          : FEATURE_MAP_STATE.imagePath;
+
+        const imageElement = await loadImageElement(imagePath);
+        if (requestToken !== FEATURE_MAP_RENDER_TOKEN) return;
+
+        FEATURE_MAP_STATE.sourceImage = imageElement;
+        const imageView = document.getElementById('fm-source-image');
+        if (imageView) imageView.src = imagePath;
+
+        const realBundle = getRealFeatureActivationBundle(
+          FEATURE_MAP_STATE.modelName,
+          layerConfig.key,
+          FEATURE_MAP_STATE.imagePath
+        );
+        const realFilters = getRealFeatureFilters(realBundle);
+
+        if (realFilters.length) {
+          const maxFilters = realFilters.length;
+          FEATURE_MAP_STATE.filterIndex = clampNumber(FEATURE_MAP_STATE.filterIndex, 1, maxFilters);
+          const slider = document.getElementById('fm-filter-slider');
+          if (slider) slider.value = String(FEATURE_MAP_STATE.filterIndex);
+          updateFeatureFilterLabel(FEATURE_MAP_STATE.filterIndex, maxFilters);
+
+          const selectedRecord = realFilters[FEATURE_MAP_STATE.filterIndex - 1];
+          const selectedImageData = buildImageDataFromFilterRecord(selectedRecord, FEATURE_MAP_STATE.modelName);
+          const selectedStats = computeFeatureStatsFromFilterRecord(selectedRecord);
+
+          if (selectedImageData) {
+            renderFeatureMapToCanvas('fm-canvas', selectedImageData);
+          }
+          renderFeatureMapStats(selectedStats);
+
+          const mapTitle = document.getElementById('fm-map-title');
+          if (mapTitle) {
+            const backboneKey = normalizeModelBackboneKey(FEATURE_MAP_STATE.modelName);
+            const spatial = Array.isArray(realBundle.spatial_shape) ? realBundle.spatial_shape : [];
+            const spatialLabel = spatial.length === 3 ? ` (${spatial[1]}x${spatial[2]})` : '';
+            mapTitle.textContent = `${getBackboneDisplayName(backboneKey, FEATURE_MAP_STATE.modelName)} - ${layerConfig.label}${spatialLabel} - Filter #${selectedRecord.filter_id}`;
+          }
+
+          setFeatureMapStatus(`Inference data: ${FEATURE_MAP_STATE.modelName} | ${layerConfig.label} | Filter #${selectedRecord.filter_id} (${FEATURE_MAP_STATE.filterIndex}/${maxFilters})`);
+          return;
+        }
+
+        const featureMap = generateFeatureActivationMap(
+          imageElement,
+          FEATURE_MAP_STATE.modelName,
+          layerConfig,
+          FEATURE_MAP_STATE.filterIndex
+        );
+
+        renderFeatureMapToCanvas('fm-canvas', featureMap.imageData);
+        renderFeatureMapStats(featureMap.stats);
+
+        const mapTitle = document.getElementById('fm-map-title');
+        if (mapTitle) {
+          const backboneKey = normalizeModelBackboneKey(FEATURE_MAP_STATE.modelName);
+          mapTitle.textContent = `${getBackboneDisplayName(backboneKey, FEATURE_MAP_STATE.modelName)} - ${layerConfig.label} - Filter #${FEATURE_MAP_STATE.filterIndex}`;
+        }
+
+        setFeatureMapStatus(`Ready: ${FEATURE_MAP_STATE.modelName} | ${layerConfig.label} | Filter #${FEATURE_MAP_STATE.filterIndex}`);
+      } catch (error) {
+        console.error('Feature map rendering failed:', error);
+        renderFeatureMapStats(null);
+        setFeatureMapStatus('Unable to render feature map for the selected image.');
+      }
+    }
+
+    function updateLearningEpochUi() {
+      const epochLabel = document.getElementById('lc-epoch-label');
+      if (epochLabel) {
+        epochLabel.textContent = `Epoch ${LEARNING_CURVE_STATE.currentEpoch}/${LEARNING_CURVE_STATE.maxEpoch}`;
+      }
+
+      const slider = document.getElementById('lc-epoch-slider');
+      if (slider) {
+        slider.min = '1';
+        slider.max = String(Math.max(1, LEARNING_CURVE_STATE.maxEpoch));
+        slider.value = String(clampNumber(LEARNING_CURVE_STATE.currentEpoch, 1, LEARNING_CURVE_STATE.maxEpoch));
+      }
+    }
+
+    function syncLearningCurveBounds() {
+      let maxEpoch = 1;
+      LEARNING_CURVE_STATE.selectedModels.forEach((modelName) => {
+        const curves = resolveLearningCurves(modelName);
+        if (curves && Array.isArray(curves.epochs)) {
+          maxEpoch = Math.max(maxEpoch, curves.epochs.length);
+        }
+      });
+
+      LEARNING_CURVE_STATE.maxEpoch = Math.max(1, maxEpoch);
+      LEARNING_CURVE_STATE.currentEpoch = clampNumber(
+        LEARNING_CURVE_STATE.currentEpoch,
+        1,
+        LEARNING_CURVE_STATE.maxEpoch
+      );
+      updateLearningEpochUi();
+    }
+
+    function setLearningSpeedLabel() {
+      const speedLabel = document.getElementById('lc-speed-label');
+      const speedMap = { 1: '0.5x', 2: '0.75x', 3: '1.0x', 4: '1.5x', 5: '2.0x' };
+      if (speedLabel) speedLabel.textContent = speedMap[LEARNING_CURVE_STATE.speedLevel] || '1.0x';
+    }
+
+    function populateLearningModelList(modelNames) {
+      const container = document.getElementById('lc-model-list');
+      if (!container) return;
+
+      const sorted = sortModelsByReleaseDate(modelNames);
+      const noAugDefaults = getVisualizationDefaultModels(modelNames)
+        .filter((name) => /\(NoAug\)/i.test(name));
+
+      LEARNING_CURVE_STATE.selectedModels = noAugDefaults.length
+        ? noAugDefaults
+        : sorted.filter((name) => /\(NoAug\)/i.test(name)).slice(0, 4);
+
+      if (!LEARNING_CURVE_STATE.selectedModels.length) {
+        LEARNING_CURVE_STATE.selectedModels = sorted.slice(0, Math.min(4, sorted.length));
+      }
+
+      container.innerHTML = '';
+      sorted.forEach((modelName) => {
+        const item = document.createElement('label');
+        item.className = 'lc-model-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = modelName;
+        checkbox.checked = LEARNING_CURVE_STATE.selectedModels.includes(modelName);
+        checkbox.addEventListener('change', handleLearningModelToggle);
+
+        const nameText = document.createElement('span');
+        nameText.textContent = modelName;
+
+        item.appendChild(checkbox);
+        item.appendChild(nameText);
+        container.appendChild(item);
+      });
+
+      const metricSelect = document.getElementById('lc-metric-select');
+      if (metricSelect) metricSelect.value = LEARNING_CURVE_STATE.metricKey;
+
+      const speedSlider = document.getElementById('lc-speed-slider');
+      if (speedSlider) speedSlider.value = String(LEARNING_CURVE_STATE.speedLevel);
+
+      setLearningSpeedLabel();
+      syncLearningCurveBounds();
+    }
+
+    function renderLearningMetricCards(metricCfg) {
+      const container = document.getElementById('lc-live-metrics');
+      if (!container) return;
+
+      if (!LEARNING_CURVE_STATE.selectedModels.length) {
+        container.innerHTML = '<div class="lc-live-card"><h5>No model selected</h5><div class="lc-live-row"><span>Select at least one model.</span></div></div>';
+        return;
+      }
+
+      container.innerHTML = LEARNING_CURVE_STATE.selectedModels.map((modelName) => {
+        const curves = resolveLearningCurves(modelName);
+        if (!curves) {
+          return `<div class="lc-live-card"><h5>${escapeHtml(modelName)}</h5><div class="lc-live-row"><span>History</span><strong>Unavailable</strong></div></div>`;
+        }
+
+        const index = clampNumber(LEARNING_CURVE_STATE.currentEpoch - 1, 0, curves.epochs.length - 1);
+        const trainValue = Number(curves[metricCfg.trainKey][index]);
+        const valValue = Number(curves[metricCfg.valKey][index]);
+        const gap = Number.isFinite(trainValue) && Number.isFinite(valValue) ? (valValue - trainValue) : Number.NaN;
+
+        const gapFormatted = metricCfg.label === 'Loss'
+          ? (Number.isFinite(gap) ? gap.toFixed(4) : '-')
+          : (Number.isFinite(gap) ? `${(gap * 100).toFixed(2)} pp` : '-');
+
+        return `<div class="lc-live-card">
+          <h5>${escapeHtml(modelName)}</h5>
+          <div class="lc-live-row"><span>Train ${metricCfg.label}</span><strong>${formatMetricValue(LEARNING_CURVE_STATE.metricKey, trainValue)}</strong></div>
+          <div class="lc-live-row"><span>Val ${metricCfg.label}</span><strong>${formatMetricValue(LEARNING_CURVE_STATE.metricKey, valValue)}</strong></div>
+          <div class="lc-live-row"><span>Generalization Gap</span><strong>${gapFormatted}</strong></div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderSelectedLC() {
+      const metricCfg = LEARNING_METRIC_CONFIG[LEARNING_CURVE_STATE.metricKey] || LEARNING_METRIC_CONFIG.loss;
+      syncLearningCurveBounds();
+
+      const traces = [];
+      LEARNING_CURVE_STATE.selectedModels.forEach((modelName) => {
+        const curves = resolveLearningCurves(modelName);
+        if (!curves || !Array.isArray(curves.epochs) || !curves.epochs.length) return;
+
+        const end = clampNumber(LEARNING_CURVE_STATE.currentEpoch, 1, curves.epochs.length);
+        const xValues = curves.epochs.slice(0, end);
+        const color = getModelSeriesColor(modelName);
+
+        if (LEARNING_CURVE_STATE.showTrain) {
+          traces.push({
+            x: xValues,
+            y: curves[metricCfg.trainKey].slice(0, end),
+            name: `${modelName} - Train`,
+            mode: 'lines+markers',
+            marker: { size: 4 },
+            line: { color, width: 2.4 },
+          });
+        }
+
+        if (LEARNING_CURVE_STATE.showVal) {
+          traces.push({
+            x: xValues,
+            y: curves[metricCfg.valKey].slice(0, end),
+            name: `${modelName} - Val`,
+            mode: 'lines+markers',
+            marker: { size: 4 },
+            line: { color: rgbaFromHex(color, 0.85), width: 2.4, dash: 'dot' },
+          });
+        }
+      });
+
+      const layout = {
+        ...PLOTLY_LAYOUT,
+        title: `${metricCfg.label} Replay - Epoch ${LEARNING_CURVE_STATE.currentEpoch}/${LEARNING_CURVE_STATE.maxEpoch}`,
+        xaxis: {
+          title: 'Epoch',
+          gridcolor: '#e5e7eb',
+          dtick: 1,
+          range: [0.8, LEARNING_CURVE_STATE.maxEpoch + 0.2],
+        },
+        yaxis: {
+          title: metricCfg.axisTitle,
+          gridcolor: '#e5e7eb',
+        },
+        legend: {
+          orientation: 'h',
+          y: -0.26,
+          x: 0,
+        },
+        shapes: [
+          {
+            type: 'line',
+            x0: LEARNING_CURVE_STATE.currentEpoch,
+            x1: LEARNING_CURVE_STATE.currentEpoch,
+            y0: 0,
+            y1: 1,
+            yref: 'paper',
+            line: { color: '#64748b', width: 1.2, dash: 'dot' },
+          },
+        ],
+      };
+
+      if (!traces.length) {
+        layout.annotations = [
+          {
+            text: 'No curves available for the selected models.',
+            x: 0.5,
+            y: 0.5,
+            xref: 'paper',
+            yref: 'paper',
+            showarrow: false,
+            font: { size: 13, color: '#64748b' },
+          },
+        ];
+      }
+
+      Plotly.react('chart-lc-realtime', traces, layout, PLOTLY_CONFIG);
+      renderLearningMetricCards(metricCfg);
+    }
+
+    function handleLearningModelToggle(event) {
+      const selected = Array.from(document.querySelectorAll('#lc-model-list input:checked'))
+        .map((input) => input.value);
+
+      if (!selected.length && event && event.target) {
+        event.target.checked = true;
+        return;
+      }
+
+      LEARNING_CURVE_STATE.selectedModels = selected;
+      syncLearningCurveBounds();
+      renderSelectedLC();
+    }
+
+    function handleLearningMetricChange() {
+      const select = document.getElementById('lc-metric-select');
+      if (!select) return;
+      LEARNING_CURVE_STATE.metricKey = select.value;
+      renderSelectedLC();
+    }
+
+    function handleLearningSplitToggle() {
+      const trainToggle = document.getElementById('lc-show-train');
+      const valToggle = document.getElementById('lc-show-val');
+      if (!trainToggle || !valToggle) return;
+
+      if (!trainToggle.checked && !valToggle.checked) {
+        valToggle.checked = true;
+      }
+
+      LEARNING_CURVE_STATE.showTrain = trainToggle.checked;
+      LEARNING_CURVE_STATE.showVal = valToggle.checked;
+      renderSelectedLC();
+    }
+
+    function handleLearningSpeedChange(event) {
+      const speedLevel = clampNumber(event.target.value, 1, 5);
+      LEARNING_CURVE_STATE.speedLevel = speedLevel;
+
+      const intervalBySpeed = {
+        1: 1300,
+        2: 950,
+        3: 700,
+        4: 500,
+        5: 330,
+      };
+
+      LEARNING_CURVE_STATE.intervalMs = intervalBySpeed[speedLevel] || 700;
+      setLearningSpeedLabel();
+
+      if (LEARNING_CURVE_STATE.playbackActive) {
+        stopLearningCurvePlayback();
+        startLearningCurvePlayback();
+      }
+    }
+
+    function handleLearningEpochScrub(event) {
+      LEARNING_CURVE_STATE.currentEpoch = clampNumber(event.target.value, 1, LEARNING_CURVE_STATE.maxEpoch);
+      renderSelectedLC();
+    }
+
+    function stopLearningCurvePlayback() {
+      if (LEARNING_CURVE_STATE.playbackTimer) {
+        clearInterval(LEARNING_CURVE_STATE.playbackTimer);
+        LEARNING_CURVE_STATE.playbackTimer = null;
+      }
+      LEARNING_CURVE_STATE.playbackActive = false;
+      const playBtn = document.getElementById('lc-play-btn');
+      if (playBtn) playBtn.textContent = 'Start Replay';
+    }
+
+    function startLearningCurvePlayback() {
+      stopLearningCurvePlayback();
+
+      if (LEARNING_CURVE_STATE.currentEpoch >= LEARNING_CURVE_STATE.maxEpoch) {
+        LEARNING_CURVE_STATE.currentEpoch = 1;
+      }
+
+      LEARNING_CURVE_STATE.playbackActive = true;
+      const playBtn = document.getElementById('lc-play-btn');
+      if (playBtn) playBtn.textContent = 'Pause Replay';
+
+      LEARNING_CURVE_STATE.playbackTimer = setInterval(() => {
+        if (LEARNING_CURVE_STATE.currentEpoch >= LEARNING_CURVE_STATE.maxEpoch) {
+          stopLearningCurvePlayback();
+          return;
+        }
+        LEARNING_CURVE_STATE.currentEpoch += 1;
+        renderSelectedLC();
+      }, LEARNING_CURVE_STATE.intervalMs);
+    }
+
+    function toggleLearningCurvePlayback() {
+      if (LEARNING_CURVE_STATE.playbackActive) {
+        stopLearningCurvePlayback();
+      } else {
+        startLearningCurvePlayback();
+      }
+    }
+
+    function resetLearningCurvePlayback() {
+      stopLearningCurvePlayback();
+      LEARNING_CURVE_STATE.currentEpoch = 1;
+      renderSelectedLC();
+    }
+
+    function getArchitectureSummary(modelName) {
+      if (MODEL_SUMMARIES[modelName]) return MODEL_SUMMARIES[modelName];
+      if (FALLBACK_RESULTS && FALLBACK_RESULTS.experiments && FALLBACK_RESULTS.experiments[modelName]) {
+        return FALLBACK_RESULTS.experiments[modelName];
+      }
+      return null;
+    }
+
+    function getArchitectureBlueprint(backboneKey) {
+      return ARCHITECTURE_BLUEPRINTS[backboneKey] || ARCHITECTURE_BLUEPRINTS.resnet50;
+    }
+
+    function populateArchitectureSelector(modelNames) {
+      const select = document.getElementById('arch-model-select');
+      if (!select) return;
+
+      select.innerHTML = '';
+      const sorted = sortModelsByReleaseDate(modelNames);
+      sorted.forEach((name) => select.add(new Option(getModelUiLabel(name), name)));
+
+      const defaultModel = sorted.find((name) => /\(NoAug\)/i.test(name)) || sorted[0] || '';
+      if (defaultModel) select.value = defaultModel;
+    }
+
+    function renderArchitectureOverview(modelName, summary) {
+      const grid = document.getElementById('arch-overview-grid');
+      if (!grid) return;
+
+      const backboneKey = normalizeModelBackboneKey(modelName);
+      const resourceMetrics = (summary && summary.resource_metrics) || {};
+      const modelConfig = (summary && summary.model_config) || {};
+      const dataConfig = (summary && summary.data_config) || {};
+
+      const inferenceMs = Number(
+        resourceMetrics.inference_time_ms ||
+        (MODEL_METRICS[modelName] && MODEL_METRICS[modelName].inference_time) ||
+        0
+      );
+
+      const overviewItems = [
+        { label: 'Backbone', value: getBackboneDisplayName(backboneKey, modelName) },
+        { label: 'Family', value: getBackboneTypeLabel(backboneKey, modelConfig.family) },
+        { label: 'Parameters', value: resourceMetrics.parameters ? `${(Number(resourceMetrics.parameters) / 1e6).toFixed(2)}M` : '-' },
+        { label: 'FLOPs', value: resourceMetrics.flops ? `${(Number(resourceMetrics.flops) / 1e9).toFixed(2)}B` : '-' },
+        { label: 'Inference', value: Number.isFinite(inferenceMs) && inferenceMs > 0 ? `${inferenceMs.toFixed(2)} ms` : '-' },
+        { label: 'Pretrained', value: modelConfig.pretrained_source || '-' },
+        { label: 'Input', value: Array.isArray(dataConfig.input_size) ? `${dataConfig.input_size[1]}x${dataConfig.input_size[2]}x${dataConfig.input_size[0]}` : '-' },
+        { label: 'Best For', value: getBackboneBestFor(backboneKey) },
+      ];
+
+      grid.innerHTML = overviewItems.map((item) => `<article class="arch-overview-card">
+        <div class="arch-overview-label">${escapeHtml(item.label)}</div>
+        <div class="arch-overview-value">${escapeHtml(item.value)}</div>
+      </article>`).join('');
+    }
+
+    function renderArchitectureFlow(blueprint) {
+      const flow = document.getElementById('arch-flow');
+      if (!flow) return;
+
+      flow.innerHTML = blueprint.map((stage, index) => {
+        const color = ARCHITECTURE_TYPE_COLORS[stage.type] || '#4f46e5';
+        const node = `<article class="arch-node" style="border-top-color:${color};">
+          <h5>${escapeHtml(stage.name)}</h5>
+          <p><strong>Op:</strong> ${escapeHtml(stage.operation)}</p>
+          <p><strong>Out:</strong> ${escapeHtml(stage.output)}</p>
+        </article>`;
+
+        if (index === blueprint.length - 1) return node;
+        return `${node}<div class="arch-arrow">&rarr;</div>`;
+      }).join('');
+    }
+
+    function renderArchitectureStageTable(blueprint) {
+      const tbody = document.getElementById('arch-stage-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = blueprint.map((stage, index) => `<tr>
+        <td>${index + 1}</td>
+        <td>${escapeHtml(stage.name)}</td>
+        <td>${escapeHtml(stage.operation)}</td>
+        <td>${escapeHtml(stage.output)}</td>
+        <td>${escapeHtml(stage.purpose)}</td>
+      </tr>`).join('');
+    }
+
+    function renderArchitectureVisualizer() {
+      const select = document.getElementById('arch-model-select');
+      if (!select) return;
+
+      let modelName = select.value;
+      if (!modelName && select.options.length) {
+        modelName = select.options[0].value;
+        select.value = modelName;
+      }
+
+      if (!modelName) return;
+      const summary = getArchitectureSummary(modelName);
+      const backboneKey = normalizeModelBackboneKey(modelName);
+      const blueprint = getArchitectureBlueprint(backboneKey);
+
+      renderArchitectureOverview(modelName, summary);
+      renderArchitectureFlow(blueprint);
+      renderArchitectureStageTable(blueprint);
+    }
+
+    async function populateSelectors(modelNames) {
+      const sorted = sortModelsByReleaseDate(modelNames);
+      const best = [...modelNames].sort((a, b) => MODEL_METRICS[b].accuracy - MODEL_METRICS[a].accuracy)[0] || sorted[0] || '';
+      const visualizationModels = getVisualizationDefaultModels(modelNames);
+      const visualizationDefaultModel = visualizationModels.find((name) => /\(NoAug\)/i.test(name))
+        || visualizationModels[0]
+        || best;
+
+      populateLearningModelList(modelNames);
+      populateArchitectureSelector(visualizationModels);
+
+      const featureModelSelect = document.getElementById('fm-model-select');
+      if (featureModelSelect) {
+        featureModelSelect.innerHTML = '';
+        visualizationModels.forEach((name) => featureModelSelect.add(new Option(getModelUiLabel(name), name)));
+        FEATURE_MAP_STATE.modelName = visualizationDefaultModel;
+        if (visualizationDefaultModel) featureModelSelect.value = visualizationDefaultModel;
+      }
+
+      FEATURE_MAP_SAMPLES = await loadFeatureMapSamples();
+      populateFeatureMapImageSelect(FEATURE_MAP_SAMPLES);
+
+      updateFeatureLayerSelect();
+      updateFeatureFilterLimits();
+      renderFeatureMapExplorer();
+
+      LEARNING_CURVE_STATE.currentEpoch = 1;
+      renderSelectedLC();
+      renderArchitectureVisualizer();
     }
 
     function resolveLearningCurves(modelName) {
@@ -3754,44 +5668,7 @@ val_result = run_epoch(
       return null;
     }
 
-    function renderSelectedLC() {
-      const modelName = document.getElementById('lc-model-select').value;
-      if (!modelName) return;
-      const curves = resolveLearningCurves(modelName);
-      if (!curves) {
-        return;
-      }
-
-      Plotly.newPlot('chart-lc-loss', [
-        { x: curves.epochs, y: curves.train_loss, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#4a90d9' } },
-        { x: curves.epochs, y: curves.val_loss, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#f59e0b' } },
-      ], {
-        ...PLOTLY_LAYOUT,
-        title: `${modelName} - Loss`,
-        xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' },
-        yaxis: { title: 'Loss', gridcolor: '#f0f0f0' },
-      }, PLOTLY_CONFIG);
-
-      Plotly.newPlot('chart-lc-accuracy', [
-        { x: curves.epochs, y: curves.train_accuracy, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#4a90d9' } },
-        { x: curves.epochs, y: curves.val_accuracy, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#f59e0b' } },
-      ], {
-        ...PLOTLY_LAYOUT,
-        title: `${modelName} - Accuracy`,
-        xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' },
-        yaxis: { title: 'Accuracy', gridcolor: '#f0f0f0' },
-      }, PLOTLY_CONFIG);
-
-      Plotly.newPlot('chart-lc-f1', [
-        { x: curves.epochs, y: curves.train_f1, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#4a90d9' } },
-        { x: curves.epochs, y: curves.val_f1, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#f59e0b' } },
-      ], {
-        ...PLOTLY_LAYOUT,
-        title: `${modelName} - F1-Score`,
-        xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' },
-        yaxis: { title: 'F1-Score', gridcolor: '#f0f0f0' },
-      }, PLOTLY_CONFIG);
-    }
+    
 
     function resolveClassNames(modelName) {
       const summary = MODEL_SUMMARIES[modelName];
@@ -3882,6 +5759,7 @@ val_result = run_epoch(
         ]);
 
         FALLBACK_RESULTS = await safeFetchJson('data/results_data.json');
+        FEATURE_MAP_DATA = await safeFetchJson('data/feature_maps_data.json');
 
         const modelNames = Object.keys(MODEL_METRICS);
         if (!modelNames.length) return;
@@ -3891,11 +5769,13 @@ val_result = run_epoch(
         renderPerformanceTable(modelNames);
         renderResourceTable(modelNames);
         renderArchitectureTable(modelNames);
-        populateSelectors(modelNames);
+        await populateSelectors(modelNames);
 
         const best = [...modelNames].sort((a, b) => MODEL_METRICS[b].accuracy - MODEL_METRICS[a].accuracy)[0];
         renderConfiguration(best);
         renderSelectedLC();
+        renderArchitectureVisualizer();
+        renderFeatureMapExplorer();
         renderConfusionMatrices();
         switchCompareTab('performance');
       } catch (error) {
