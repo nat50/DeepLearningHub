@@ -13,6 +13,18 @@
   <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" data-manual></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]']],
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+      },
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
     .results-scope-note {
       background: #eaf4ff;
@@ -1135,32 +1147,296 @@
       margin-top: 0.6rem;
     }
 
-    .formula-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0.75rem;
+    .formula-panel {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
     }
 
-    .formula-card {
-      border: 1px solid var(--border);
+    .formula-main-title {
+      margin: 0 0 0.95rem 0;
+      color: #0f172a;
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .formula-section {
+      margin-bottom: 1.15rem;
+    }
+
+    .formula-section-title {
+      margin: 0 0 0.75rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #d8dee9;
+      color: #2563eb;
+      font-size: 1.06rem;
+      font-weight: 700;
+    }
+
+    .formula-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .formula-entry-card {
+      border: 1px solid #d7dbe4;
+      border-radius: 10px;
+      background: #f5f7fb;
+      padding: 1rem 1.1rem;
+    }
+
+    .formula-entry-title {
+      margin: 0 0 0.72rem 0;
+      color: #0f172a;
+      font-size: 1.03rem;
+      font-weight: 700;
+    }
+
+    .formula-equation-box {
+      border: 2px solid #3b82f6;
       border-radius: 8px;
+      background: #eaf1ff;
+      padding: 1.2rem 1rem;
+      text-align: center;
+      overflow-x: auto;
+    }
+
+    .formula-equation-box-tall {
+      padding-top: 1.45rem;
+      padding-bottom: 1.45rem;
+    }
+
+    .formula-equation {
+      margin: 0;
+      color: #1d4ed8;
+      font-family: Cambria, "Times New Roman", serif;
+      font-size: 1.94rem;
+      line-height: 1.48;
+      letter-spacing: 0.01em;
+      white-space: normal;
+    }
+
+    .formula-equation-multi {
+      margin: 0.55rem 0;
+    }
+
+    .formula-entry-note {
+      margin: 0.72rem 0 0;
+      color: #475569;
+      font-size: 0.98rem;
+      font-style: italic;
+    }
+
+    .formula-frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 0.3rem;
+      vertical-align: middle;
+      line-height: 1.12;
+    }
+
+    .formula-frac .num {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 0.12rem;
+      border-bottom: 2px solid currentColor;
+      padding: 0 0.28rem 0.12rem;
+    }
+
+    .formula-frac .den {
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 0.12rem;
+      padding-top: 0.12rem;
+    }
+
+    .formula-sigma {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.45em;
+      margin: 0 0.18rem;
+      vertical-align: middle;
+      line-height: 0.95;
+    }
+
+    .formula-sigma .upper,
+    .formula-sigma .lower {
+      font-size: 0.58em;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .formula-sigma .symbol {
+      font-size: 1.38em;
+      line-height: 0.8;
+      font-weight: 700;
+    }
+
+    .formula-equation sub,
+    .formula-equation sup {
+      font-size: 0.68em;
+      line-height: 0;
+    }
+
+    .formula-latex {
+      margin: 0;
+      color: #1d4ed8;
+      font-size: 1.78rem;
+      line-height: 1.4;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .formula-latex + .formula-latex {
+      margin-top: 0.9rem;
+    }
+
+    .formula-latex .mjx-container {
+      margin: 0;
+      color: #1d4ed8;
+    }
+
+    .configuration-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.4rem 0 0;
+    }
+
+    .config-section h3 {
+      color: #1f2937;
+      font-size: 2rem;
+      margin: 0 0 0.8rem;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .config-intro {
+      text-align: center;
+      color: #64748b;
+      font-size: 1.03rem;
+      margin-bottom: 2rem;
+    }
+
+    .config-group {
+      margin-bottom: 2.1rem;
+    }
+
+    .config-group h4 {
+      color: #4f46e5;
+      font-size: 1.5rem;
+      margin: 0 0 1rem;
+      padding-bottom: 0.52rem;
+      border-bottom: 3px solid #e5e7eb;
+    }
+
+    .config-card {
       background: #ffffff;
-      padding: 0.85rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.2rem 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      transition: none;
     }
 
-    .formula-card h4 {
-      margin: 0 0 0.25rem 0;
-      font-size: 0.9rem;
+    .config-card:hover {
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      border-color: #e5e7eb;
+      transform: none;
     }
 
-    .formula-card p {
-      margin: 0.2rem 0;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
+    #compare-formulas .formula-entry-card,
+    #compare-formulas .formula-equation-box {
+      transition: none;
     }
 
-    .formula-card code {
-      font-size: 0.82rem;
+    #compare-formulas .formula-entry-card:hover,
+    #compare-formulas .formula-equation-box:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .config-card h5 {
+      color: #059669;
+      font-size: 1.2rem;
+      margin: 0 0 0.85rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #d1fae5;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .config-model-icon {
+      width: 1.4rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.08rem;
+      line-height: 1;
+    }
+
+    .config-detail {
+      display: grid;
+      gap: 0;
+    }
+
+    .config-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.56rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .config-item:last-child {
+      border-bottom: none;
+    }
+
+    .config-label {
+      font-weight: 700;
+      color: #1f334f;
+      min-width: 150px;
+      flex-shrink: 0;
+    }
+
+    .config-value {
+      color: #475569;
+      flex: 1;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .config-arch-card .config-item {
+      gap: 0.6rem;
+    }
+
+    .config-arch-card .config-label {
+      min-width: 110px;
+    }
+
+    .config-model-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .config-note-inline {
+      margin-top: 0.35rem;
+      color: #64748b;
+      font-size: 0.83rem;
+      font-style: italic;
     }
 
     .info-table td strong {
@@ -1222,6 +1498,26 @@
 
       .head-component-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .formula-equation {
+        font-size: 1.58rem;
+      }
+
+      .formula-latex {
+        font-size: 1.52rem;
+      }
+
+      .config-section h3 {
+        font-size: 1.7rem;
+      }
+
+      .config-group h4 {
+        font-size: 1.26rem;
+      }
+
+      .config-model-grid {
+        grid-template-columns: 1fr;
       }
 
       .results-summary-grid,
@@ -1318,6 +1614,59 @@
 
       .tensor-shape-title {
         font-size: 1.45rem;
+      }
+
+      .formula-main-title {
+        font-size: 1.06rem;
+      }
+
+      .formula-section-title {
+        font-size: 0.95rem;
+      }
+
+      .formula-entry-card {
+        padding: 0.85rem;
+      }
+
+      .formula-entry-title {
+        font-size: 0.95rem;
+      }
+
+      .formula-entry-note {
+        font-size: 0.86rem;
+      }
+
+      .formula-equation {
+        font-size: 1.18rem;
+      }
+
+      .formula-latex {
+        font-size: 1.2rem;
+      }
+
+      .config-card {
+        padding: 1rem;
+      }
+
+      .config-item {
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .config-label {
+        min-width: auto;
+      }
+
+      .config-value {
+        font-size: 0.86rem;
+      }
+
+      .config-group h4 {
+        font-size: 1.08rem;
+      }
+
+      .config-intro {
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -2305,7 +2654,7 @@ val_result = run_epoch(
         <div class="resource-hardware-grid">
           <div class="resource-hardware-card">
             <h4>LightningAI GPU</h4>
-            <p id="gpu-name">NVIDIA RTXP 6000</p>
+            <p id="gpu-name">NVIDIA RTX 6000</p>
           </div>
           <div class="resource-hardware-card">
             <h4>GPU Count</h4>
@@ -2329,94 +2678,188 @@ val_result = run_epoch(
     </div>
 
     <div id="compare-formulas" class="compare-pane">
-      <div class="panel-block">
-        <h3>Classification Metrics Formulas</h3>
-        <div class="formula-grid">
-          <div class="formula-card">
-            <h4>Accuracy</h4>
-            <p>Overall correctness.</p>
-            <p><code>(TP + TN) / (TP + TN + FP + FN)</code></p>
+      <div class="panel-block formula-panel">
+        <h3 class="formula-main-title">&#128202; Classification Metrics Formulas</h3>
+
+        <section class="formula-section">
+          <h4 class="formula-section-title">&#127919; Basic Classification Metrics</h4>
+          <div class="formula-stack">
+            <article class="formula-entry-card">
+              <h5 class="formula-entry-title">Accuracy</h5>
+              <div class="formula-equation-box">
+                <div class="formula-latex">\[\text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}} = \frac{\text{Correct Predictions}}{\text{Total Predictions}}\]</div>
+              </div>
+              <p class="formula-entry-note">Overall correctness of the model across all classes</p>
+            </article>
+
+            <article class="formula-entry-card">
+              <h5 class="formula-entry-title">Precision</h5>
+              <div class="formula-equation-box">
+                <div class="formula-latex">\[\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Positives}}\]</div>
+              </div>
+              <p class="formula-entry-note">Proportion of positive predictions that are actually correct</p>
+            </article>
+
+            <article class="formula-entry-card">
+              <h5 class="formula-entry-title">Recall</h5>
+              <div class="formula-equation-box">
+                <div class="formula-latex">\[\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}}\]</div>
+              </div>
+              <p class="formula-entry-note">Proportion of actual positives that are correctly identified</p>
+            </article>
+
+            <article class="formula-entry-card">
+              <h5 class="formula-entry-title">F1-Score</h5>
+              <div class="formula-equation-box">
+                <div class="formula-latex">\[\text{F1-Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} = \frac{2\text{TP}}{2\text{TP} + \text{FP} + \text{FN}}\]</div>
+              </div>
+              <p class="formula-entry-note">Harmonic mean of precision and recall</p>
+            </article>
+
+            <article class="formula-entry-card">
+              <h5 class="formula-entry-title">Top-5 Accuracy</h5>
+              <div class="formula-equation-box">
+                <div class="formula-latex">\[\text{Top-5 Accuracy} = \frac{\text{Number of correct predictions in top-5}}{\text{Total predictions}}\]</div>
+              </div>
+              <p class="formula-entry-note">Accuracy when considering top-5 predictions</p>
+            </article>
           </div>
-          <div class="formula-card">
-            <h4>Precision</h4>
-            <p>Positive predictions that are correct.</p>
-            <p><code>TP / (TP + FP)</code></p>
+        </section>
+
+        <section class="formula-section">
+          <h4 class="formula-section-title">&#128200; Averaging Methods</h4>
+          <div class="formula-stack">
+            <article class="formula-entry-card">
+              <h5 class="formula-entry-title">Macro Average</h5>
+              <div class="formula-equation-box formula-equation-box-tall">
+                <div class="formula-latex">\[\text{Macro-Precision} = \frac{1}{n} \sum_{i=1}^{n} \text{Precision}_i\]</div>
+                <div class="formula-latex">\[\text{Macro-Recall} = \frac{1}{n} \sum_{i=1}^{n} \text{Recall}_i\]</div>
+                <div class="formula-latex">\[\text{Macro-F1} = \frac{1}{n} \sum_{i=1}^{n} \text{F1}_i\]</div>
+              </div>
+              <p class="formula-entry-note">Simple average across all classes (treats all classes equally)</p>
+            </article>
+
+            <article class="formula-entry-card">
+              <h5 class="formula-entry-title">Weighted Average</h5>
+              <div class="formula-equation-box formula-equation-box-tall">
+                <div class="formula-latex">\[\text{Weighted-Precision} = \frac{\sum_{i=1}^{n} \text{Precision}_i \times \text{Support}_i}{\sum_{i=1}^{n} \text{Support}_i}\]</div>
+                <div class="formula-latex">\[\text{Weighted-Recall} = \frac{\sum_{i=1}^{n} \text{Recall}_i \times \text{Support}_i}{\sum_{i=1}^{n} \text{Support}_i}\]</div>
+                <div class="formula-latex">\[\text{Weighted-F1} = \frac{\sum_{i=1}^{n} \text{F1}_i \times \text{Support}_i}{\sum_{i=1}^{n} \text{Support}_i}\]</div>
+              </div>
+              <p class="formula-entry-note">Average weighted by the number of true instances for each class</p>
+            </article>
           </div>
-          <div class="formula-card">
-            <h4>Recall</h4>
-            <p>Actual positives that are found.</p>
-            <p><code>TP / (TP + FN)</code></p>
+        </section>
+
+        <section class="formula-section">
+          <h4 class="formula-section-title">&#9889; Resource Metrics</h4>
+          <div class="formula-stack">
+            <article class="formula-entry-card">
+              <h5 class="formula-entry-title">FLOPs (Floating Point Operations)</h5>
+              <div class="formula-equation-box formula-equation-box-tall">
+                <div class="formula-latex">\[\text{FLOPs} = \sum_{l=1}^{L} \text{FLOPs}_l\]</div>
+                <div class="formula-latex">\[\text{FLOPs}_l = 2 \times \text{MACs}_l\]</div>
+              </div>
+              <p class="formula-entry-note">Total floating point operations for forward pass</p>
+            </article>
           </div>
-          <div class="formula-card">
-            <h4>F1-Score</h4>
-            <p>Harmonic mean of precision and recall.</p>
-            <p><code>2 * P * R / (P + R)</code></p>
-          </div>
-          <div class="formula-card">
-            <h4>Top-5 Accuracy</h4>
-            <p>Correct class appears in top-5 predicted labels.</p>
-            <p><code>correct_in_top5 / total_samples</code></p>
-          </div>
-        </div>
+        </section>
       </div>
     </div>
 
     <div id="compare-configuration" class="compare-pane">
-      <div class="panel-block">
-        <h3>Training Configuration (from train.ipynb)</h3>
-        <table class="info-table" style="max-width:640px; margin-bottom:1.2rem;">
-          <tbody id="training-config-body">
-            <tr><td><strong>Strategy</strong></td><td>Frozen backbone + trainable head</td></tr>
-            <tr><td><strong>Optimizer</strong></td><td>Adam (lr=<span id="cfg-learning-rate">1e-3</span>)</td></tr>
-            <tr><td><strong>Loss Function</strong></td><td>CrossEntropyLoss</td></tr>
-            <tr><td><strong>Batch Size</strong></td><td id="cfg-batch-size">1024</td></tr>
-            <tr><td><strong>Num Workers</strong></td><td id="cfg-num-workers">8</td></tr>
-            <tr><td><strong>Max Epochs</strong></td><td id="cfg-max-epochs">40</td></tr>
-            <tr><td><strong>Early Stopping</strong></td><td id="cfg-early-stopping">patience=5, min_delta=1e-3</td></tr>
-            <tr><td><strong>Benchmark Runs</strong></td><td id="cfg-benchmark-runs">100 (warmup 10)</td></tr>
-            <tr><td><strong>Results Root</strong></td><td id="cfg-results-root">results/food101_classification</td></tr>
-          </tbody>
-        </table>
+      <div class="panel-block configuration-content">
+        <div class="config-section">
+          <h3>&#9881;&#65039; Model Configurations</h3>
+          <p class="config-intro">Training and evaluation configurations for all Food-101 experiments in this repository.</p>
 
-        <h3>Data Configuration (from results summaries)</h3>
-        <table class="info-table" style="max-width:760px; margin-bottom:1.2rem;">
-          <tbody>
-            <tr><td><strong>Dataset</strong></td><td>Food-101</td></tr>
-            <tr><td><strong>Split</strong></td><td id="cfg-split">70% Train / 15% Val / 15% Test</td></tr>
-            <tr><td><strong>Split Sizes</strong></td><td id="cfg-split-sizes">Train 70,700 | Val 15,150 | Test 15,150</td></tr>
-            <tr><td><strong>Classes</strong></td><td id="cfg-num-classes">101</td></tr>
-            <tr><td><strong>Input Size</strong></td><td id="cfg-input-size">3 x 224 x 224</td></tr>
-            <tr><td><strong>Augmentation</strong></td><td>Resize -> RandomResizedCrop -> HorizontalFlip -> ColorJitter -> Normalize</td></tr>
-          </tbody>
-        </table>
+          <div class="config-group">
+            <h4>&#127919; Training Configuration</h4>
 
-        <h3>Model Architectures</h3>
-        <div style="overflow-x:auto; margin-bottom:1.2rem;">
-          <table class="comparison-table" id="arch-table">
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th>Family</th>
-                <th>timm Name</th>
-                <th>Pretrained Source</th>
-                <th>Total Params (M)</th>
-                <th>Trainable Params (M)</th>
-              </tr>
-            </thead>
-            <tbody id="arch-tbody"></tbody>
-          </table>
+            <div class="config-card">
+              <h5><span class="config-model-icon">&#129504;</span>Transfer Learning Strategy</h5>
+              <div class="config-detail">
+                <div class="config-item"><span class="config-label">Mode:</span><span class="config-value" id="cfg-transfer-mode">Transfer Learning (Frozen backbone + trainable head)</span></div>
+                <div class="config-item"><span class="config-label">Frozen Layers:</span><span class="config-value" id="cfg-frozen-layers">All backbone layers</span></div>
+                <div class="config-item"><span class="config-label">Trainable Layers:</span><span class="config-value" id="cfg-trainable-layers">ClassificationHead only</span></div>
+                <div class="config-item"><span class="config-label">Pretrained Weights:</span><span class="config-value" id="cfg-pretrained-weights">timm pretrained checkpoints</span></div>
+              </div>
+            </div>
+
+            <div class="config-card">
+              <h5><span class="config-model-icon">&#9889;</span>Hyperparameters</h5>
+              <div class="config-detail">
+                <div class="config-item"><span class="config-label">Optimizer:</span><span class="config-value">Adam</span></div>
+                <div class="config-item"><span class="config-label">Learning Rate:</span><span class="config-value" id="cfg-learning-rate">1e-3</span></div>
+                <div class="config-item"><span class="config-label">Batch Size:</span><span class="config-value" id="cfg-batch-size">1024</span></div>
+                <div class="config-item"><span class="config-label">Num Workers:</span><span class="config-value" id="cfg-num-workers">8</span></div>
+                <div class="config-item"><span class="config-label">Max Epochs:</span><span class="config-value" id="cfg-max-epochs">40</span></div>
+                <div class="config-item"><span class="config-label">Early Stopping:</span><span class="config-value" id="cfg-early-stopping">patience=5, min_delta=1e-3</span></div>
+                <div class="config-item"><span class="config-label">Loss Function:</span><span class="config-value">CrossEntropyLoss</span></div>
+                <div class="config-item"><span class="config-label">Benchmark Runs:</span><span class="config-value" id="cfg-benchmark-runs">100 (warmup 10)</span></div>
+                <div class="config-item"><span class="config-label">Results Root:</span><span class="config-value" id="cfg-results-root">results/food101_classification</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <h4>&#128202; Data Configuration</h4>
+
+            <div class="config-card">
+              <h5><span class="config-model-icon">&#128202;</span>Dataset Split</h5>
+              <div class="config-detail">
+                <div class="config-item"><span class="config-label">Dataset:</span><span class="config-value">Food-101</span></div>
+                <div class="config-item"><span class="config-label">Split Ratio:</span><span class="config-value" id="cfg-split">70% Train / 15% Val / 15% Test</span></div>
+                <div class="config-item"><span class="config-label">Training Set:</span><span class="config-value" id="cfg-train-size">70,700 images</span></div>
+                <div class="config-item"><span class="config-label">Validation Set:</span><span class="config-value" id="cfg-val-size">15,150 images</span></div>
+                <div class="config-item"><span class="config-label">Test Set:</span><span class="config-value" id="cfg-test-size">15,150 images</span></div>
+                <div class="config-item"><span class="config-label">Number of Classes:</span><span class="config-value" id="cfg-num-classes">101 classes</span></div>
+              </div>
+            </div>
+
+            <div class="config-card">
+              <h5><span class="config-model-icon">&#128247;</span>Image Preprocessing</h5>
+              <div class="config-detail">
+                <div class="config-item"><span class="config-label">Input Size:</span><span class="config-value" id="cfg-input-size">224 x 224 x 3 (RGB)</span></div>
+                <div class="config-item"><span class="config-label">Normalization:</span><div class="config-value" id="cfg-normalization-lines">Loading normalization settings...</div></div>
+              </div>
+            </div>
+
+            <div class="config-card">
+              <h5><span class="config-model-icon">&#127912;</span>Data Augmentation</h5>
+              <div class="config-detail">
+                <div class="config-item"><span class="config-label">No Augmentation:</span><span class="config-value">Resize(256) -&gt; CenterCrop(224) -&gt; ToTensor() -&gt; Normalize</span></div>
+                <div class="config-item"><span class="config-label">With Augmentation:</span><span class="config-value">RandomResizedCrop(224) -&gt; RandomHorizontalFlip(p=0.5) -&gt; ColorJitter -&gt; ToTensor() -&gt; Normalize</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <h4>&#127959;&#65039; Model Architectures</h4>
+            <div class="config-model-grid" id="arch-card-grid">
+              <div class="config-card">
+                <h5><span class="config-model-icon">&#9203;</span>Loading model cards...</h5>
+                <p class="config-note-inline">Cards are generated from experiment summaries in results/food101_classification.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-group" style="margin-bottom:0.3rem;">
+            <h4>&#129514; Evaluation Configuration</h4>
+            <div class="config-card">
+              <h5><span class="config-model-icon">&#128187;</span>Metrics &amp; Hardware</h5>
+              <div class="config-detail">
+                <div class="config-item"><span class="config-label">Metrics:</span><span class="config-value">Accuracy, Precision, Recall, F1-Score, Top-5 Accuracy</span></div>
+                <div class="config-item"><span class="config-label">Averaging Method:</span><span class="config-value">Macro / Weighted</span></div>
+                <div class="config-item"><span class="config-label">Training Platform:</span><span class="config-value">LightningAI Studio</span></div>
+                <div class="config-item"><span class="config-label">Training GPU:</span><span class="config-value" id="cfg-gpu-name">NVIDIA RTX 6000</span></div>
+                <div class="config-item"><span class="config-label">GPU Memory:</span><span class="config-value" id="cfg-gpu-memory">96 GB VRAM</span></div>
+                <div class="config-item"><span class="config-label">Devices Used:</span><span class="config-value">1 GPU</span></div>
+                <div class="config-item"><span class="config-label">Inference Benchmark:</span><span class="config-value" id="cfg-inference-benchmark">Single image, GPU inference, average over 100 runs</span></div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <h3>Runtime / Hardware</h3>
-        <table class="info-table" style="max-width:760px;">
-          <tbody>
-            <tr><td><strong>Training Platform</strong></td><td>LightningAI Studio</td></tr>
-            <tr><td><strong>GPU Type</strong></td><td>NVIDIA RTXP 6000</td></tr>
-            <tr><td><strong>GPU Memory</strong></td><td>96 GB VRAM</td></tr>
-            <tr><td><strong>Devices Used</strong></td><td>1 GPU</td></tr>
-            <tr><td><strong>Notebook Device Setting</strong></td><td id="cfg-device">torch.device("cuda")</td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
@@ -2623,6 +3066,77 @@ val_result = run_epoch(
       vit_b16: 6,
       swin_b: 7,
     };
+
+    const BACKBONE_DISPLAY_NAMES = {
+      resnet50: 'ResNet50',
+      mobilenet_v3: 'MobileNetV3 Large 100',
+      vit_b16: 'ViT-B/16',
+      swin_b: 'Swin-B',
+    };
+
+    const BACKBONE_ICONS = {
+      resnet50: '&#129504;',
+      mobilenet_v3: '&#128241;',
+      vit_b16: '&#129302;',
+      swin_b: '&#128376;&#65039;',
+    };
+
+    const BACKBONE_TYPE_LABELS = {
+      resnet50: 'Residual Network',
+      mobilenet_v3: 'Depthwise Separable CNN',
+      vit_b16: 'Vision Transformer',
+      swin_b: 'Hierarchical Vision Transformer',
+    };
+
+    const BACKBONE_DEPTH_LABELS = {
+      resnet50: '50 layers with residual skip connections',
+      mobilenet_v3: 'Inverted residual bottleneck blocks with SE modules',
+      vit_b16: '12 transformer encoder blocks (patch size 16)',
+      swin_b: '4-stage shifted-window transformer blocks',
+    };
+
+    const BACKBONE_BEST_FOR = {
+      resnet50: 'Balanced performance and efficiency',
+      mobilenet_v3: 'Mobile and edge deployment',
+      vit_b16: 'Strong global context modeling',
+      swin_b: 'Highest-accuracy deployment in this project',
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getBackboneDisplayName(backboneKey, fallbackName) {
+      return BACKBONE_DISPLAY_NAMES[backboneKey] || fallbackName || backboneKey || 'Unknown Backbone';
+    }
+
+    function getBackboneIcon(backboneKey) {
+      return BACKBONE_ICONS[backboneKey] || '&#128421;&#65039;';
+    }
+
+    function formatFamilyLabel(familyValue) {
+      const raw = String(familyValue || '').toLowerCase();
+      if (raw === 'cnn') return 'Convolutional Neural Network';
+      if (raw === 'transformer') return 'Vision Transformer';
+      return familyValue || '-';
+    }
+
+    function getBackboneTypeLabel(backboneKey, familyValue) {
+      return BACKBONE_TYPE_LABELS[backboneKey] || formatFamilyLabel(familyValue);
+    }
+
+    function getBackboneDepthLabel(backboneKey) {
+      return BACKBONE_DEPTH_LABELS[backboneKey] || 'Architecture depth is backbone-specific';
+    }
+
+    function getBackboneBestFor(backboneKey) {
+      return BACKBONE_BEST_FOR[backboneKey] || 'General transfer-learning baseline';
+    }
 
     function normalizeModelBackboneKey(modelName) {
       const summary = MODEL_SUMMARIES[modelName];
@@ -3104,31 +3618,58 @@ val_result = run_epoch(
     }
 
     function renderArchitectureTable(modelNames) {
-      const seen = new Set();
-      const tbody = document.getElementById('arch-tbody');
+      const cardGrid = document.getElementById('arch-card-grid');
+      if (!cardGrid) return;
+
       const sorted = sortModelsByReleaseDate(modelNames);
-      tbody.innerHTML = sorted.filter((name) => {
+      const grouped = new Map();
+
+      sorted.forEach((name) => {
         const summary = MODEL_SUMMARIES[name];
-        if (!summary) return false;
-        if (seen.has(summary.backbone)) return false;
-        seen.add(summary.backbone);
-        return true;
-      }).map((name) => {
-        const summary = MODEL_SUMMARIES[name];
+        if (!summary) return;
+        const backboneKey = normalizeModelBackboneKey(name);
+        if (!grouped.has(backboneKey)) grouped.set(backboneKey, []);
+        grouped.get(backboneKey).push(name);
+      });
+
+      cardGrid.innerHTML = Array.from(grouped.entries()).map(([backboneKey, names]) => {
+        const primaryName = names[0];
+        const summary = MODEL_SUMMARIES[primaryName] || {};
         const modelCfg = summary.model_config || {};
         const resources = summary.resource_metrics || {};
-        return `<tr>
-          <td><strong>${name.split(' (')[0]}</strong></td>
-          <td>${modelCfg.family || '-'}</td>
-          <td><code>${modelCfg.timm_name || '-'}</code></td>
-          <td>${modelCfg.pretrained_source || '-'}</td>
-          <td>${((resources.parameters || 0) / 1e6).toFixed(3)}</td>
-          <td>${((resources.trainable_parameters || 0) / 1e6).toFixed(3)}</td>
-        </tr>`;
+
+        const title = getBackboneDisplayName(backboneKey, primaryName.split(' (')[0]);
+        const icon = getBackboneIcon(backboneKey);
+        const typeLabel = getBackboneTypeLabel(backboneKey, modelCfg.family);
+        const depthLabel = getBackboneDepthLabel(backboneKey);
+        const bestFor = getBackboneBestFor(backboneKey);
+        const parameterValue = Number(resources.parameters || 0);
+        const parameterLabel = parameterValue > 0 ? `${(parameterValue / 1e6).toFixed(2)}M` : '-';
+
+        return `<article class="config-card config-arch-card">
+          <h5><span class="config-model-icon">${icon}</span>${escapeHtml(title)}</h5>
+          <div class="config-detail">
+            <div class="config-item"><span class="config-label">Type:</span><span class="config-value">${escapeHtml(typeLabel)}</span></div>
+            <div class="config-item"><span class="config-label">Depth:</span><span class="config-value">${escapeHtml(depthLabel)}</span></div>
+            <div class="config-item"><span class="config-label">Parameters:</span><span class="config-value">${escapeHtml(parameterLabel)}</span></div>
+            <div class="config-item"><span class="config-label">Best for:</span><span class="config-value">${escapeHtml(bestFor)}</span></div>
+          </div>
+        </article>`;
       }).join('');
     }
 
     function renderConfiguration(sampleModelName) {
+      setText('cfg-transfer-mode', 'Transfer Learning (Frozen backbone + trainable head)');
+      setText('cfg-frozen-layers', 'All timm backbone parameters are frozen during training');
+      setText('cfg-trainable-layers', 'Shared ClassificationHead only (LayerNorm -> Dropout -> Linear -> GELU -> Dropout -> Linear)');
+
+      const pretrainedSources = [...new Set(
+        Object.values(MODEL_SUMMARIES)
+          .map((summary) => summary && summary.model_config && summary.model_config.pretrained_source)
+          .filter(Boolean)
+      )];
+      setText('cfg-pretrained-weights', pretrainedSources.join(', ') || 'timm pretrained checkpoints');
+
       setText('cfg-batch-size', NOTEBOOK_CONFIG.batch_size);
       setText('cfg-num-workers', NOTEBOOK_CONFIG.num_workers);
       setText('cfg-learning-rate', NOTEBOOK_CONFIG.learning_rate);
@@ -3137,6 +3678,9 @@ val_result = run_epoch(
       setText('cfg-benchmark-runs', `${NOTEBOOK_CONFIG.benchmark_runs} (warmup ${NOTEBOOK_CONFIG.warmup_runs})`);
       setText('cfg-results-root', NOTEBOOK_CONFIG.results_root);
       setText('cfg-device', `torch.device("${NOTEBOOK_CONFIG.device}")`);
+      setText('cfg-gpu-name', 'NVIDIA RTX 6000');
+      setText('cfg-gpu-memory', '96 GB VRAM');
+      setText('cfg-inference-benchmark', `Single image, GPU inference, average over ${NOTEBOOK_CONFIG.benchmark_runs} runs`);
 
       const summary = MODEL_SUMMARIES[sampleModelName];
       if (!summary) return;
@@ -3153,11 +3697,38 @@ val_result = run_epoch(
         setText('cfg-split', `${trainPct}% Train / ${valPct}% Val / ${testPct}% Test`);
       }
 
-      setText('cfg-split-sizes', `Train ${train.toLocaleString()} | Val ${val.toLocaleString()} | Test ${test.toLocaleString()}`);
-      setText('cfg-num-classes', Array.isArray(summary.class_names) ? summary.class_names.length : '-');
+      setText('cfg-train-size', `${train.toLocaleString()} images`);
+      setText('cfg-val-size', `${val.toLocaleString()} images`);
+      setText('cfg-test-size', `${test.toLocaleString()} images`);
+
+      const numClasses = Array.isArray(summary.class_names) ? summary.class_names.length : 0;
+      setText('cfg-num-classes', numClasses ? `${numClasses} classes` : '-');
 
       const input = (summary.data_config && summary.data_config.input_size) || [3, 224, 224];
-      setText('cfg-input-size', `${input[0]} x ${input[1]} x ${input[2]}`);
+      setText('cfg-input-size', `${input[1]} x ${input[2]} x ${input[0]} (RGB)`);
+
+      const normalizationContainer = document.getElementById('cfg-normalization-lines');
+      if (normalizationContainer) {
+        const seenBackbones = new Set();
+        const lines = sortModelsByReleaseDate(Object.keys(MODEL_SUMMARIES))
+          .map((name) => MODEL_SUMMARIES[name])
+          .filter((entry) => {
+            if (!entry || !entry.backbone || !entry.data_config) return false;
+            if (seenBackbones.has(entry.backbone)) return false;
+            seenBackbones.add(entry.backbone);
+            return Array.isArray(entry.data_config.mean) && Array.isArray(entry.data_config.std);
+          })
+          .map((entry) => {
+            const label = getBackboneDisplayName(entry.backbone, entry.backbone);
+            const mean = entry.data_config.mean.join(', ');
+            const std = entry.data_config.std.join(', ');
+            return `<div><strong>${escapeHtml(label)}:</strong> mean=[${escapeHtml(mean)}], std=[${escapeHtml(std)}]</div>`;
+          });
+
+        normalizationContainer.innerHTML = lines.length
+          ? lines.join('')
+          : '<div>Normalization data unavailable.</div>';
+      }
     }
 
     function populateSelectors(modelNames) {
