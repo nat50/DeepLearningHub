@@ -9,7 +9,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-vsc-dark-plus.min.css">
   <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" data-manual></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
   <style>
     .menu-actions { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 20px; }
     .menu-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: 0.2s; color: #374151; }
@@ -25,8 +28,8 @@
     .tutorial-explanation h3 { margin-top: 0; color: #7c3d5a; }
     .explanation-item { margin-bottom: 12px; }
     .explanation-item strong { color: #b8567a; font-size: 1.05rem; }
-    .code-tab-content pre { margin-top: 15px; background: #282c34; color: #abb2bf; padding: 15px; border-radius: 6px; overflow-x: auto; }
-    .code-tab-content pre code { background: transparent !important; color: inherit !important; padding: 0 !important; font-family: monospace !important; border: none !important; }
+    .code-tab-content pre { margin-top: 15px; background: #1e1e1e; color: #d4d4d4; border: 1px solid #2f2f2f; padding: 15px; border-radius: 6px; font-size: 0.96rem; line-height: 1.6; overflow-x: auto; }
+    .code-tab-content pre code { background: transparent !important; padding: 0 !important; font-family: monospace !important; font-size: inherit !important; line-height: inherit !important; border: none !important; }
     .eda-cls-stat .stat-card { background: #F6FFDC; border: 1px solid #DAF9DE; }
     .eda-cls-note { background: #CFECF3; border: 1px solid #b8dfe8; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; color: #374151; }
     .eda-cls-insight { background: #DAF9DE; border: 1px solid #b8e8c8 !important; }
@@ -731,6 +734,17 @@ print(backbone_df)</code></pre>
       }
     }
 
+    function applyEditorStyleHighlighting() {
+      if (typeof Prism === 'undefined') return;
+
+      document.querySelectorAll('pre[class*="language-"] > code').forEach((codeBlock) => {
+        const langClass = Array.from(codeBlock.parentElement.classList).find((name) => name.startsWith('language-'));
+        if (langClass) codeBlock.classList.add(langClass);
+      });
+
+      Prism.highlightAllUnder(document);
+    }
+
     const PLOTLY_LAYOUT = {
       font: { family: 'Inter, sans-serif', size: 12 },
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -933,6 +947,7 @@ print(backbone_df)</code></pre>
       }
     }
 
+    applyEditorStyleHighlighting();
     loadData();
   </script>
 

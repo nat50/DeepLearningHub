@@ -3,31 +3,1323 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Classification — Food-101 | DL Hub</title>
-  <meta name="description" content="Food-101 classification pipeline with CNN and Vision Transformer architectures, transfer learning, and results.">
+  <title>Classification - Food-101 | DL Hub</title>
+  <meta name="description" content="Food-101 classification pipeline with CNN and Vision Transformer architectures, transfer learning, model comparison, and confusion matrix.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-vsc-dark-plus.min.css">
   <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" data-manual></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
   <style>
-    .menu-actions { display:flex; flex-wrap: wrap; gap: 8px; margin: 1rem 0 1.5rem; align-items: center; }
-    .menu-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: 0.2s; color: #374151; }
-    .btn-tutorial { background: #F9B2D7; }
-    .btn-tutorial:hover { filter: brightness(0.97); transform: translateY(-1px); }
-    .btn-code { background: #CFECF3; }
-    .btn-code:hover { filter: brightness(0.97); transform: translateY(-1px); }
-    .btn-copy { background: #DAF9DE; }
-    .btn-copy:hover { filter: brightness(0.97); transform: translateY(-1px); }
-    .tutorial-panel, .code-panel { display: none; background: #F6FFDC; border-left: 5px solid #F9B2D7; border-radius: 8px; padding: 20px; margin: 0 0 1rem 0; }
-    .code-panel { border-left-color: #CFECF3; background: #fafff5; }
-    .tutorial-panel.active, .code-panel.active { display: block; }
-    .tutorial-explanation h3 { margin-top: 0; color: #7c3d5a; }
-    .explanation-item { margin-bottom: 12px; }
-    .explanation-item strong { color: #b8567a; font-size: 1.05rem; }
-    .code-tab-content pre { margin-top: 12px; background: #282c34; color: #abb2bf; padding: 15px; border-radius: 6px; overflow-x: auto; }
-    .code-tab-content pre code { background: transparent !important; color: inherit !important; font-family: monospace !important; }
-    .results-scope-note { background: #CFECF3; border: 1px solid #b8dfe8; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; color: #374151; font-size: 0.95rem; max-width: 960px; }
+    .results-scope-note {
+      background: #eaf4ff;
+      border: 1px solid #c3dbf3;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin: 0 0 1.25rem 0;
+      color: #234b73;
+      font-size: 0.92rem;
+    }
+
+    .pipeline-flow.pipeline-clickable {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      overflow-x: auto;
+      gap: 0;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .pipeline-step-btn {
+      border: none;
+      cursor: pointer;
+      min-width: 172px;
+      padding: 0.95rem 1rem;
+      opacity: 0.88;
+      transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+
+    .pipeline-step-btn.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+      outline: 2px solid rgba(255, 255, 255, 0.85);
+      outline-offset: 2px;
+    }
+
+    .pipeline-arrow {
+      flex: 0 0 auto;
+      margin: 0 0.35rem;
+    }
+
+    .pipeline-detail-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+      padding: 1rem 1rem 0.9rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pipeline-detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
+
+    .pipeline-detail-header h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .pipeline-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .pipeline-detail-grid h4 {
+      margin: 0 0 0.45rem 0;
+      font-size: 0.92rem;
+      color: #1f3552;
+    }
+
+    .pipeline-detail-grid ul {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+
+    .pipeline-detail-grid li {
+      margin-bottom: 0.35rem;
+      color: #334155;
+      font-size: 0.88rem;
+    }
+
+    .cnn-pipeline-section {
+      margin-bottom: 2rem;
+    }
+
+    .cnn-node-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.3rem 0 1rem;
+    }
+
+    .tutorial-nav-btn.active {
+      background: #4f46e5;
+      color: #fff;
+      border-color: #3730a3;
+    }
+
+    .tutorial-node {
+      display: none;
+    }
+
+    .tutorial-node.active {
+      display: block;
+    }
+
+    .pipeline-node-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      padding: 1rem 1rem 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .pipeline-node-card h3 {
+      margin-top: 0;
+      margin-bottom: 0.4rem;
+      font-size: 1.02rem;
+      color: #1f3552;
+    }
+
+    .pipeline-node-card h4 {
+      margin-top: 1rem;
+      margin-bottom: 0.35rem;
+      color: #334155;
+      font-size: 0.92rem;
+    }
+
+    .pipeline-node-card p {
+      margin-bottom: 0.45rem;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .tensor-format-note {
+      margin: 0.15rem 0 0.8rem;
+      color: #5a6679;
+      font-size: 0.88rem;
+      font-style: italic;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .tensor-format-board {
+      border: 2px solid #4f46e5;
+      border-radius: 14px;
+      background: #f7f8ff;
+      padding: 1.35rem 1.2rem 1.25rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .tensor-shape-title {
+      margin: 0 0 1rem;
+      text-align: center;
+      color: #5d5bc4;
+      font-size: 1.72rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .tensor-dimension-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.62rem;
+    }
+
+    .tensor-dimension-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.38rem;
+      border-left: 5px solid #4f46e5;
+      border-radius: 10px;
+      background: #eceef4;
+      padding: 0.62rem 0.7rem;
+    }
+
+    .tensor-dimension-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: #4f46e5;
+      color: #ffffff;
+      font-size: 1.3rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+      flex-shrink: 0;
+    }
+
+    .tensor-dimension-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.16rem;
+      width: 100%;
+    }
+
+    .tensor-dimension-text h6 {
+      margin: 0;
+      color: #18233c;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .tensor-dimension-text p {
+      margin: 0;
+      font-size: 0.73rem;
+      color: #4e5d75;
+      line-height: 1.35;
+    }
+
+    .input-key-principles {
+      margin-top: 0.9rem;
+      border: 1px solid #84c5ff;
+      border-radius: 9px;
+      background: #eaf5ff;
+      padding: 0.85rem 1rem;
+    }
+
+    .input-key-principles h5 {
+      margin: 0 0 0.5rem;
+      text-align: center;
+      color: #2f5b8a;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .input-key-principles ul {
+      margin: 0;
+      padding-left: 1.15rem;
+    }
+
+    .input-key-principles li {
+      margin-bottom: 0.3rem;
+      color: #1f4b79;
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .input-subsection-title {
+      margin: 1.1rem 0 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #223a5d;
+    }
+
+    .dataloader-config-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 0.75rem;
+    }
+
+    .dataloader-config-card {
+      border: 1px solid #d6dbe5;
+      border-radius: 9px;
+      background: #f7f8fb;
+      padding: 0.8rem 0.8rem 0.75rem;
+    }
+
+    .dataloader-config-card h6 {
+      margin: 0 0 0.35rem;
+      color: #4f46e5;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    .dataloader-config-card p {
+      margin: 0;
+      color: #415069;
+      font-size: 0.82rem;
+      line-height: 1.42;
+    }
+
+    .dataloader-inline-code {
+      display: inline-block;
+      margin-top: 0.45rem;
+      margin-right: 0.32rem;
+      background: #1f1f1f;
+      color: #f8f8f2;
+      border-radius: 5px;
+      padding: 0.22rem 0.46rem;
+      font-family: monospace;
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+
+    .preprocess-layout {
+      border: 1px solid #d8dce6;
+      border-radius: 10px;
+      background: #fbfcff;
+      padding: 1rem 0.9rem 0.95rem;
+    }
+
+    .input-layout {
+      border: 1px solid #d8dce6;
+      border-radius: 10px;
+      background: #fbfcff;
+      padding: 1rem 0.9rem 0.95rem;
+      margin-bottom: 0.95rem;
+    }
+
+    .input-main-title {
+      margin: 0.2rem 0 0.35rem;
+      text-align: center;
+      color: #5a57c9;
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .input-main-desc {
+      margin: 0;
+      text-align: center;
+      color: #5b6881;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .preprocess-main-title {
+      margin: 0.2rem 0 0.35rem;
+      text-align: center;
+      color: #5a57c9;
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .preprocess-main-desc {
+      margin: 0 0 1rem;
+      text-align: center;
+      color: #5b6881;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .preprocess-section {
+      margin-top: 1.1rem;
+      padding-top: 0.95rem;
+      border-top: 2px solid #e3e6ef;
+    }
+
+    .preprocess-section-title {
+      margin: 0 0 0.6rem;
+      color: #4f46e5;
+      font-size: 1.55rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .preprocess-section-note {
+      margin: 0 0 0.75rem;
+      color: #5d6780;
+      font-size: 0.88rem;
+      font-style: italic;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .preprocess-objective {
+      margin: 0.45rem 0 0.7rem;
+    }
+
+    .preprocess-objective strong {
+      color: #1f2f45;
+      font-size: 0.86rem;
+    }
+
+    .preprocess-objective p {
+      margin: 0.5rem 0 0;
+      color: #28374f;
+      font-size: 0.87rem;
+      line-height: 1.5;
+    }
+
+    .preprocess-objective ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .preprocess-objective li {
+      margin-bottom: 0.28rem;
+      color: #23344f;
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .preprocess-step-stack {
+      display: grid;
+      gap: 0.72rem;
+      margin-top: 0.6rem;
+    }
+
+    .preprocess-step-card {
+      border: 1px solid #d7dce6;
+      border-radius: 9px;
+      background: #ffffff;
+      padding: 0.8rem 0.8rem 0.72rem;
+    }
+
+    .preprocess-step-head {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .preprocess-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: #4f46e5;
+      color: #ffffff;
+      font-size: 0.84rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .preprocess-step-name {
+      margin: 0;
+      color: #233a5b;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .preprocess-step-card .code-block {
+      max-width: 560px;
+      margin-top: 0.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .preprocess-step-caption {
+      margin: 0;
+      color: #55637c;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .preprocess-mini-title {
+      margin: 0.85rem 0 0.35rem;
+      color: #233a5b;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .preprocess-label {
+      margin: 0.55rem 0 0.25rem;
+      color: #2f4469;
+      font-size: 0.83rem;
+      font-weight: 700;
+    }
+
+    .preprocess-note-list {
+      margin: 0.45rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .preprocess-note-list li {
+      margin-bottom: 0.28rem;
+      color: #243652;
+      font-size: 0.85rem;
+      line-height: 1.44;
+    }
+
+    .preprocess-footnote {
+      margin: 0.3rem 0 0;
+      color: #4f607a;
+      font-size: 0.83rem;
+      line-height: 1.4;
+    }
+
+    .preprocess-best-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 0.55rem;
+    }
+
+    .preprocess-best-card {
+      border: 1px solid #d9dfeb;
+      border-radius: 9px;
+      background: #f8faff;
+      padding: 0.72rem 0.75rem;
+    }
+
+    .preprocess-best-card h6 {
+      margin: 0 0 0.35rem;
+      color: #1f3760;
+      font-size: 0.83rem;
+      font-weight: 800;
+    }
+
+    .preprocess-best-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+
+    .preprocess-best-card li {
+      margin-bottom: 0.23rem;
+      color: #284063;
+      font-size: 0.82rem;
+      line-height: 1.38;
+    }
+
+    .backbone-layout {
+      border: 1px solid #d8dce6;
+      border-radius: 10px;
+      background: #fbfcff;
+      padding: 1rem 0.9rem 0.95rem;
+    }
+
+    .backbone-main-title {
+      margin: 0.2rem 0 0.35rem;
+      text-align: center;
+      color: #5a57c9;
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .backbone-main-desc {
+      margin: 0 0 1rem;
+      text-align: center;
+      color: #5b6881;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .backbone-section {
+      margin-top: 1.1rem;
+      padding-top: 0.95rem;
+      border-top: 2px solid #e3e6ef;
+    }
+
+    .backbone-section-title {
+      margin: 0 0 0.6rem;
+      color: #4f46e5;
+      font-size: 1.55rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .backbone-section-note {
+      margin: 0 0 0.75rem;
+      color: #5d6780;
+      font-size: 0.88rem;
+      font-style: italic;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .backbone-objective {
+      margin: 0.45rem 0 0.7rem;
+    }
+
+    .backbone-objective strong {
+      color: #1f2f45;
+      font-size: 0.86rem;
+    }
+
+    .backbone-objective p {
+      margin: 0.5rem 0 0;
+      color: #28374f;
+      font-size: 0.87rem;
+      line-height: 1.5;
+    }
+
+    .backbone-objective ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .backbone-objective li {
+      margin-bottom: 0.28rem;
+      color: #23344f;
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .backbone-label {
+      margin: 0.55rem 0 0.25rem;
+      color: #2f4469;
+      font-size: 0.83rem;
+      font-weight: 700;
+    }
+
+    .backbone-arrow {
+      margin: 0.35rem 0 0.2rem;
+      color: #2b3953;
+      font-size: 1.12rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .backbone-mini-title {
+      margin: 0.85rem 0 0.35rem;
+      color: #233a5b;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .backbone-note-list {
+      margin: 0.45rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .backbone-note-list li {
+      margin-bottom: 0.28rem;
+      color: #243652;
+      font-size: 0.85rem;
+      line-height: 1.44;
+    }
+
+    .backbone-footnote {
+      margin: 0.3rem 0 0;
+      color: #4f607a;
+      font-size: 0.83rem;
+      line-height: 1.4;
+    }
+
+    .backbone-model-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.55rem;
+    }
+
+    .backbone-model-card {
+      border: 1px solid #d9dfeb;
+      border-radius: 9px;
+      background: #f8faff;
+      padding: 0.72rem 0.75rem;
+    }
+
+    .backbone-model-card h6 {
+      margin: 0 0 0.35rem;
+      color: #1f3760;
+      font-size: 0.83rem;
+      font-weight: 800;
+    }
+
+    .backbone-model-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+
+    .backbone-model-card li {
+      margin-bottom: 0.23rem;
+      color: #284063;
+      font-size: 0.82rem;
+      line-height: 1.38;
+    }
+
+    .backbone-link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .backbone-link-row a {
+      color: #4f46e5;
+      font-size: 0.8rem;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    .backbone-transfer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.55rem;
+    }
+
+    .backbone-transfer-card {
+      border: 1px solid #8fd0ff;
+      border-radius: 9px;
+      background: #eaf5ff;
+      padding: 0.75rem 0.75rem 0.7rem;
+    }
+
+    .backbone-transfer-card h6 {
+      margin: 0 0 0.35rem;
+      color: #224a74;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .backbone-transfer-card p {
+      margin: 0;
+      color: #35597f;
+      font-size: 0.82rem;
+      line-height: 1.42;
+    }
+
+    .backbone-transfer-card .code-block {
+      margin-top: 0.48rem;
+    }
+
+    .backbone-compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 0.55rem;
+    }
+
+    .backbone-compare-card {
+      border: 1px solid #d9dfeb;
+      border-radius: 9px;
+      background: #f8faff;
+      padding: 0.72rem 0.75rem;
+    }
+
+    .backbone-compare-card h6 {
+      margin: 0 0 0.35rem;
+      color: #1f3760;
+      font-size: 0.83rem;
+      font-weight: 800;
+    }
+
+    .backbone-compare-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+
+    .backbone-compare-card li {
+      margin-bottom: 0.23rem;
+      color: #284063;
+      font-size: 0.82rem;
+      line-height: 1.38;
+    }
+
+    .head-layout {
+      border: 1px solid #d8dce6;
+      border-radius: 10px;
+      background: #fbfcff;
+      padding: 1rem 0.9rem 0.95rem;
+    }
+
+    .head-main-title {
+      margin: 0.2rem 0 0.35rem;
+      text-align: center;
+      color: #5a57c9;
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .head-main-desc {
+      margin: 0 0 1rem;
+      text-align: center;
+      color: #5b6881;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .head-section {
+      margin-top: 1.1rem;
+      padding-top: 0.95rem;
+      border-top: 2px solid #e3e6ef;
+    }
+
+    .head-section-title {
+      margin: 0 0 0.6rem;
+      color: #4f46e5;
+      font-size: 1.55rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .head-section-note {
+      margin: 0 0 0.75rem;
+      color: #5d6780;
+      font-size: 0.88rem;
+      font-style: italic;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .head-label {
+      margin: 0.55rem 0 0.25rem;
+      color: #2f4469;
+      font-size: 0.83rem;
+      font-weight: 700;
+    }
+
+    .head-arrow {
+      margin: 0.35rem 0 0.2rem;
+      color: #2b3953;
+      font-size: 1.12rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .head-component-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 0.55rem;
+    }
+
+    .head-component-card {
+      border: 1px solid #d9dfeb;
+      border-radius: 9px;
+      background: #f8faff;
+      padding: 0.72rem 0.75rem;
+    }
+
+    .head-component-card h6 {
+      margin: 0 0 0.35rem;
+      color: #1f3760;
+      font-size: 0.83rem;
+      font-weight: 800;
+    }
+
+    .head-component-card p {
+      margin: 0;
+      color: #284063;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .head-note-list {
+      margin: 0.5rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .head-note-list li {
+      margin-bottom: 0.28rem;
+      color: #243652;
+      font-size: 0.85rem;
+      line-height: 1.44;
+    }
+
+    .results-layout {
+      border: 1px solid #d8dce6;
+      border-radius: 10px;
+      background: #fbfcff;
+      padding: 1rem 0.9rem 0.95rem;
+    }
+
+    .results-main-title {
+      margin: 0.2rem 0 0.35rem;
+      text-align: center;
+      color: #5a57c9;
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .results-main-desc {
+      margin: 0 0 1rem;
+      text-align: center;
+      color: #5b6881;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .results-subtitle {
+      margin: 0.1rem 0 0.7rem;
+      color: #5d6780;
+      font-size: 0.88rem;
+      font-style: italic;
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.45;
+    }
+
+    .results-section {
+      margin-top: 1.1rem;
+      padding-top: 0.95rem;
+      border-top: 2px solid #e3e6ef;
+    }
+
+    .results-section-title {
+      margin: 0 0 0.6rem;
+      color: #4f46e5;
+      font-size: 1.55rem;
+      font-weight: 800;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .results-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.55rem;
+    }
+
+    .results-summary-card {
+      border: 1px solid #d9dfeb;
+      border-radius: 9px;
+      background: #f8faff;
+      padding: 0.8rem 0.85rem;
+    }
+
+    .results-summary-card h6 {
+      margin: 0 0 0.35rem;
+      color: #1f3760;
+      font-size: 0.83rem;
+      font-weight: 800;
+    }
+
+    .results-summary-card p {
+      margin: 0.2rem 0;
+      color: #284063;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .results-note-list {
+      margin: 0.45rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .results-note-list li {
+      margin-bottom: 0.28rem;
+      color: #243652;
+      font-size: 0.85rem;
+      line-height: 1.44;
+    }
+
+    .results-mini-title {
+      margin: 0.75rem 0 0.3rem;
+      color: #233a5b;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .results-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.55rem;
+    }
+
+    .results-detail-card {
+      border: 1px solid #d9dfeb;
+      border-radius: 9px;
+      background: #f8faff;
+      padding: 0.8rem 0.85rem;
+    }
+
+    .results-detail-card h6 {
+      margin: 0 0 0.35rem;
+      color: #1f3760;
+      font-size: 0.83rem;
+      font-weight: 800;
+    }
+
+    .results-detail-card p {
+      margin: 0.2rem 0;
+      color: #284063;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .results-jump-line {
+      color: #1f4b79 !important;
+      font-weight: 600;
+    }
+
+    .cnn-pipeline-section .code-block {
+      margin-top: 0.45rem;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 1px solid #2f2f2f;
+      border-radius: 6px;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 0.96rem;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    .cnn-pipeline-section .code-block code {
+      background: transparent !important;
+      padding: 0 !important;
+      border: none !important;
+      font-family: monospace !important;
+      font-size: inherit !important;
+      line-height: inherit !important;
+    }
+
+    .menu-btn {
+      padding: 0.42rem 0.85rem;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      background: #f8fafc;
+      color: #1f2937;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font);
+    }
+
+    .menu-btn:hover {
+      background: #eef2f7;
+      transform: translateY(-1px);
+    }
+
+    .compare-tabs-wrap {
+      background: #eceff4;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 8px;
+      margin: 1rem 0 1.2rem;
+      overflow-x: auto;
+    }
+
+    .compare-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 8px;
+      min-width: 760px;
+    }
+
+    .compare-tab-btn {
+      border: 1px solid #cfd6e1;
+      border-radius: 8px;
+      background: #f3f4f6;
+      color: #475569;
+      font-size: 0.92rem;
+      font-weight: 600;
+      min-height: 56px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      transition: all 0.2s;
+      font-family: var(--font);
+    }
+
+    .compare-tab-btn:hover {
+      background: #ffffff;
+      color: #334155;
+    }
+
+    .compare-tab-btn.active {
+      background: #4f46e5;
+      color: #ffffff;
+      border-color: #3730a3;
+      box-shadow: 0 2px 10px rgba(79, 70, 229, 0.28);
+    }
+
+    .compare-icon {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .compare-pane {
+      display: none;
+    }
+
+    .compare-pane.active {
+      display: block;
+    }
+
+    .panel-block {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .panel-block h3 {
+      margin: 0 0 0.55rem 0;
+      font-size: 1rem;
+    }
+
+    .panel-block p {
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .resource-hardware-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .resource-hardware-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 0.75rem 0.85rem;
+    }
+
+    .resource-hardware-card h4 {
+      margin: 0 0 0.35rem 0;
+      font-size: 0.86rem;
+    }
+
+    .resource-hardware-card p {
+      margin: 0;
+      color: #475569;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .tiny-note {
+      color: #64748b;
+      font-size: 0.79rem;
+      margin-top: 0.6rem;
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .formula-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 0.85rem;
+    }
+
+    .formula-card h4 {
+      margin: 0 0 0.25rem 0;
+      font-size: 0.9rem;
+    }
+
+    .formula-card p {
+      margin: 0.2rem 0;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .formula-card code {
+      font-size: 0.82rem;
+    }
+
+    .info-table td strong {
+      color: #0f172a;
+    }
+
+    @media (max-width: 980px) {
+      .pipeline-detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tensor-dimension-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .tensor-shape-title {
+        font-size: 1.7rem;
+      }
+
+      .dataloader-config-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .preprocess-main-title {
+        font-size: 1.7rem;
+      }
+
+      .input-main-title {
+        font-size: 1.7rem;
+      }
+
+      .preprocess-section-title {
+        font-size: 1.28rem;
+      }
+
+      .preprocess-best-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .backbone-main-title {
+        font-size: 1.7rem;
+      }
+
+      .head-main-title {
+        font-size: 1.7rem;
+      }
+
+      .backbone-section-title {
+        font-size: 1.28rem;
+      }
+
+      .head-section-title {
+        font-size: 1.28rem;
+      }
+
+      .backbone-model-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .head-component-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .results-summary-grid,
+      .results-detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .backbone-transfer-grid,
+      .backbone-compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .pipeline-flow.pipeline-clickable {
+        justify-content: flex-start;
+      }
+
+      .pipeline-step-btn {
+        min-width: 155px;
+      }
+
+      .pipeline-arrow {
+        transform: none;
+      }
+
+      .tensor-dimension-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dataloader-config-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preprocess-main-title {
+        font-size: 1.45rem;
+      }
+
+      .input-main-title {
+        font-size: 1.45rem;
+      }
+
+      .preprocess-section-title {
+        font-size: 1.1rem;
+      }
+
+      .preprocess-best-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preprocess-step-card .code-block {
+        max-width: 100%;
+      }
+
+      .backbone-main-title {
+        font-size: 1.45rem;
+      }
+
+      .head-main-title {
+        font-size: 1.45rem;
+      }
+
+      .backbone-section-title {
+        font-size: 1.1rem;
+      }
+
+      .head-section-title {
+        font-size: 1.1rem;
+      }
+
+      .backbone-model-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .head-component-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results-main-title {
+        font-size: 1.45rem;
+      }
+
+      .results-section-title {
+        font-size: 1.1rem;
+      }
+
+      .results-summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results-detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tensor-shape-title {
+        font-size: 1.45rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -44,523 +1336,707 @@
     </div>
   </nav>
 
-  <!-- Hero -->
   <header class="hero-banner">
     <h1>Food-101 Classification</h1>
-    <p class="subtitle">101-class food classification using CNN and ViT architectures with transfer learning</p>
+    <p class="subtitle">101-class food classification with transfer learning on ResNet50, MobileNetV3, ViT-B/16, and Swin-B</p>
     <div class="stat-cards" id="hero-stats">
       <div class="stat-card"><span class="stat-value" id="hero-classes">101</span><span class="stat-label">Classes</span></div>
       <div class="stat-card"><span class="stat-value" id="hero-images">101,000</span><span class="stat-label">Images</span></div>
       <div class="stat-card"><span class="stat-value" id="hero-models">8</span><span class="stat-label">Models</span></div>
-      <div class="stat-card"><span class="stat-value" id="hero-acc">—</span><span class="stat-label">Best Accuracy</span></div>
+      <div class="stat-card"><span class="stat-value" id="hero-acc">-</span><span class="stat-label">Best Accuracy</span></div>
     </div>
   </header>
 
   <section class="section">
-    <!-- Pipeline Flow -->
     <h2 class="section-title">Pipeline</h2>
-    <p class="section-subtitle">Computer Vision classification pipeline with CNN and ViT architectures</p>
 
-    <div class="pipeline-flow">
-      <div class="pipeline-step green">
-        <span class="step-icon">🖼️</span>
-        <span class="step-title">Image Input</span>
-        <span class="step-desc">224×224 RGB images</span>
-      </div>
-      <span class="pipeline-arrow">→</span>
-      <div class="pipeline-step green">
-        <span class="step-icon">🔧</span>
+    <div class="pipeline-flow pipeline-clickable">
+      <button type="button" class="pipeline-step pipeline-step-btn green active" data-step="input" onclick="selectPipelineStep('input')">
+        <span class="step-icon">&#128247;</span>
+        <span class="step-title">Input Data</span>
+        <span class="step-desc">Food-101 images</span>
+      </button>
+      <span class="pipeline-arrow">-&gt;</span>
+      <button type="button" class="pipeline-step pipeline-step-btn green" data-step="preprocess" onclick="selectPipelineStep('preprocess')">
+        <span class="step-icon">&#128295;</span>
         <span class="step-title">Preprocessing</span>
-        <span class="step-badge">Fixed</span>
-        <span class="step-desc">Normalize, Resize</span>
-      </div>
-      <span class="pipeline-arrow">→</span>
-      <div class="pipeline-step yellow">
-        <span class="step-icon">🧠</span>
-        <span class="step-title">CNN/ViT Backbone</span>
-        <span class="step-badge">Choose Below</span>
-        <span class="step-desc">ResNet50, MobileNet, ViT, Swin</span>
-      </div>
-      <span class="pipeline-arrow">→</span>
-      <div class="pipeline-step blue">
-        <span class="step-icon">🎯</span>
+        <span class="step-desc">Resize, Normalize</span>
+      </button>
+      <span class="pipeline-arrow">-&gt;</span>
+      <button type="button" class="pipeline-step pipeline-step-btn yellow" data-step="backbone" onclick="selectPipelineStep('backbone')">
+        <span class="step-icon">&#129504;</span>
+        <span class="step-title">Backbone</span>
+        <span class="step-desc">CNN / ViT / Swin</span>
+      </button>
+      <span class="pipeline-arrow">-&gt;</span>
+      <button type="button" class="pipeline-step pipeline-step-btn blue" data-step="head" onclick="selectPipelineStep('head')">
+        <span class="step-icon">&#127919;</span>
         <span class="step-title">Classifier Head</span>
-        <span class="step-badge">Adapted</span>
-        <span class="step-desc">1000 → 101 classes</span>
-      </div>
-      <span class="pipeline-arrow">→</span>
-      <div class="pipeline-step purple">
-        <span class="step-icon">✨</span>
+        <span class="step-desc">Feature -&gt; 101 classes</span>
+      </button>
+      <span class="pipeline-arrow">-&gt;</span>
+      <button type="button" class="pipeline-step pipeline-step-btn purple" data-step="results" onclick="selectPipelineStep('results')">
+        <span class="step-icon">&#10024;</span>
         <span class="step-title">Classification Results</span>
-        <span class="step-desc">101 food predictions</span>
+      </button>
+    </div>
+
+    <div class="pipeline-detail-card">
+      <div class="pipeline-detail-header">
+        <h3 id="pipeline-detail-title">Step 1 - Input Data and Split</h3>
       </div>
-    </div>
-
-    <div class="menu-actions pipeline-toolbar">
-      <button type="button" class="menu-btn btn-tutorial" onclick="showPipelineTutorial();">📚 Tutorial</button>
-      <button type="button" class="menu-btn btn-code" onclick="togglePipelineCode();">💻 Code</button>
-      <button type="button" class="menu-btn btn-copy" onclick="copyPipelineCode();">📋 Copy All</button>
-    </div>
-    <div class="tutorial-panel" id="pipeline-tutorial">
-      <div class="tutorial-explanation">
-        <h3>Pipeline tutorials</h3>
-        <div class="explanation-item"><strong>What:</strong> <p>End-to-end Food-101 training: data loading, augmentations, timm backbone, frozen features, classifier head, metrics.</p></div>
-        <div class="explanation-item"><strong>Why:</strong> <p>Matches the experiments that produced the results JSON for this page.</p></div>
-        <div class="explanation-item"><strong>How:</strong> <p>Open the <strong>Tutorials</strong> tab below for the dataset, model, and training blocks, then use the code panel here for a compact end-to-end training script.</p></div>
-      </div>
-    </div>
-    <div class="code-panel" id="pipeline-code">
-      <div class="code-tab-content active" id="pipeline-plotly">
-        <pre class="language-python"><code>import copy
-from dataclasses import dataclass
-from pathlib import Path
-
-import numpy as np
-import timm
-import torch
-import torch.nn as nn
-from PIL import Image
-from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, Dataset, Subset
-from torchvision import transforms
-
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-DATA_ROOT = Path("data/food-101")
-IMG_DIR = DATA_ROOT / "images"
-
-
-@dataclass
-class ExperimentConfig:
-    batch_size: int = 32
-    num_workers: int = 2
-    learning_rate: float = 1e-3
-    max_epochs: int = 40
-    patience: int = 5
-    min_delta: float = 1e-3
-
-
-class Food101Dataset(Dataset):
-    def __init__(self, transform=None):
-        self.image_root = IMG_DIR
-        self.transform = transform
-        self.classes = sorted([path.name for path in self.image_root.iterdir() if path.is_dir()])
-        self.class_to_idx = {class_name: idx for idx, class_name in enumerate(self.classes)}
-        self.samples = []
-        for class_name in self.classes:
-            for image_path in sorted((self.image_root / class_name).iterdir()):
-                if image_path.is_file() and image_path.suffix.lower() in IMAGE_EXTENSIONS:
-                    self.samples.append((str(image_path), self.class_to_idx[class_name]))
-        self.targets = [label for _, label in self.samples]
-
-    def __len__(self):
-        return len(self.samples)
-
-    def __getitem__(self, idx):
-        image_path, label = self.samples[idx]
-        with Image.open(image_path) as image:
-            image = image.convert("RGB")
-        if self.transform is not None:
-            image = self.transform(image)
-        return image, label
-
-
-def build_transforms(use_augmentation=True, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
-    if use_augmentation:
-        return transforms.Compose(
-            [
-                transforms.Resize(256),
-                transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
-                transforms.RandomHorizontalFlip(p=0.5),
-                transforms.ColorJitter(brightness=0.2, contrast=0.2),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=mean, std=std),
-            ]
-        )
-    return transforms.Compose(
-        [
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std),
-        ]
-    )
-
-
-class ClassificationHead(nn.Module):
-    def __init__(self, in_features, num_classes):
-        super().__init__()
-        self.layers = nn.Sequential(
-            nn.LayerNorm(in_features),
-            nn.Dropout(0.3),
-            nn.Linear(in_features, 512),
-            nn.GELU(),
-            nn.Dropout(0.3),
-            nn.Linear(512, num_classes),
-        )
-
-    def forward(self, x):
-        return self.layers(x)
-
-
-class ImageClassifier(nn.Module):
-    def __init__(self, num_classes, pretrained=True):
-        super().__init__()
-        self.backbone = timm.create_model("resnetv2_50x1_bit.goog_in21k", pretrained=pretrained, num_classes=0)
-        self.feature_dim = self.backbone(torch.zeros(1, 3, 224, 224)).shape[-1]
-        self.head = ClassificationHead(self.feature_dim, num_classes)
-        for param in self.backbone.parameters():
-            param.requires_grad = False
-
-    def forward(self, x):
-        return self.head(self.backbone(x))
-
-
-config = ExperimentConfig()
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-train_dataset = Food101Dataset(transform=build_transforms(use_augmentation=True))
-eval_dataset = Food101Dataset(transform=build_transforms(use_augmentation=False))
-
-indices = np.arange(len(eval_dataset.targets))
-train_idx, temp_idx = train_test_split(indices, train_size=0.7, random_state=42, stratify=np.asarray(eval_dataset.targets))
-val_idx, test_idx = train_test_split(temp_idx, train_size=0.5, random_state=42, stratify=np.asarray(eval_dataset.targets)[temp_idx])
-
-train_loader = DataLoader(Subset(train_dataset, train_idx.tolist()), batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
-val_loader = DataLoader(Subset(eval_dataset, val_idx.tolist()), batch_size=config.batch_size, shuffle=False, num_workers=config.num_workers)
-
-model = ImageClassifier(num_classes=len(eval_dataset.classes)).to(device)
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam([param for param in model.parameters() if param.requires_grad], lr=config.learning_rate)
-
-
-def run_epoch(model, loader, criterion, device, optimizer=None):
-    is_training = optimizer is not None
-    model.train(is_training)
-    total_loss = 0.0
-    total_samples = 0
-
-    for images, labels in loader:
-        images = images.to(device)
-        labels = labels.to(device)
-
-        if is_training:
-            optimizer.zero_grad(set_to_none=True)
-
-        with torch.set_grad_enabled(is_training):
-            logits = model(images)
-            loss = criterion(logits, labels)
-            if is_training:
-                loss.backward()
-                optimizer.step()
-
-        total_loss += float(loss.item()) * labels.size(0)
-        total_samples += labels.size(0)
-
-    return total_loss / max(total_samples, 1)
-
-
-best_val_loss = float("inf")
-best_state = None
-for epoch in range(config.max_epochs):
-    train_loss = run_epoch(model, train_loader, criterion, device, optimizer=optimizer)
-    val_loss = run_epoch(model, val_loader, criterion, device, optimizer=None)
-    print(f"Epoch {epoch + 1}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
-    if val_loss < best_val_loss - config.min_delta:
-        best_val_loss = val_loss
-        best_state = copy.deepcopy(model.state_dict())</code></pre>
-      </div>
-    </div>
-
-    <!-- Tab Navigation -->
-    <div class="tab-nav">
-      <button type="button" class="tab-btn active" data-tab="tutorials" onclick="switchTab('tutorials')">Tutorials</button>
-      <button type="button" class="tab-btn" data-tab="results" onclick="switchTab('results')">Results</button>
-      <button type="button" class="tab-btn" data-tab="config" onclick="switchTab('config')">Configuration</button>
-    </div>
-
-    <!-- ===== TUTORIALS TAB ===== -->
-    <div class="tab-content active" id="tab-tutorials">
-
-      <div class="accordion open">
-        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
-          <h3>CNN Pipeline Tutorials</h3>
-          <span class="accordion-toggle">▼</span>
+      <div class="pipeline-detail-grid">
+        <div>
+          <h4>Analysis</h4>
+          <ul id="pipeline-analysis-list"></ul>
         </div>
-        <div class="accordion-body">
+      </div>
+    </div>
 
-          <!-- Input Tensor Format -->
-          <div class="content-block">
-            <h3>Input Tensor Format</h3>
-            <p>CNN models require 4D tensors with specific dimension ordering for efficient computation.</p>
+    <div class="accordion open cnn-pipeline-section" id="cnn-pipeline-tutorials">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>CNN Pipeline Tutorials</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="cnn-node-nav">
+          <button type="button" class="menu-btn tutorial-nav-btn active" data-step="input" onclick="selectPipelineStep('input')">Input Image</button>
+          <button type="button" class="menu-btn tutorial-nav-btn" data-step="preprocess" onclick="selectPipelineStep('preprocess')">Preprocessing</button>
+          <button type="button" class="menu-btn tutorial-nav-btn" data-step="backbone" onclick="selectPipelineStep('backbone')">Backbone</button>
+          <button type="button" class="menu-btn tutorial-nav-btn" data-step="head" onclick="selectPipelineStep('head')">Classifier Head</button>
+          <button type="button" class="menu-btn tutorial-nav-btn" data-step="results" onclick="selectPipelineStep('results')">Results</button>
+        </div>
+
+        <div class="pipeline-node-card tutorial-node active" id="cnn-node-input" data-step="input">
+          <h3>1) Input Image Pipeline</h3>
+          <div class="input-layout">
+            <h4 class="input-main-title">&#128247; Input Image Pipeline</h4>
+            <p class="input-main-desc">Technical aspects of preparing input data for CNN models: tensor formats, data loading, and preprocessing.</p>
+
+            <h4>Input Tensor Format</h4>
+            <p class="tensor-format-note">CNN models require 4D tensors with specific dimension ordering for efficient computation.</p>
+            <div class="tensor-format-board">
+              <h5 class="tensor-shape-title">Shape: (N, C, H, W)</h5>
+              <div class="tensor-dimension-grid">
+                <div class="tensor-dimension-card">
+                  <span class="tensor-dimension-badge">N</span>
+                  <div class="tensor-dimension-text">
+                    <h6>Batch Size</h6>
+                    <p>Number of images in batch (e.g., 32, 64, 128)</p>
+                  </div>
+                </div>
+                <div class="tensor-dimension-card">
+                  <span class="tensor-dimension-badge">C</span>
+                  <div class="tensor-dimension-text">
+                    <h6>Channels</h6>
+                    <p>Color channels (3 for RGB, 1 for grayscale)</p>
+                  </div>
+                </div>
+                <div class="tensor-dimension-card">
+                  <span class="tensor-dimension-badge">H</span>
+                  <div class="tensor-dimension-text">
+                    <h6>Height</h6>
+                    <p>Image height in pixels (e.g., 224, 256, 512)</p>
+                  </div>
+                </div>
+                <div class="tensor-dimension-card">
+                  <span class="tensor-dimension-badge">W</span>
+                  <div class="tensor-dimension-text">
+                    <h6>Width</h6>
+                    <p>Image width in pixels (e.g., 224, 256, 512)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <h4>Architecture-Specific Dimensions</h4>
             <div class="model-info-grid">
-              <div class="model-info-card"><h5>ResNet50 / ViT-B/16</h5><p><code>(N, 3, 224, 224)</code></p><p>memory: 3.2MB/image</p></div>
-              <div class="model-info-card"><h5>MobileNetV3</h5><p><code>(N, 3, 224, 224)</code></p><p>memory: 3.2MB/image</p></div>
-              <div class="model-info-card"><h5>Swin-B</h5><p><code>(N, 3, 224, 224)</code></p><p>memory: 3.2MB/image</p></div>
+              <div class="model-info-card"><h5>ResNet50</h5><p><code>(N, 3, 224, 224)</code></p><p>~0.57 MB / image (float32 tensor)</p></div>
+              <div class="model-info-card"><h5>MobileNetV3 Large 100</h5><p><code>(N, 3, 224, 224)</code></p><p>~0.57 MB / image (float32 tensor)</p></div>
+              <div class="model-info-card"><h5>ViT-B/16</h5><p><code>(N, 3, 224, 224)</code></p><p>~0.57 MB / image (float32 tensor)</p></div>
+              <div class="model-info-card"><h5>Swin-B</h5><p><code>(N, 3, 224, 224)</code></p><p>~0.57 MB / image (float32 tensor)</p></div>
             </div>
-          </div>
 
-          <!-- Channel Ordering -->
-          <div class="content-block">
-            <h3>Channel Ordering: PyTorch vs TensorFlow</h3>
-            <p>Understanding the difference between channel-first and channel-last memory layouts.</p>
-            <div class="model-info-grid">
-              <div class="model-info-card">
-                <h5>PyTorch (Channel-First)</h5>
-                <pre class="code-block"><span class="comment"># PyTorch tensor format</span>
+            <h4>Channel Ordering</h4>
+            <pre class="code-block"><code># PyTorch memory layout
+# [batch, channels, height, width]
 tensor.shape = (N, C, H, W)
-<span class="comment"># Example: (32, 3, 224, 224)</span></pre>
-                <ul style="font-size:0.82rem; margin-top:0.5rem;">
-                  <li>Default for PyTorch models</li>
-                  <li>More efficient for GPU ops</li>
-                </ul>
-              </div>
-              <div class="model-info-card">
-                <h5>TensorFlow (Channel-Last)</h5>
-                <pre class="code-block"><span class="comment"># TensorFlow tensor format</span>
-tensor.shape = (N, H, W, C)
-<span class="comment"># Example: (32, 224, 224, 3)</span></pre>
-                <ul style="font-size:0.82rem; margin-top:0.5rem;">
-                  <li>Default for TF models</li>
-                  <li>More intuitive for images</li>
-                </ul>
-              </div>
-            </div>
-          </div>
 
-          <!-- PyTorch Dataset & DataLoader -->
-          <div class="content-block">
-            <h3>PyTorch Dataset &amp; DataLoader</h3>
-            <p>The Food101Dataset implementation used in this project:</p>
-                <pre class="code-block"><code>from pathlib import Path
-from typing import List, Tuple
+# Example batch from this project
+batch_images, batch_labels = next(iter(train_loader))
+print(batch_images.shape)  # (batch_size, 3, 224, 224)</code></pre>
 
-import numpy as np
-from PIL import Image
-from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, Dataset, Subset
+            <h4>PyTorch Dataset &amp; DataLoader</h4>
+            <pre class="code-block"><code>class Food101Dataset(Dataset):
+        """
+        Food101 image classification dataset.
+        """
 
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-DATA_ROOT = "data"
-FOOD101_RELATIVE_ROOT = Path("food-101")
+        def __init__(self, transform=None):
+          self.dataset_root = Path(DATA_ROOT).expanduser() / FOOD101_RELATIVE_ROOT
+          self.image_root = self.dataset_root / "images"
+          self.transform = transform
 
+          folder_names = [path.name for path in self.image_root.iterdir() if path.is_dir()]
+          self.classes = sorted(folder_names)
+          self.class_to_idx = {class_name: idx for idx, class_name in enumerate(self.classes)}
+          self.idx_to_class = {idx: class_name for class_name, idx in self.class_to_idx.items()}
 
-class Food101Dataset(Dataset):
-    def __init__(self, transform=None):
-        self.dataset_root = Path(DATA_ROOT).expanduser() / FOOD101_RELATIVE_ROOT
-        self.image_root = self.dataset_root / "images"
-        self.transform = transform
-        self.classes = sorted([path.name for path in self.image_root.iterdir() if path.is_dir()])
-        self.class_to_idx = {class_name: idx for idx, class_name in enumerate(self.classes)}
-        self.idx_to_class = {idx: class_name for class_name, idx in self.class_to_idx.items()}
-        self.samples = self._build_samples()
-        self.targets = [label for _, label in self.samples]
+          self.samples = self._build_samples()
+          self.targets = [label for _, label in self.samples]
 
-    def _build_samples(self) -> List[Tuple[str, int]]:
-        samples = []
-        for class_name in self.classes:
+        def _build_samples(self) -> List[Tuple[str, int]]:
+          samples: List[Tuple[str, int]] = []
+
+          for class_name in self.classes:
             class_dir = self.image_root / class_name
             for image_path in sorted(class_dir.iterdir()):
-                if image_path.is_file() and image_path.suffix.lower() in IMAGE_EXTENSIONS:
-                    samples.append((str(image_path), self.class_to_idx[class_name]))
-        return samples
+              if image_path.is_file() and image_path.suffix.lower() in IMAGE_EXTENSIONS:
+                samples.append((str(image_path), self.class_to_idx[class_name]))
 
-    def __len__(self):
-        return len(self.samples)
+          return samples
 
-    def __getitem__(self, idx):
-        image_path, label = self.samples[idx]
-        with Image.open(image_path) as image:
+        def __len__(self) -> int:
+          return len(self.samples)
+
+        def __getitem__(self, idx: int):
+          image_path, label = self.samples[idx]
+          with Image.open(image_path) as image:
             image = image.convert("RGB")
-        if self.transform is not None:
+
+          if self.transform is not None:
             image = self.transform(image)
-        return image, label
 
+          return image, label</code></pre>
 
-def make_stratified_split_indices(labels, train_size=0.7, val_size=0.15, test_size=0.15):
-    indices = np.arange(len(labels))
-    labels_arr = np.asarray(labels)
-    train_idx, temp_idx = train_test_split(indices, train_size=train_size, random_state=42, stratify=labels_arr)
-    val_ratio = val_size / (val_size + test_size)
-    val_idx, test_idx = train_test_split(temp_idx, train_size=val_ratio, random_state=42, stratify=labels_arr[temp_idx])
-    return {"train": train_idx.tolist(), "val": val_idx.tolist(), "test": test_idx.tolist()}</code></pre>
+            <div class="input-key-principles">
+              <h5>&#128161; Key Principles:</h5>
+              <ul>
+                <li><strong>Lazy Loading:</strong> Images loaded only when needed</li>
+                <li><strong>Transform Pipeline:</strong> Preprocessing applied on-the-fly</li>
+                <li><strong>Memory Efficient:</strong> No pre-loading of entire dataset</li>
+              </ul>
+            </div>
 
-            <h4>DataLoader Configuration</h4>
-            <pre class="code-block"><code>train_dataset = Food101Dataset(transform=train_tf)
-eval_dataset = Food101Dataset(transform=eval_tf)
-split_indices = make_stratified_split_indices(eval_dataset.targets)
-
-train_subset = Subset(train_dataset, split_indices["train"])
-val_subset = Subset(eval_dataset, split_indices["val"])
-test_subset = Subset(eval_dataset, split_indices["test"])
-
-train_loader = DataLoader(
-    train_subset,
-    batch_size=32,
-    shuffle=True,
-    num_workers=2,
-    pin_memory=torch.cuda.is_available(),
-    drop_last=False,
+            <h5 class="input-subsection-title">&#128196; DataLoader Configuration</h5>
+            <pre class="code-block"><code># Create DataLoader
+dataloader = DataLoader(
+    dataset,
+    batch_size=1024,           # Number of samples per batch
+    shuffle=True,              # Randomize order each epoch
+    num_workers=8,             # Parallel loading processes
+    pin_memory=True,           # GPU transfer optimization
+    drop_last=True             # Drop incomplete batches
 )
-val_loader = DataLoader(val_subset, batch_size=32, shuffle=False, num_workers=2)
-test_loader = DataLoader(test_subset, batch_size=32, shuffle=False, num_workers=2)</code></pre>
-          </div>
 
-          <!-- Preprocessing -->
-          <div class="content-block">
-            <h3>Image Preprocessing Pipeline</h3>
-            <p>Step-by-step preprocessing transforms for CNN input preparation:</p>
-            <pre class="code-block"><code>from torchvision import transforms
+# Usage in training loop
+for batch_idx, (images, labels) in enumerate(dataloader):
+    # images: (batch_size, 3, 224, 224)
+    # labels: (batch_size,)
+    outputs = model(images)
+    loss = criterion(outputs, labels)</code></pre>
 
-
-def build_transforms(
-    use_augmentation=True,
-    mean=(0.485, 0.456, 0.406),
-    std=(0.229, 0.224, 0.225),
-):
-    if use_augmentation:
-        return transforms.Compose(
-            [
-                transforms.Resize(256),
-                transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
-                transforms.RandomHorizontalFlip(p=0.5),
-                transforms.ColorJitter(brightness=0.2, contrast=0.2),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=mean, std=std),
-            ]
-        )
-
-    return transforms.Compose(
-        [
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std),
-        ]
-    )
-
-
-train_tf = build_transforms(use_augmentation=True)
-eval_tf = build_transforms(use_augmentation=False)</code></pre>
-
-            <div class="note-box">
-              <strong>Important:</strong> Apply augmentation ONLY to training set. Validation and test sets use fixed transforms for consistent evaluation.
-            </div>
-          </div>
-
-          <!-- Data Normalization -->
-          <div class="content-block">
-            <h3>Data Normalization</h3>
-            <p>Standardize pixel values for training stability. Formula: <code>normalized = (pixel - mean) / std</code></p>
-            <h4>Model-Specific Statistics</h4>
-            <div class="model-info-grid">
-              <div class="model-info-card"><h5>ImageNet Standard</h5><p>mean=[0.485, 0.456, 0.406]</p><p>std=[0.229, 0.224, 0.225]</p><p style="font-size:0.75rem;">ResNet, VGG, MobileNet</p></div>
-              <div class="model-info-card"><h5>BiT / ResNetV2</h5><p>mean=[0.5, 0.5, 0.5]</p><p>std=[0.5, 0.5, 0.5]</p><p style="font-size:0.75rem;">ResNet50 BiT in this project</p></div>
-              <div class="model-info-card"><h5>ViT / Swin</h5><p>mean=[0.5, 0.5, 0.5]</p><p>std=[0.5, 0.5, 0.5]</p><p style="font-size:0.75rem;">Vision Transformers</p></div>
-            </div>
-          </div>
-
-          <!-- Feature Extraction & Transfer Learning -->
-          <div class="content-block">
-            <h3>Feature Extraction &amp; Transfer Learning</h3>
-            <p>CNN/ViT backbones transform input images into high-level features for classification.</p>
-            <pre class="code-block"><code>import torch
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = ImageClassifier(backbone="resnet50", num_classes=101, pretrained=True, device=device).to(device)
-dummy_batch = torch.randn(8, 3, 224, 224, device=device)
-
-with torch.no_grad():
-    features = model.backbone(dummy_batch)
-    logits = model(dummy_batch)
-
-print("input_tensor.shape =", tuple(dummy_batch.shape))
-print("features.shape =", tuple(features.shape))
-print("predictions.shape =", tuple(logits.shape))</code></pre>
-
-            <h4>Popular Models Used</h4>
-            <div class="model-info-grid">
-              <div class="model-info-card">
-                <h5>ResNet50 (BiT)</h5>
-                <p>Family: CNN</p>
-                <p>Params: ~24.6M</p>
-                <p>Source: ImageNet-21k</p>
-                <a href="https://arxiv.org/abs/1512.03385" target="_blank">📄 Paper</a>
+            <div class="dataloader-config-grid">
+              <div class="dataloader-config-card">
+                <h6>batch_size</h6>
+                <p>Number of samples per batch. Affects memory usage and training stability.</p>
+                <span class="dataloader-inline-code">batch_size=1024</span>
+                <p>(high VRAM GPU)</p>
               </div>
-              <div class="model-info-card">
-                <h5>MobileNetV3 Large</h5>
-                <p>Family: CNN</p>
-                <p>Params: ~5.5M</p>
-                <p>Source: ImageNet-21k</p>
-                <a href="https://arxiv.org/abs/1905.02244" target="_blank">📄 Paper</a>
+              <div class="dataloader-config-card">
+                <h6>shuffle</h6>
+                <p>Randomize sample order each epoch. Essential for training, not for validation.</p>
+                <span class="dataloader-inline-code">shuffle=True</span>
+                <p>(training)</p>
+                <span class="dataloader-inline-code">shuffle=False</span>
+                <p>(validation)</p>
               </div>
-              <div class="model-info-card">
-                <h5>ViT-B/16</h5>
-                <p>Family: Transformer</p>
-                <p>Params: ~86M</p>
-                <p>Source: ImageNet-21k</p>
-                <a href="https://arxiv.org/abs/2010.11929" target="_blank">📄 Paper</a>
+              <div class="dataloader-config-card">
+                <h6>num_workers</h6>
+                <p>Parallel data loading processes. Usually 4-8 for optimal performance.</p>
+                <span class="dataloader-inline-code">num_workers=8</span>
               </div>
-              <div class="model-info-card">
-                <h5>Swin-B</h5>
-                <p>Family: Transformer</p>
-                <p>Params: ~88M</p>
-                <p>Source: ImageNet-22k</p>
-                <a href="https://arxiv.org/abs/2103.14030" target="_blank">📄 Paper</a>
+              <div class="dataloader-config-card">
+                <h6>pin_memory</h6>
+                <p>Faster GPU transfer. Use True when training on GPU.</p>
+                <span class="dataloader-inline-code">pin_memory=True</span>
+                <p>(GPU training)</p>
               </div>
             </div>
-
-            <h4>Transfer Learning Strategy</h4>
-            <p>All models use <strong>frozen backbone + trainable classifier head</strong>:</p>
-            <pre class="code-block"><code>import timm
-import torch
-import torch.nn as nn
-
-
-class ImageClassifier(nn.Module):
-    def __init__(self, backbone: str, num_classes: int, pretrained: bool = True, device=None):
-        super().__init__()
-        if backbone == "resnet50":
-            self.backbone = timm.create_model("resnetv2_50x1_bit.goog_in21k", pretrained=pretrained, num_classes=0)
-        elif backbone == "mobilenet_v3":
-            self.backbone = timm.create_model("mobilenetv3_large_100.miil_in21k", pretrained=pretrained, num_classes=0)
-        elif backbone == "vit_b16":
-            self.backbone = timm.create_model("vit_base_patch16_224.orig_in21k", pretrained=pretrained, num_classes=0)
-        elif backbone == "swin_b":
-            self.backbone = timm.create_model("swin_base_patch4_window7_224.ms_in22k", pretrained=pretrained, num_classes=0)
-        else:
-            raise ValueError("Unsupported backbone")
-
-        if device is not None:
-            self.backbone = self.backbone.to(device)
-
-        dummy = torch.zeros(1, 3, 224, 224, device=device or torch.device("cpu"))
-        with torch.no_grad():
-            self.feature_dim = int(self.backbone(dummy).shape[-1])
-
-        self.head = ClassificationHead(in_features=self.feature_dim, num_classes=num_classes)
-        if device is not None:
-            self.head = self.head.to(device)
-
-        for param in self.backbone.parameters():
-            param.requires_grad = False
-
-    def trainable_parameters(self):
-        return [param for param in self.parameters() if param.requires_grad]
-
-    def forward(self, x):
-        features = self.backbone(x)
-        return self.head(features)</code></pre>
           </div>
+        </div>
 
-          <!-- Classifier Head -->
-          <div class="content-block">
-            <h3>Classifier Head Design</h3>
-            <p>The classifier head converts extracted features into class predictions:</p>
-            <pre class="code-block"><code>import torch
-import torch.nn as nn
+        <div class="pipeline-node-card tutorial-node" id="cnn-node-preprocess" data-step="preprocess">
+          <h3>2) Preprocessing Node</h3>
+          <div class="preprocess-layout">
+            <h4 class="preprocess-main-title">&#128295; Preprocessing Pipeline</h4>
+            <p class="preprocess-main-desc">Essential image preprocessing steps for CNN input preparation: resizing, data augmentation, and normalization.</p>
 
+            <div class="preprocess-section">
+              <h5 class="preprocess-section-title">&#128207; Image Resizing &amp; Standardization</h5>
+              <p class="preprocess-section-note">Convert images of different sizes to uniform dimensions for batch processing.</p>
 
-class ClassificationHead(nn.Module):
+              <div class="preprocess-objective">
+                <strong>&#127919; Objective</strong>
+                <p>Ensure all images have the same dimensions to create consistent tensors with shape <code>(N, C, H, W)</code> for efficient batch processing.</p>
+              </div>
+
+              <div class="preprocess-step-stack">
+                <div class="preprocess-step-card">
+                  <div class="preprocess-step-head">
+                    <span class="preprocess-step-num">1</span>
+                    <h6 class="preprocess-step-name">Resize to Standard Size</h6>
+                  </div>
+                  <pre class="code-block"><code># Resize to 256px (maintains aspect ratio)
+transforms.Resize(256)</code></pre>
+                  <p class="preprocess-step-caption">Scale image to 256px while preserving aspect ratio.</p>
+                </div>
+
+                <div class="preprocess-step-card">
+                  <div class="preprocess-step-head">
+                    <span class="preprocess-step-num">2</span>
+                    <h6 class="preprocess-step-name">Center Crop to Target Size</h6>
+                  </div>
+                  <pre class="code-block"><code># Crop to exact 224x224 from center
+transforms.CenterCrop(224)</code></pre>
+                  <p class="preprocess-step-caption">Extract 224x224 region from center of resized image.</p>
+                </div>
+
+                <div class="preprocess-step-card">
+                  <div class="preprocess-step-head">
+                    <span class="preprocess-step-num">3</span>
+                    <h6 class="preprocess-step-name">Convert to Tensor</h6>
+                  </div>
+                  <pre class="code-block"><code># Convert PIL to tensor, scale [0,255] -> [0,1]
+transforms.ToTensor()</code></pre>
+                  <p class="preprocess-step-caption">Convert PIL image to PyTorch tensor with normalized range.</p>
+                </div>
+              </div>
+
+              <h6 class="preprocess-mini-title">&#128202; Result:</h6>
+              <pre class="code-block"><code># Input: Various sized images
+# Output: Consistent tensor shape
+tensor.shape = (batch_size, 3, 224, 224)
+# Example: (1024, 3, 224, 224) for batch of 1024 images</code></pre>
+            </div>
+
+            <div class="preprocess-section">
+              <h5 class="preprocess-section-title">&#127912; Data Augmentation</h5>
+              <p class="preprocess-section-note">Techniques from this project to increase dataset diversity and improve model generalization.</p>
+
+              <div class="preprocess-objective">
+                <strong>&#127919; Objective</strong>
+                <ul>
+                  <li><strong>Increase Dataset Diversity:</strong> Generate varied training samples from existing images.</li>
+                  <li><strong>Improve Generalization:</strong> Help model learn robust features across visual changes.</li>
+                  <li><strong>Reduce Overfitting:</strong> Prevent memorization of specific image characteristics.</li>
+                  <li><strong>Consistent Evaluation:</strong> Keep validation/test deterministic for fair comparison.</li>
+                </ul>
+              </div>
+
+              <h6 class="preprocess-mini-title">&#128736; Implementation Methods</h6>
+              <p class="preprocess-label">Geometric Transforms</p>
+              <pre class="code-block"><code># Random crop with scale variation
+transforms.RandomResizedCrop(224, scale=(0.8, 1.0))
+
+# Random horizontal flip
+transforms.RandomHorizontalFlip(p=0.5)</code></pre>
+
+              <p class="preprocess-label">Color Transforms</p>
+              <pre class="code-block"><code># Color jitter for brightness/contrast
+transforms.ColorJitter(
+    brightness=0.2,
+    contrast=0.2,
+)</code></pre>
+
+              <h6 class="preprocess-mini-title">&#9888; Important Notes:</h6>
+              <ul class="preprocess-note-list">
+                <li><strong>Training Only:</strong> Apply augmentation only to training set.</li>
+                <li><strong>No Validation/Test:</strong> Keep validation and test transforms unchanged.</li>
+                <li><strong>Consistent Evaluation:</strong> Use same eval pipeline across all models.</li>
+                <li><strong>Realistic Augmentation:</strong> Use transforms that match food image domain shifts.</li>
+              </ul>
+
+              <p class="preprocess-label">Complete Augmentation Pipeline</p>
+              <pre class="code-block"><code># Training transforms (WITH augmentation)
+train_transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225]),
+])
+
+# Validation transforms (NO augmentation)
+val_transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225]),
+])</code></pre>
+            </div>
+
+            <div class="preprocess-section">
+              <h5 class="preprocess-section-title">&#128202; Data Normalization</h5>
+              <p class="preprocess-section-note">Standardize pixel values to improve training stability and convergence.</p>
+
+              <div class="preprocess-objective">
+                <strong>&#127919; Objective</strong>
+                <ul>
+                  <li><strong>Stabilize Training:</strong> Prevent gradient scale issues and speed up optimization.</li>
+                  <li><strong>Faster Convergence:</strong> Help optimizer find good minima more efficiently.</li>
+                  <li><strong>Feature Standardization:</strong> Keep channel magnitudes comparable.</li>
+                  <li><strong>Transfer Learning Compatibility:</strong> Match pretrained backbone expectations.</li>
+                </ul>
+              </div>
+
+              <h6 class="preprocess-mini-title">&#128736; Implementation</h6>
+              <p class="preprocess-label">Normalization Formula</p>
+              <pre class="code-block"><code>normalized_pixel = (pixel - mean) / std</code></pre>
+              <p class="preprocess-footnote">Where pixel values are in range [0, 1] after <code>transforms.ToTensor()</code>.</p>
+
+              <p class="preprocess-label">Model-Specific Statistics</p>
+              <pre class="code-block"><code># ResNet50
+mean = [0.5, 0.5, 0.5]
+std = [0.5, 0.5, 0.5]
+
+# MobileNetV3
+mean = [0.0, 0.0, 0.0]
+std = [1.0, 1.0, 1.0]
+
+# ViT-B/16
+mean = [0.5, 0.5, 0.5]
+std = [0.5, 0.5, 0.5]
+
+# Swin-B
+mean = [0.485, 0.456, 0.406]
+std = [0.229, 0.224, 0.225]</code></pre>
+
+              <h6 class="preprocess-mini-title">&#128161; Best Practices</h6>
+              <div class="preprocess-best-grid">
+                <div class="preprocess-best-card">
+                  <h6>&#127919; Training vs Validation</h6>
+                  <ul>
+                    <li>Use augmentation for training only.</li>
+                    <li>Keep validation/test transforms unchanged.</li>
+                    <li>Apply same normalization to all splits.</li>
+                  </ul>
+                </div>
+                <div class="preprocess-best-card">
+                  <h6>&#9889; Performance</h6>
+                  <ul>
+                    <li>Use appropriate batch sizes for available VRAM.</li>
+                    <li>Enable <code>pin_memory=True</code> when training on GPU.</li>
+                    <li>Use enough workers to keep GPU fed.</li>
+                  </ul>
+                </div>
+                <div class="preprocess-best-card">
+                  <h6>&#128736; Implementation</h6>
+                  <ul>
+                    <li>Build transforms with <code>transforms.Compose()</code>.</li>
+                    <li>Keep evaluation pipeline deterministic.</li>
+                    <li>Track normalization config per backbone.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline-node-card tutorial-node" id="cnn-node-backbone" data-step="backbone">
+          <h3>3) Backbone Node</h3>
+          <div class="backbone-layout">
+            <h4 class="backbone-main-title">&#129504; CNN Backbone Architecture</h4>
+            <p class="backbone-main-desc">Feature extraction backbones and transfer learning strategies used in this project for Food-101 classification.</p>
+
+            <div class="backbone-section">
+              <h5 class="backbone-section-title">&#128269; Feature Extraction and Transformation</h5>
+              <p class="backbone-section-note">Backbone modules transform normalized images into high-level features suitable for classification.</p>
+
+              <div class="backbone-objective">
+                <strong>&#128229; Input Processing</strong>
+              </div>
+
+              <p class="backbone-label">Input Tensor</p>
+              <pre class="code-block"><code># Input: Batch of normalized images
+input_tensor.shape = (N, C, H, W)
+# Example: (1024, 3, 224, 224)
+# N = batch_size, C = 3 (RGB), H = W = 224</code></pre>
+
+              <p class="backbone-arrow">&#8594;</p>
+              <p class="backbone-label">CNN Backbone Processing</p>
+              <pre class="code-block"><code># Convolutional/transformer layers + non-linear activations
+# Project model pipeline
+features = model.forward_features(images)
+logits = model.head(features)</code></pre>
+
+              <p class="backbone-arrow">&#8594;</p>
+              <p class="backbone-label">Output Features</p>
+                <pre class="code-block"><code># Output vectors from model.forward_features(images)
+        # (measured from assignment1/image_classification/models.py)
+
+        # ResNet50
+        features.shape = (N, 2048)
+
+        # MobileNetV3 Large 100
+        features.shape = (N, 1280)
+
+        # ViT-B/16
+        features.shape = (N, 768)
+
+        # Swin-B
+        features.shape = (N, 1024)
+
+        # Final classifier output
+        logits.shape = (N, 101)</code></pre>
+
+              <h6 class="backbone-mini-title">&#128736; Convolutional Layer Details</h6>
+                <p class="backbone-label">ResNet50</p>
+                <pre class="code-block"><code># First layer (timm name: resnetv2_50x1_bit.goog_in21k)
+        stem.conv = Conv2d(3, 64, kernel_size=7, stride=2, padding=3)
+
+        # Output feature dim
+        feature_dim = 2048
+
+        # Parameters
+        # First-layer formula: 64 * 3 * 7 * 7 = 9,408 (bias=False)
+        # Total formula: backbone_params + head_params = total_params
+        backbone_params = 23,500,352
+        head_params = 1,104,997
+        total_params = 24,605,349</code></pre>
+
+                <p class="backbone-label">MobileNetV3 Large 100</p>
+                <pre class="code-block"><code># First layer (timm name: mobilenetv3_large_100.miil_in21k)
+        conv_stem = Conv2d(3, 16, kernel_size=3, stride=2, padding=1)
+
+        # Output feature dim
+        feature_dim = 1280
+
+        # Parameters
+        # First-layer formula: 16 * 3 * 3 * 3 = 432 (bias=False)
+        # Total formula: backbone_params + head_params = total_params
+        backbone_params = 4,202,032
+        head_params = 710,245
+        total_params = 4,912,277</code></pre>
+
+                <p class="backbone-label">ViT-B/16</p>
+                <pre class="code-block"><code># Patch embedding layer (timm name: vit_base_patch16_224.orig_in21k)
+        patch_embed.proj = Conv2d(3, 768, kernel_size=16, stride=16, padding=0)
+
+        # Output feature dim
+        feature_dim = 768
+
+        # Parameters
+        # First-layer formula: 768 * 3 * 16 * 16 + 768 = 590,592 (bias=True)
+        # Total formula: backbone_params + head_params = total_params
+        backbone_params = 85,798,656
+        head_params = 447,077
+        total_params = 86,245,733</code></pre>
+
+                <p class="backbone-label">Swin-B</p>
+                <pre class="code-block"><code># Patch embedding layer (timm name: swin_base_patch4_window7_224.ms_in22k)
+        patch_embed.proj = Conv2d(3, 128, kernel_size=4, stride=4, padding=0)
+
+        # Output feature dim
+        feature_dim = 1024
+
+        # Parameters
+        # First-layer formula: 128 * 3 * 4 * 4 + 128 = 6,272 (bias=True)
+        # Total formula: backbone_params + head_params = total_params
+        backbone_params = 86,743,224
+        head_params = 578,661
+        total_params = 87,321,885</code></pre>
+
+              <h6 class="backbone-mini-title">&#128202; Key Points:</h6>
+              <ul class="backbone-note-list">
+                <li><strong>Learnable Parameters:</strong> Most parameters stay in the frozen backbone during current training strategy.</li>
+                <li><strong>Feature Maps:</strong> Each backbone extracts hierarchical semantic features from food images.</li>
+                <li><strong>Unified Comparison:</strong> Same classification head is used across backbones for fair benchmarking.</li>
+                <li><strong>Stable Interface:</strong> All models expose consistent <code>forward_features</code> -> <code>head</code> flow.</li>
+              </ul>
+            </div>
+
+            <div class="backbone-section">
+              <h5 class="backbone-section-title">&#127942; Popular Classification Models</h5>
+              <p class="backbone-section-note">Backbones configured in this project (metrics sourced from classification/data/results_data.json).</p>
+
+              <div class="backbone-model-grid">
+                <div class="backbone-model-card">
+                  <h6>ResNet50</h6>
+                  <div class="backbone-link-row">
+                    <a href="https://arxiv.org/abs/1512.03385" target="_blank" rel="noopener noreferrer">ResNet Paper</a>
+                    <a href="https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html" target="_blank" rel="noopener noreferrer">TorchVision</a>
+                    <a href="https://huggingface.co/timm/resnetv2_50x1_bit.goog_in21k" target="_blank" rel="noopener noreferrer">timm</a>
+                  </div>
+                  <ul>
+                    <li>Family: CNN (BiT / ImageNet-21k)</li>
+                    <li>Params: 24.61M</li>
+                    <li>Strong baseline for Food-101</li>
+                  </ul>
+                </div>
+
+                <div class="backbone-model-card">
+                  <h6>MobileNetV3 Large 100</h6>
+                  <div class="backbone-link-row">
+                    <a href="https://arxiv.org/abs/1905.02244" target="_blank" rel="noopener noreferrer">MobileNetV3 Paper</a>
+                    <a href="https://pytorch.org/vision/stable/models/generated/torchvision.models.mobilenet_v3_large.html" target="_blank" rel="noopener noreferrer">TorchVision</a>
+                    <a href="https://huggingface.co/timm/mobilenetv3_large_100.miil_in21k" target="_blank" rel="noopener noreferrer">timm</a>
+                  </div>
+                  <ul>
+                    <li>Family: CNN (MIIL / ImageNet-21k)</li>
+                    <li>Params: 4.91M</li>
+                    <li>Lightweight, efficient deployment</li>
+                  </ul>
+                </div>
+
+                <div class="backbone-model-card">
+                  <h6>ViT-B/16</h6>
+                  <div class="backbone-link-row">
+                    <a href="https://arxiv.org/abs/2010.11929" target="_blank" rel="noopener noreferrer">ViT Paper</a>
+                    <a href="https://pytorch.org/vision/stable/models/generated/torchvision.models.vit_b_16.html" target="_blank" rel="noopener noreferrer">TorchVision</a>
+                    <a href="https://huggingface.co/timm/vit_base_patch16_224.orig_in21k" target="_blank" rel="noopener noreferrer">timm</a>
+                  </div>
+                  <ul>
+                    <li>Family: Transformer (ImageNet-21k)</li>
+                    <li>Params: 86.25M</li>
+                    <li>High-capacity global attention model</li>
+                  </ul>
+                </div>
+
+                <div class="backbone-model-card">
+                  <h6>Swin-B</h6>
+                  <div class="backbone-link-row">
+                    <a href="https://arxiv.org/abs/2103.14030" target="_blank" rel="noopener noreferrer">Swin Paper</a>
+                    <a href="https://pytorch.org/vision/stable/models/generated/torchvision.models.swin_b.html" target="_blank" rel="noopener noreferrer">TorchVision</a>
+                    <a href="https://huggingface.co/timm/swin_base_patch4_window7_224.ms_in22k" target="_blank" rel="noopener noreferrer">timm</a>
+                  </div>
+                  <ul>
+                    <li>Family: Transformer (ImageNet-22k)</li>
+                    <li>Params: 87.32M</li>
+                    <li>Window-based attention for vision tasks</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="backbone-section">
+              <h5 class="backbone-section-title">&#128260; Transfer Learning</h5>
+              <p class="backbone-section-note">Current training pipeline leverages pre-trained backbones and a shared classification head.</p>
+
+              <div class="backbone-objective">
+                <strong>&#127919; Design Principles</strong>
+              </div>
+
+              <div class="backbone-transfer-grid">
+                <div class="backbone-transfer-card">
+                  <h6>a) Reuse Pre-trained Features</h6>
+                  <p>Load backbone weights pre-trained on large-scale datasets and keep strong visual priors.</p>
+                  <pre class="code-block"><code>model = create_model(
+    backbone="resnet50",
+    num_classes=101,
+    pretrained=True,
+    device=device,
+)</code></pre>
+                </div>
+                <div class="backbone-transfer-card">
+                  <h6>b) Replace Classifier Head</h6>
+                  <p>Attach a project-specific head to map extracted features into 101 food classes.</p>
+                  <pre class="code-block"><code>self.head = ClassificationHead(
+    in_features=self.feature_dim,
+    num_classes=num_classes,
+)</code></pre>
+                </div>
+              </div>
+
+              <h6 class="backbone-mini-title">&#9989; Advantages of Transfer Learning:</h6>
+              <ul class="backbone-note-list">
+                <li><strong>Faster Training:</strong> Pre-trained features accelerate convergence.</li>
+                <li><strong>Better Performance:</strong> Leverage knowledge from ImageNet-scale pretraining.</li>
+                <li><strong>Lower Compute Cost:</strong> Freeze strategy trains only the head in current experiments.</li>
+                <li><strong>Reliable Baseline:</strong> Consistent setup for comparing 4 backbones.</li>
+              </ul>
+
+              <h6 class="backbone-mini-title">&#128736; Training Strategy Selection</h6>
+              <p class="backbone-label">c.1 Freeze Backbone (used in this project)</p>
+              <pre class="code-block"><code>def freeze_backbone(self) -> None:
+    for param in self.backbone.parameters():
+        param.requires_grad = False
+
+optimizer = torch.optim.Adam(model.trainable_parameters(), lr=config.learning_rate)</code></pre>
+              <p class="backbone-footnote"><strong>Use case:</strong> Stable and compute-efficient training for medium-size datasets like Food-101.</p>
+
+              <p class="backbone-label">c.2 Optional Full Fine-tuning (extension)</p>
+              <pre class="code-block"><code># Optional extension for larger compute budget
+for param in model.backbone.parameters():
+    param.requires_grad = True
+
+optimizer = torch.optim.Adam([
+    {"params": model.backbone.parameters(), "lr": 1e-4},
+    {"params": model.head.parameters(), "lr": 1e-3},
+])</code></pre>
+              <p class="backbone-footnote"><strong>Use case:</strong> Larger datasets or final performance push after head-only warm-up.</p>
+
+              <h6 class="backbone-mini-title">&#128187; Transfer Learning Implementation</h6>
+              <pre class="code-block"><code>model = create_model(
+    backbone=backbone,
+    num_classes=dataloaders["num_classes"],
+    pretrained=True,
+    device=device,
+)
+
+criterion = nn.CrossEntropyLoss().to(device)
+optimizer = torch.optim.Adam(model.trainable_parameters(), lr=config.learning_rate)
+
+train_result = run_epoch(model, dataloaders["train_loader"], criterion, device, optimizer)
+val_result = run_epoch(model, dataloaders["val_loader"], criterion, device)</code></pre>
+
+              <h6 class="backbone-mini-title">&#128202; TorchVision vs timm</h6>
+              <div class="backbone-compare-grid">
+                <div class="backbone-compare-card">
+                  <h6>TorchVision</h6>
+                  <ul>
+                    <li>Official PyTorch model collection.</li>
+                    <li>Straightforward APIs and stable defaults.</li>
+                    <li>Smaller model zoo for advanced variants.</li>
+                  </ul>
+                </div>
+                <div class="backbone-compare-card">
+                  <h6>timm (used in this project)</h6>
+                  <ul>
+                    <li>Extensive model zoo and pretrained checkpoints.</li>
+                    <li>Direct access to modern architectures.</li>
+                    <li>Consistent interface for CNN and Transformer backbones.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline-node-card tutorial-node" id="cnn-node-head" data-step="head">
+          <h3>4) Classifier Head Node</h3>
+          <div class="head-layout">
+            <h4 class="head-main-title">&#127919; Classifier Head</h4>
+            <p class="head-main-desc">Single shared head from <code>models.py</code> to convert backbone features into 101 Food-101 class logits.</p>
+
+            <div class="head-section">
+              <h5 class="head-section-title">&#127919; Classifier Head Overview</h5>
+              <p class="head-section-note">No multiple head designs here: this section follows exactly the head architecture used in assignment1/image_classification.</p>
+
+              <p class="head-label">Input Features from Backbone</p>
+              <pre class="code-block"><code># output from model.forward_features(images)
+# shape depends on selected timm backbone
+# ResNet50: (N, 2048)
+# MobileNetV3: (N, 1280)
+# ViT-B/16: (N, 768)
+# Swin-B: (N, 1024)</code></pre>
+
+              <p class="head-arrow">&#8594;</p>
+              <p class="head-label">Processing: Shared ClassificationHead (models.py)</p>
+              <pre class="code-block"><code>class ClassificationHead(nn.Module):
     def __init__(self, in_features: int, num_classes: int):
         super().__init__()
         self.layers = nn.Sequential(
@@ -574,449 +2050,1200 @@ class ClassificationHead(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.layers(x)</code></pre>
-            <div class="success-box">
-              <strong>Design choices:</strong> LayerNorm for stable training, GELU activation, dual dropout (0.3) for regularization, and a hidden layer of 512 units.
+
+              <p class="head-arrow">&#8594;</p>
+              <p class="head-label">Output: Class Predictions</p>
+              <pre class="code-block"><code># logits for Food-101
+logits.shape = (N, 101)</code></pre>
             </div>
-          </div>
 
-          <!-- Training -->
-          <div class="content-block">
-            <h3>Training Configuration</h3>
-            <pre class="code-block"><code>import copy
-from dataclasses import dataclass
+            <div class="head-section">
+              <h5 class="head-section-title">&#129513; Architecture Components</h5>
+              <p class="head-section-note">Each component in the head plays a clear role in transfer learning stability and generalization.</p>
 
-import torch
-import torch.nn as nn
+              <div class="head-component-grid">
+                <div class="head-component-card">
+                  <h6>LayerNorm(in_features)</h6>
+                  <p>Standardizes backbone features before dense projection for stable optimization across model families.</p>
+                </div>
+                <div class="head-component-card">
+                  <h6>Dropout(0.3)</h6>
+                  <p>Regularization to reduce overfitting while training only the head on Food-101.</p>
+                </div>
+                <div class="head-component-card">
+                  <h6>Linear(in_features, 512)</h6>
+                  <p>Projects each backbone output into a shared hidden representation.</p>
+                </div>
+                <div class="head-component-card">
+                  <h6>GELU</h6>
+                  <p>Non-linear activation that preserves smooth gradients and richer feature interactions.</p>
+                </div>
+                <div class="head-component-card">
+                  <h6>Linear(512, 101)</h6>
+                  <p>Final mapping from hidden features to 101 class logits.</p>
+                </div>
+              </div>
+            </div>
 
+            <div class="head-section">
+              <h5 class="head-section-title">&#128293; Training (timm only)</h5>
+              <p class="head-section-note">Training example aligned with <code>training_pipeline.py</code> and timm-based backbones only.</p>
 
-@dataclass
-class ExperimentConfig:
-    batch_size: int = 32
-    num_workers: int = 2
-    learning_rate: float = 1e-3
-    max_epochs: int = 40
-    patience: int = 5
-    min_delta: float = 1e-3
-    train_size: float = 0.7
-    val_size: float = 0.15
-    test_size: float = 0.15
-    seed: int = 42
+              <pre class="code-block"><code>config = ExperimentConfig(
+    batch_size=1024,  # for large VRAM GPU
+    learning_rate=1e-3,
+    max_epochs=40,
+    patience=5,
+)
 
+model = create_model(
+    backbone="swin_b",  # timm backbone
+    num_classes=101,
+    pretrained=True,
+    device=device,
+)
 
-config = ExperimentConfig()
-criterion = nn.CrossEntropyLoss()
+criterion = nn.CrossEntropyLoss().to(device)
 optimizer = torch.optim.Adam(model.trainable_parameters(), lr=config.learning_rate)
 
-best_val_f1 = 0.0
-best_epoch = 0
-best_state = None
+train_result = run_epoch(
+    model,
+    dataloaders["train_loader"],
+    criterion,
+    device,
+    optimizer=optimizer,
+    desc="swin_b train",
+)
+val_result = run_epoch(
+    model,
+    dataloaders["val_loader"],
+    criterion,
+    device,
+    desc="swin_b val",
+)</code></pre>
 
-for epoch in range(config.max_epochs):
-    train_metrics = run_epoch(model, train_loader, criterion, device, optimizer=optimizer, desc=f"Train {epoch + 1}")
-    val_metrics = run_epoch(model, val_loader, criterion, device, optimizer=None, desc=f"Val {epoch + 1}")
-
-    val_f1 = val_metrics["metrics"]["f1"]
-    if val_f1 > best_val_f1 + config.min_delta:
-        best_val_f1 = val_f1
-        best_epoch = epoch + 1
-        best_state = copy.deepcopy(model.state_dict())</code></pre>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== RESULTS TAB ===== -->
-    <div class="tab-content" id="tab-results">
-
-      <div class="results-scope-note">
-        <strong>Results tab — data scope:</strong> Learning curves, confusion matrices, and summary metrics are loaded from <code>results_data.json</code> (full per-epoch train/validation logs for each experiment; no random subsampling of batches or epochs).
-      </div>
-
-      <!-- Quick Summary -->
-      <div class="accordion open">
-        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
-          <h3>Classification Results</h3>
-          <span class="accordion-toggle">▼</span>
-        </div>
-        <div class="accordion-body">
-          <h4>Quick Summary</h4>
-          <div class="stat-cards-colored" id="results-summary">
-            <div class="stat-card-color blue"><span class="stat-value" id="best-model-name">—</span><span class="stat-label">Best Model</span></div>
-            <div class="stat-card-color teal"><span class="stat-value" id="best-acc">—</span><span class="stat-label">Best Accuracy</span></div>
-            <div class="stat-card-color purple"><span class="stat-value" id="best-f1">—</span><span class="stat-label">Best F1</span></div>
-            <div class="stat-card-color orange"><span class="stat-value" id="fastest-model">—</span><span class="stat-label">Fastest Model</span></div>
-          </div>
-
-          <!-- Key Insights -->
-          <div class="insights-grid" style="margin-top:1.5rem;">
-            <div class="insight-card success">
-              <h4>What Worked</h4>
-              <ul>
-                <li>Transfer learning significantly outperformed training from scratch</li>
-                <li>Transformer-based models (ViT, Swin) showed strong performance</li>
-                <li>Frozen backbone + trainable head is effective for Food-101</li>
-                <li>Data augmentation helped most models generalize better</li>
-              </ul>
-            </div>
-            <div class="insight-card warning">
-              <h4>Key Takeaways</h4>
-              <ul>
-                <li>Architecture choice matters: ViT/Swin vs CNN tradeoffs</li>
-                <li>Data augmentation is model-specific: not all models benefit equally</li>
-                <li>MobileNetV3 provides best speed/accuracy tradeoff for deployment</li>
-                <li>Food-101 is challenging: visually similar food classes</li>
+              <ul class="head-note-list">
+                <li><strong>One head for all backbones:</strong> Fair comparison comes from changing backbone only.</li>
+                <li><strong>Batch size:</strong> Set to <code>1024</code> only on large GPUs; for lower-VRAM GPUs, use 128-256-512.</li>
               </ul>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Performance Comparison -->
-      <div class="accordion open">
-        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
-          <h3>Model Comparison</h3>
-          <span class="accordion-toggle">▼</span>
-        </div>
-        <div class="accordion-body">
-          <h4>Performance Metrics</h4>
-          <div style="overflow-x:auto;">
-            <table class="comparison-table" id="perf-table">
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Precision ↑</th>
-                  <th>Recall ↑</th>
-                  <th>F1-Score ↑</th>
-                  <th>Accuracy ↑</th>
-                  <th>Top-5 Acc ↑</th>
-                </tr>
-              </thead>
-              <tbody id="perf-tbody"></tbody>
-            </table>
-          </div>
+        <div class="pipeline-node-card tutorial-node" id="cnn-node-results" data-step="results">
+          <h3>5) Classification Results</h3>
+          <div class="results-layout">
+            <h4 class="results-main-title">&#10024; Classification Results</h4>
+            <p class="results-main-desc" id="results-overview-line">Key findings and insights from the Food-101 classification experiments.</p>
 
-          <h4 style="margin-top:2rem;">Resource Metrics</h4>
-          <div style="overflow-x:auto;">
-            <table class="comparison-table" id="resource-table">
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Train Time ↓ (min)</th>
-                  <th>Inference ↓ (ms)</th>
-                  <th>Params ↓ (M)</th>
-                  <th>Size ↓ (MB)</th>
-                </tr>
-              </thead>
-              <tbody id="resource-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+            <div class="results-section">
+              <h5 class="results-section-title">&#128202; Quick Summary</h5>
+              <p class="results-subtitle">High-level overview of model performance and key findings.</p>
 
-      <!-- Learning Curves -->
-      <div class="accordion open">
-        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
-          <h3>Learning Curves</h3>
-          <span class="accordion-toggle">▼</span>
-        </div>
-        <div class="accordion-body">
-          <p>Select a model to view its training and validation curves:</p>
-          <select id="lc-model-select" onchange="renderSelectedLC()" style="padding:0.4rem 0.8rem; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:0.875rem; margin-bottom:1rem;">
-            <option value="">— Select Model —</option>
-          </select>
-          <div class="chart-container" id="chart-lc-loss"></div>
-          <div class="chart-container" id="chart-lc-accuracy"></div>
-          <div class="chart-container" id="chart-lc-f1"></div>
-        </div>
-      </div>
-
-      <!-- Confusion Matrix -->
-      <div class="accordion">
-        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
-          <h3>Confusion Matrix</h3>
-          <span class="accordion-toggle">▼</span>
-        </div>
-        <div class="accordion-body">
-          <p>Select a model from the comparison table above to view its confusion matrix.</p>
-          <select id="cm-model-select" onchange="renderConfusionMatrix()" style="padding:0.4rem 0.8rem; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:0.875rem; margin-bottom:1rem;">
-            <option value="">— Select Model —</option>
-          </select>
-          <div class="confusion-container" id="chart-confusion"></div>
-        </div>
-      </div>
-
-      <!-- Metrics Formulas -->
-      <div class="accordion">
-        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
-          <h3>Classification Metrics Formulas</h3>
-          <span class="accordion-toggle">▼</span>
-        </div>
-        <div class="accordion-body">
-          <div class="content-block">
-            <h4>Basic Metrics</h4>
-            <div class="model-info-grid">
-              <div class="model-info-card"><h5>Accuracy</h5><p>Overall correctness across all classes</p><p><code>TP + TN / Total</code></p></div>
-              <div class="model-info-card"><h5>Precision</h5><p>Positive predictions that are correct</p><p><code>TP / (TP + FP)</code></p></div>
-              <div class="model-info-card"><h5>Recall</h5><p>Actual positives correctly identified</p><p><code>TP / (TP + FN)</code></p></div>
-              <div class="model-info-card"><h5>F1-Score</h5><p>Harmonic mean of Precision & Recall</p><p><code>2·P·R / (P+R)</code></p></div>
+              <div class="results-summary-grid">
+                <div class="results-summary-card">
+                  <h6>&#127942; Best Performing Model</h6>
+                  <p id="results-best-model">Loading...</p>
+                  <p id="results-best-accuracy"></p>
+                  <p id="results-best-f1"></p>
+                  <p id="results-best-comment"></p>
+                </div>
+                <div class="results-summary-card">
+                  <h6>&#128200; Performance Range</h6>
+                  <p id="results-range-accuracy"></p>
+                  <p id="results-range-f1"></p>
+                  <p id="results-range-top5"></p>
+                </div>
+                <div class="results-summary-card">
+                  <h6>&#9889; Fastest Model</h6>
+                  <p id="results-fastest-model">Loading...</p>
+                  <p id="results-fastest-profile"></p>
+                  <p id="results-fastest-accuracy"></p>
+                  <p id="results-fastest-comment"></p>
+                </div>
+              </div>
             </div>
-            <h4>Averaging Methods</h4>
-            <ul class="key-points">
-              <li><strong>Macro Average:</strong> Simple average across all classes (treats all classes equally)</li>
-              <li><strong>Weighted Average:</strong> Average weighted by number of true instances per class</li>
-            </ul>
+
+            <div class="results-section">
+              <h5 class="results-section-title">&#128161; Key Insights</h5>
+              <p class="results-subtitle">Main findings and lessons learned from the experiments.</p>
+
+              <h6 class="results-mini-title">&#9989; What Worked</h6>
+              <ul class="results-note-list" id="results-worked-list"></ul>
+
+              <h6 class="results-mini-title">&#10060; What Didn't Work</h6>
+              <ul class="results-note-list" id="results-not-worked-list"></ul>
+
+              <h6 class="results-mini-title">&#127919; Key Takeaways</h6>
+              <ul class="results-note-list" id="results-takeaways-list"></ul>
+            </div>
+
+            <div class="results-section">
+              <h5 class="results-section-title">&#128269; Detailed Analysis</h5>
+              <p class="results-subtitle">For comprehensive performance analysis, explore the sections below.</p>
+              <div class="results-detail-grid">
+                <div class="results-detail-card">
+                  <h6>&#128202; Model Comparison</h6>
+                  <p>Detailed performance metrics, confusion matrices, and model rankings.</p>
+                  <p class="results-jump-line">&#128071; See "Model Comparison" section below</p>
+                </div>
+                <div class="results-detail-card">
+                  <h6>&#127912; Feature Maps Explorer</h6>
+                  <p>Visualize model outputs and understand what the backbones are learning.</p>
+                  <p class="results-jump-line">&#128071; See "Visualizations" tab below</p>
+                </div>
+                <div class="results-detail-card">
+                  <h6>&#9881; Configuration</h6>
+                  <p>Model architectures, training parameters, and data configurations.</p>
+                  <p class="results-jump-line">&#128071; See "Configuration" tab below</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="results-section">
+              <h5 class="results-section-title">&#128640; Recommendations</h5>
+              <p class="results-subtitle">Practical guidance for model selection and deployment.</p>
+              <div class="results-summary-grid">
+                <div class="results-summary-card">
+                  <h6>&#127919; For Best Accuracy</h6>
+                  <p id="results-rec-best-model"></p>
+                  <p id="results-rec-best-detail"></p>
+                  <p id="results-rec-best-use"></p>
+                </div>
+                <div class="results-summary-card">
+                  <h6>&#9889; For Mobile Deployment</h6>
+                  <p id="results-rec-mobile-model"></p>
+                  <p id="results-rec-mobile-detail"></p>
+                  <p id="results-rec-mobile-use"></p>
+                </div>
+                <div class="results-summary-card">
+                  <h6>&#128260; For Balanced Performance</h6>
+                  <p id="results-rec-balanced-model"></p>
+                  <p id="results-rec-balanced-detail"></p>
+                  <p id="results-rec-balanced-use"></p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ===== CONFIG TAB ===== -->
-    <div class="tab-content" id="tab-config">
-      <div class="accordion open">
-        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
-          <h3>Model Configurations</h3>
-          <span class="accordion-toggle">▼</span>
+    <h2 class="section-title">Model Comparison</h2>
+
+    <div class="compare-tabs-wrap">
+      <div class="compare-tabs">
+        <button type="button" class="compare-tab-btn active" data-compare-tab="performance" onclick="switchCompareTab('performance')">
+          <span class="compare-icon">&#128200;</span>
+          <span>Performance</span>
+        </button>
+        <button type="button" class="compare-tab-btn" data-compare-tab="resources" onclick="switchCompareTab('resources')">
+          <span class="compare-icon">&#9889;</span>
+          <span>Resources</span>
+        </button>
+        <button type="button" class="compare-tab-btn" data-compare-tab="formulas" onclick="switchCompareTab('formulas')">
+          <span class="compare-icon">&#129518;</span>
+          <span>Formulas</span>
+        </button>
+        <button type="button" class="compare-tab-btn" data-compare-tab="configuration" onclick="switchCompareTab('configuration')">
+          <span class="compare-icon">&#9881;</span>
+          <span>Configuration</span>
+        </button>
+        <button type="button" class="compare-tab-btn" data-compare-tab="visualizations" onclick="switchCompareTab('visualizations')">
+          <span class="compare-icon">&#128202;</span>
+          <span>Visualizations</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="compare-performance" class="compare-pane active">
+      <div class="panel-block">
+        <h3>Performance Metrics</h3>
+        <p>Click a model row to render confusion matrix below.</p>
+        <div style="overflow-x:auto;">
+          <table class="comparison-table" id="perf-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Precision ↑</th>
+                <th>Recall ↑</th>
+                <th>F1-Score ↑</th>
+                <th>Accuracy ↑</th>
+                <th>Top-5 Acc ↑</th>
+              </tr>
+            </thead>
+            <tbody id="perf-tbody"></tbody>
+          </table>
         </div>
-        <div class="accordion-body">
-          <h4>Training Configuration</h4>
-          <table class="info-table" style="max-width:500px; margin-bottom:1.5rem;">
-            <tbody>
-              <tr><td style="font-weight:600;">Strategy</td><td>Frozen backbone + trainable head</td></tr>
-              <tr><td style="font-weight:600;">Optimizer</td><td>Adam (lr=1e-3)</td></tr>
-              <tr><td style="font-weight:600;">Loss Function</td><td>CrossEntropyLoss</td></tr>
-              <tr><td style="font-weight:600;">Max Epochs</td><td>40</td></tr>
-              <tr><td style="font-weight:600;">Early Stopping</td><td>Patience=5, min_delta=1e-3</td></tr>
-              <tr><td style="font-weight:600;">Batch Size</td><td>32</td></tr>
-              <tr><td style="font-weight:600;">Metric for Selection</td><td>Validation F1-Score</td></tr>
-            </tbody>
-          </table>
 
-          <h4>Data Configuration</h4>
-          <table class="info-table" style="max-width:500px; margin-bottom:1.5rem;">
-            <tbody>
-              <tr><td style="font-weight:600;">Dataset</td><td>Food-101</td></tr>
-              <tr><td style="font-weight:600;">Split</td><td>70% Train / 15% Val / 15% Test</td></tr>
-              <tr><td style="font-weight:600;">Split Method</td><td>Stratified</td></tr>
-              <tr><td style="font-weight:600;">Image Size</td><td>224×224 (all models)</td></tr>
-              <tr><td style="font-weight:600;">Augmentation</td><td>RandomResizedCrop, HFlip, ColorJitter</td></tr>
-            </tbody>
-          </table>
+        <h3 style="margin-top:1.1rem;">Confusion Matrix</h3>
+        <div class="chart-placeholder" id="chart-confusion-performance-empty">Select a model from the comparison table above to view its confusion matrix.</div>
+        <div class="confusion-container" id="chart-confusion-performance" style="display:none;"></div>
+      </div>
+    </div>
 
-          <h4>Model Architectures</h4>
-          <div style="overflow-x:auto;">
-            <table class="comparison-table" id="arch-table">
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Family</th>
-                  <th>timm Name</th>
-                  <th>Pretrained Source</th>
-                  <th>Total Params (M)</th>
-                  <th>Trainable Params (M)</th>
-                </tr>
-              </thead>
-              <tbody id="arch-tbody"></tbody>
-            </table>
+    <div id="compare-resources" class="compare-pane">
+      <div class="panel-block">
+        <h3>Resource Metrics</h3>
+        <p>Training and inference costs across all experiments. Click a row to view confusion matrix below.</p>
+        <div style="overflow-x:auto;">
+          <table class="comparison-table" id="resource-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Train Time ↓ (min)</th>
+                <th>Inference ↓ (ms)</th>
+                <th>FLOPs ↓ (B)</th>
+                <th>Params ↓ (M)</th>
+                <th>Size ↓ (MB)</th>
+              </tr>
+            </thead>
+            <tbody id="resource-tbody"></tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:1.1rem;">Confusion Matrix</h3>
+        <div class="chart-placeholder" id="chart-confusion-resource-empty">Select a model from the comparison table above to view its confusion matrix.</div>
+        <div class="confusion-container" id="chart-confusion-resource" style="display:none;"></div>
+
+        <div class="resource-hardware-grid">
+          <div class="resource-hardware-card">
+            <h4>LightningAI GPU</h4>
+            <p id="gpu-name">NVIDIA RTXP 6000</p>
+          </div>
+          <div class="resource-hardware-card">
+            <h4>GPU Count</h4>
+            <p id="gpu-count">1 GPU</p>
+          </div>
+          <div class="resource-hardware-card">
+            <h4>VRAM</h4>
+            <p id="gpu-vram">96 GB</p>
+          </div>
+          <div class="resource-hardware-card">
+            <h4>Source</h4>
+            <p>lightning.ai/pricing (RTXP 6000 row)</p>
           </div>
         </div>
+        <p class="tiny-note">GPU section intentionally uses LightningAI RTX 6000 machine information instead of local workstation specs.</p>
+      </div>
+    </div>
+
+    <div id="compare-formulas" class="compare-pane">
+      <div class="panel-block">
+        <h3>Classification Metrics Formulas</h3>
+        <div class="formula-grid">
+          <div class="formula-card">
+            <h4>Accuracy</h4>
+            <p>Overall correctness.</p>
+            <p><code>(TP + TN) / (TP + TN + FP + FN)</code></p>
+          </div>
+          <div class="formula-card">
+            <h4>Precision</h4>
+            <p>Positive predictions that are correct.</p>
+            <p><code>TP / (TP + FP)</code></p>
+          </div>
+          <div class="formula-card">
+            <h4>Recall</h4>
+            <p>Actual positives that are found.</p>
+            <p><code>TP / (TP + FN)</code></p>
+          </div>
+          <div class="formula-card">
+            <h4>F1-Score</h4>
+            <p>Harmonic mean of precision and recall.</p>
+            <p><code>2 * P * R / (P + R)</code></p>
+          </div>
+          <div class="formula-card">
+            <h4>Top-5 Accuracy</h4>
+            <p>Correct class appears in top-5 predicted labels.</p>
+            <p><code>correct_in_top5 / total_samples</code></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="compare-configuration" class="compare-pane">
+      <div class="panel-block">
+        <h3>Training Configuration (from train.ipynb)</h3>
+        <table class="info-table" style="max-width:640px; margin-bottom:1.2rem;">
+          <tbody id="training-config-body">
+            <tr><td><strong>Strategy</strong></td><td>Frozen backbone + trainable head</td></tr>
+            <tr><td><strong>Optimizer</strong></td><td>Adam (lr=<span id="cfg-learning-rate">1e-3</span>)</td></tr>
+            <tr><td><strong>Loss Function</strong></td><td>CrossEntropyLoss</td></tr>
+            <tr><td><strong>Batch Size</strong></td><td id="cfg-batch-size">1024</td></tr>
+            <tr><td><strong>Num Workers</strong></td><td id="cfg-num-workers">8</td></tr>
+            <tr><td><strong>Max Epochs</strong></td><td id="cfg-max-epochs">40</td></tr>
+            <tr><td><strong>Early Stopping</strong></td><td id="cfg-early-stopping">patience=5, min_delta=1e-3</td></tr>
+            <tr><td><strong>Benchmark Runs</strong></td><td id="cfg-benchmark-runs">100 (warmup 10)</td></tr>
+            <tr><td><strong>Results Root</strong></td><td id="cfg-results-root">results/food101_classification</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Data Configuration (from results summaries)</h3>
+        <table class="info-table" style="max-width:760px; margin-bottom:1.2rem;">
+          <tbody>
+            <tr><td><strong>Dataset</strong></td><td>Food-101</td></tr>
+            <tr><td><strong>Split</strong></td><td id="cfg-split">70% Train / 15% Val / 15% Test</td></tr>
+            <tr><td><strong>Split Sizes</strong></td><td id="cfg-split-sizes">Train 70,700 | Val 15,150 | Test 15,150</td></tr>
+            <tr><td><strong>Classes</strong></td><td id="cfg-num-classes">101</td></tr>
+            <tr><td><strong>Input Size</strong></td><td id="cfg-input-size">3 x 224 x 224</td></tr>
+            <tr><td><strong>Augmentation</strong></td><td>Resize -> RandomResizedCrop -> HorizontalFlip -> ColorJitter -> Normalize</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Model Architectures</h3>
+        <div style="overflow-x:auto; margin-bottom:1.2rem;">
+          <table class="comparison-table" id="arch-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Family</th>
+                <th>timm Name</th>
+                <th>Pretrained Source</th>
+                <th>Total Params (M)</th>
+                <th>Trainable Params (M)</th>
+              </tr>
+            </thead>
+            <tbody id="arch-tbody"></tbody>
+          </table>
+        </div>
+
+        <h3>Runtime / Hardware</h3>
+        <table class="info-table" style="max-width:760px;">
+          <tbody>
+            <tr><td><strong>Training Platform</strong></td><td>LightningAI Studio</td></tr>
+            <tr><td><strong>GPU Type</strong></td><td>NVIDIA RTXP 6000</td></tr>
+            <tr><td><strong>GPU Memory</strong></td><td>96 GB VRAM</td></tr>
+            <tr><td><strong>Devices Used</strong></td><td>1 GPU</td></tr>
+            <tr><td><strong>Notebook Device Setting</strong></td><td id="cfg-device">torch.device("cuda")</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="compare-visualizations" class="compare-pane">
+      <div class="panel-block">
+        <h3>Learning Curves</h3>
+        <p>Select a model to inspect train and validation dynamics over epochs.</p>
+        <select id="lc-model-select" onchange="renderSelectedLC()" style="padding:0.4rem 0.8rem; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:0.875rem; margin-bottom:0.9rem;">
+          <option value="">- Select Model -</option>
+        </select>
+        <div class="chart-container" id="chart-lc-loss"></div>
+        <div class="chart-container" id="chart-lc-accuracy"></div>
+        <div class="chart-container" id="chart-lc-f1"></div>
       </div>
     </div>
   </section>
 
-
-
   <script>
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      const pane = document.getElementById('tab-' + tabName);
-      if (pane) pane.classList.add('active');
-      const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
-      if (btn) btn.classList.add('active');
-    }
-
-    function showPipelineTutorial() {
-      document.getElementById('pipeline-tutorial').classList.add('active');
-      document.getElementById('pipeline-code').classList.remove('active');
-      switchTab('tutorials');
-      document.getElementById('tab-tutorials').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function togglePipelineCode() {
-      const panel = document.getElementById('pipeline-code');
-      const tutorialPanel = document.getElementById('pipeline-tutorial');
-      const isActive = panel.classList.toggle('active');
-      if (isActive && tutorialPanel) tutorialPanel.classList.remove('active');
-    }
-
-    function copyPipelineCode() {
-      const codeBlock = document.querySelector('#pipeline-plotly code');
-      if (codeBlock) {
-        navigator.clipboard.writeText(codeBlock.innerText);
-        alert('Code copied to clipboard!');
-      }
-    }
-
     const PLOTLY_LAYOUT = {
       font: { family: 'Inter, sans-serif' },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
-      margin: { l: 50, r: 20, t: 40, b: 50 },
+      margin: { l: 50, r: 20, t: 44, b: 50 },
     };
     const PLOTLY_CONFIG = { responsive: true, displayModeBar: true, displaylogo: false };
 
-    let RESULTS_DATA = null;
-    let COMPARISON_DATA = null;
+    const DEFAULT_NOTEBOOK_CONFIG = {
+      batch_size: 1024,
+      num_workers: 8,
+      learning_rate: '1e-3',
+      max_epochs: 40,
+      patience: 5,
+      min_delta: '1e-3',
+      benchmark_runs: 100,
+      warmup_runs: 10,
+      results_root: 'results/food101_classification',
+      device: 'cuda',
+    };
 
-    async function loadAllData() {
+    const PIPELINE_STEPS = {
+      input: {
+        title: 'Step 1 - Input Data and Split',
+        analysis: [
+          'Data loader reads Food-101 images from data/food-101/images and builds 101 classes.',
+          'Train/validation/test split is stratified with deterministic random_state=42.',
+          'Split ratio follows notebook and pipeline defaults: 70% train, 15% val, 15% test.',
+        ],
+        code: [
+          'from dataset import Food101Dataset, make_stratified_split_indices',
+          '',
+          'eval_dataset = Food101Dataset(transform=eval_tf)',
+          'split_indices = make_stratified_split_indices(',
+          '    eval_dataset.targets,',
+          '    train_size=0.7,',
+          '    val_size=0.15,',
+          '    test_size=0.15,',
+          ')',
+          '',
+          'print(len(eval_dataset.classes))',
+          'print({k: len(v) for k, v in split_indices.items()})',
+        ].join('\n'),
+      },
+      preprocess: {
+        title: 'Step 2 - Preprocessing and Augmentation',
+        analysis: [
+          'Transforms are built in dataset.py and reused across all backbones.',
+          'Augmentation is used only for training; validation/test use deterministic transforms.',
+          'Normalization mean/std comes from backbone-specific timm data_config.',
+        ],
+        code: [
+          'from dataset import build_transforms',
+          '',
+          'train_tf = build_transforms(',
+          '    use_augmentation=True,',
+          '    mean=(0.485, 0.456, 0.406),',
+          '    std=(0.229, 0.224, 0.225),',
+          ')',
+          'eval_tf = build_transforms(',
+          '    use_augmentation=False,',
+          '    mean=(0.485, 0.456, 0.406),',
+          '    std=(0.229, 0.224, 0.225),',
+          ')',
+        ].join('\n'),
+      },
+      backbone: {
+        title: 'Step 3 - Backbone Feature Extractor',
+        analysis: [
+          'Backbones come from timm: ResNet50, MobileNetV3, ViT-B/16, Swin-B.',
+          'Pretrained checkpoints are loaded, output head is removed with num_classes=0.',
+          'Backbone is frozen for transfer learning; only the classifier head is trainable.',
+        ],
+        code: [
+          'from models import create_model, list_backbones',
+          'import torch',
+          '',
+          'device = torch.device("cuda")',
+          'print(list_backbones())',
+          '',
+          'model = create_model(',
+          '    backbone="swin_b",',
+          '    num_classes=101,',
+          '    pretrained=True,',
+          '    device=device,',
+          ').to(device)',
+          'print(model.feature_dim)',
+        ].join('\n'),
+      },
+      head: {
+        title: 'Step 4 - Classification Head',
+        analysis: [
+          'Project uses one shared ClassificationHead from models.py (no multiple head variants).',
+          'Head architecture: LayerNorm -> Dropout -> Linear -> GELU -> Dropout -> Linear.',
+          'Training flow is timm-based and uses Adam on model.trainable_parameters().',
+        ],
+        code: [
+          'from models import create_model',
+          'from training_pipeline import ExperimentConfig, run_epoch',
+          'import torch',
+          'import torch.nn as nn',
+          '',
+          'config = ExperimentConfig(batch_size=1024, learning_rate=1e-3)',
+          'device = torch.device("cuda")',
+          '',
+          'model = create_model(',
+          '    backbone="swin_b",',
+          '    num_classes=101,',
+          '    pretrained=True,',
+          '    device=device,',
+          ')',
+          '',
+          'criterion = nn.CrossEntropyLoss().to(device)',
+          'optimizer = torch.optim.Adam(model.trainable_parameters(), lr=config.learning_rate)',
+          '',
+          'class ClassificationHead(nn.Module):',
+          '    def __init__(self, in_features: int, num_classes: int):',
+          '        super().__init__()',
+          '        self.layers = nn.Sequential(',
+          '            nn.LayerNorm(in_features),',
+          '            nn.Dropout(0.3),',
+          '            nn.Linear(in_features, 512),',
+          '            nn.GELU(),',
+          '            nn.Dropout(0.3),',
+          '            nn.Linear(512, num_classes),',
+          '        )',
+          '',
+          '    def forward(self, x):',
+          '        return self.layers(x)',
+          '',
+          'train_result = run_epoch(model, dataloaders["train_loader"], criterion, device, optimizer)',
+          'val_result = run_epoch(model, dataloaders["val_loader"], criterion, device)',
+        ].join('\n'),
+      },
+      results: {
+        title: 'Step 5 - Evaluation and Exported Results',
+        analysis: [
+          'Pipeline computes Accuracy, Precision, Recall, F1, Top-5, plus confusion matrix and per-class report.',
+          'Website JSON for model comparison is exported to results/food101_classification.',
+          'This page reads those exported artifacts directly and renders tables/charts.',
+        ],
+        code: [
+          'from training_pipeline import export_website_comparison_payload',
+          'from pathlib import Path',
+          '',
+          'payload_path = Path("results/food101_classification/model-classification-comparison-data.json")',
+          'payload = export_website_comparison_payload(experiments, payload_path)',
+          '',
+          'print(payload_path)',
+          'print(len(payload["models"]))',
+        ].join('\n'),
+      },
+    };
+
+    const PIPELINE_TUTORIAL_NODE_MAP = {
+      input: 'cnn-node-input',
+      preprocess: 'cnn-node-preprocess',
+      backbone: 'cnn-node-backbone',
+      head: 'cnn-node-head',
+      results: 'cnn-node-results',
+    };
+
+    const PIPELINE_STEP_STORAGE_KEY = 'dlhub-classification-pipeline-step';
+
+    let CURRENT_PIPELINE_STEP = 'input';
+    let MODEL_METRICS = {};
+    let MODEL_SUMMARIES = {};
+    let MODEL_HISTORIES = {};
+    let FALLBACK_RESULTS = null;
+    let NOTEBOOK_CONFIG = { ...DEFAULT_NOTEBOOK_CONFIG };
+    let SELECTED_CONFUSION_MODEL = '';
+
+    const EXPERIMENT_SLUGS = [
+      'resnet50_no_aug', 'resnet50_aug',
+      'mobilenet_v3_no_aug', 'mobilenet_v3_aug',
+      'vit_b16_no_aug', 'vit_b16_aug',
+      'swin_b_no_aug', 'swin_b_aug'
+    ];
+
+    function applyEditorStyleHighlighting() {
+      if (typeof Prism === 'undefined') return;
+
+      document.querySelectorAll('pre[class*="language-"] > code').forEach((codeBlock) => {
+        const langClass = Array.from(codeBlock.parentElement.classList).find((name) => name.startsWith('language-'));
+        if (langClass) codeBlock.classList.add(langClass);
+      });
+
+      document.querySelectorAll('.code-block code').forEach((codeBlock) => {
+        const hasLanguageClass = Array.from(codeBlock.classList).some((name) => name.startsWith('language-'));
+        if (!hasLanguageClass) codeBlock.classList.add('language-python');
+      });
+
+      Prism.highlightAllUnder(document);
+    }
+
+    function switchCompareTab(tabName) {
+      document.querySelectorAll('.compare-pane').forEach((pane) => pane.classList.remove('active'));
+      document.querySelectorAll('.compare-tab-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.compareTab === tabName);
+      });
+      const pane = document.getElementById('compare-' + tabName);
+      if (pane) pane.classList.add('active');
+    }
+
+    function setActiveTutorialNode(stepKey) {
+      const targetId = PIPELINE_TUTORIAL_NODE_MAP[stepKey];
+      document.querySelectorAll('.tutorial-node').forEach((card) => {
+        card.classList.toggle('active', card.id === targetId);
+      });
+
+      document.querySelectorAll('.tutorial-nav-btn').forEach((button) => {
+        button.classList.toggle('active', button.dataset.step === stepKey);
+      });
+    }
+
+    function selectPipelineStep(stepKey) {
+      const step = PIPELINE_STEPS[stepKey];
+      if (!step) return;
+      CURRENT_PIPELINE_STEP = stepKey;
       try {
-        // Load results data (learning curves, experiment summaries)
-        const resp1 = await fetch('data/results_data.json');
-        RESULTS_DATA = await resp1.json();
+        localStorage.setItem(PIPELINE_STEP_STORAGE_KEY, stepKey);
+      } catch (error) {
+        // Ignore storage failures and keep the current session state.
+      }
 
-        // Load comparison data (confusion matrices)
-        const resp2 = await fetch('../results/food101_classification/model-classification-comparison-data.json');
-        COMPARISON_DATA = await resp2.json();
+      document.querySelectorAll('.pipeline-step-btn').forEach((button) => {
+        button.classList.toggle('active', button.dataset.step === stepKey);
+      });
 
-        renderAllResults();
-      } catch (err) {
-        console.error('Failed to load data:', err);
+      document.getElementById('pipeline-detail-title').textContent = step.title;
+      const analysisList = document.getElementById('pipeline-analysis-list');
+      analysisList.innerHTML = step.analysis.map((line) => `<li>${line}</li>`).join('');
+      setActiveTutorialNode(stepKey);
+    }
+
+    function getInitialPipelineStep() {
+      try {
+        const savedStep = localStorage.getItem(PIPELINE_STEP_STORAGE_KEY);
+        if (savedStep && PIPELINE_STEPS[savedStep]) {
+          return savedStep;
+        }
+      } catch (error) {
+        // Ignore storage failures and fall back to the default step.
+      }
+
+      return 'input';
+    }
+
+    async function safeFetchText(path) {
+      try {
+        const response = await fetch(path);
+        if (!response.ok) return null;
+        return await response.text();
+      } catch (error) {
+        return null;
       }
     }
 
-    function renderAllResults() {
-      if (!RESULTS_DATA) return;
-      const exps = RESULTS_DATA.experiments;
-      const names = Object.keys(exps);
+    async function safeFetchJson(path) {
+      const text = await safeFetchText(path);
+      if (!text) return null;
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        return null;
+      }
+    }
 
-      // Find best model
-      let bestName = names[0], bestAcc = 0, fastestName = names[0], fastestTime = Infinity;
-      for (const name of names) {
-        const acc = exps[name].test_metrics.accuracy;
-        const inf = exps[name].resource_metrics.inference_time_ms;
-        if (acc > bestAcc) { bestAcc = acc; bestName = name; }
-        if (inf < fastestTime) { fastestTime = inf; fastestName = name; }
+    function parseSimpleCsv(text) {
+      const rows = [];
+      const lines = text.trim().split(/\r?\n/);
+      if (!lines.length) return rows;
+      const headers = lines[0].split(',');
+      for (let i = 1; i < lines.length; i += 1) {
+        const values = lines[i].split(',');
+        if (values.length !== headers.length) continue;
+        const row = {};
+        headers.forEach((header, idx) => {
+          row[header] = values[idx];
+        });
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    function buildLearningCurves(historyRows) {
+      const toNum = (value) => Number.parseFloat(value);
+      return {
+        epochs: historyRows.map((row) => toNum(row.epoch)),
+        train_loss: historyRows.map((row) => toNum(row.train_loss)),
+        val_loss: historyRows.map((row) => toNum(row.val_loss)),
+        train_accuracy: historyRows.map((row) => toNum(row.train_accuracy)),
+        val_accuracy: historyRows.map((row) => toNum(row.val_accuracy)),
+        train_f1: historyRows.map((row) => toNum(row.train_f1)),
+        val_f1: historyRows.map((row) => toNum(row.val_f1)),
+      };
+    }
+
+    async function loadNotebookConfig() {
+      const notebook = await safeFetchJson('../train.ipynb');
+      if (!notebook || !Array.isArray(notebook.cells)) return;
+
+      const sourceText = notebook.cells
+        .map((cell) => (Array.isArray(cell.source) ? cell.source.join('') : String(cell.source || '')))
+        .join('\n');
+
+      const configBlock = sourceText.match(/CONFIG\s*=\s*ExperimentConfig\(([^)]*)\)/s);
+      if (configBlock) {
+        const body = configBlock[1];
+
+        const pick = (regex, fallback) => {
+          const match = body.match(regex);
+          return match ? match[1].trim() : fallback;
+        };
+
+        NOTEBOOK_CONFIG = {
+          ...NOTEBOOK_CONFIG,
+          batch_size: pick(/batch_size\s*=\s*([^,\n]+)/, NOTEBOOK_CONFIG.batch_size),
+          num_workers: pick(/num_workers\s*=\s*([^,\n]+)/, NOTEBOOK_CONFIG.num_workers),
+          learning_rate: pick(/learning_rate\s*=\s*([^,\n]+)/, NOTEBOOK_CONFIG.learning_rate),
+          max_epochs: pick(/max_epochs\s*=\s*([^,\n]+)/, NOTEBOOK_CONFIG.max_epochs),
+          patience: pick(/patience\s*=\s*([^,\n]+)/, NOTEBOOK_CONFIG.patience),
+          min_delta: pick(/min_delta\s*=\s*([^,\n]+)/, NOTEBOOK_CONFIG.min_delta),
+          benchmark_runs: pick(/benchmark_runs\s*=\s*([^,\n]+)/, NOTEBOOK_CONFIG.benchmark_runs),
+          warmup_runs: pick(/warmup_runs\s*=\s*([^,\n]+)/, NOTEBOOK_CONFIG.warmup_runs),
+          results_root: pick(/results_root\s*=\s*"([^"]+)"/, NOTEBOOK_CONFIG.results_root),
+        };
       }
 
-      // Hero stats
-      document.getElementById('hero-acc').textContent = (bestAcc * 100).toFixed(1) + '%';
+      const deviceMatch = sourceText.match(/DEVICE\s*=\s*torch\.device\("([^"]+)"\)/);
+      if (deviceMatch) {
+        NOTEBOOK_CONFIG.device = deviceMatch[1];
+      }
+    }
 
-      // Summary cards
-      document.getElementById('best-model-name').textContent = bestName.split(' (')[0];
-      document.getElementById('best-acc').textContent = (bestAcc * 100).toFixed(1) + '%';
-      document.getElementById('best-f1').textContent = (exps[bestName].test_metrics.f1 * 100).toFixed(1) + '%';
-      document.getElementById('fastest-model').textContent = fastestName.split(' (')[0];
+    async function loadExperimentArtifacts() {
+      for (const slug of EXPERIMENT_SLUGS) {
+        const summaryPath = `../results/food101_classification/${slug}/experiment_summary.json`;
+        const historyPath = `../results/food101_classification/${slug}/history.csv`;
 
-      // Performance table
-      const sorted = names.sort((a, b) => exps[b].test_metrics.accuracy - exps[a].test_metrics.accuracy);
-      const perfTbody = document.getElementById('perf-tbody');
-      perfTbody.innerHTML = sorted.map((name, i) => {
-        const m = exps[name].test_metrics;
-        const cls = i === 0 ? ' class="best-row"' : '';
-        return `<tr${cls}>
-          <td><strong>${name}</strong></td>
-          <td>${(m.precision*100).toFixed(2)}%</td>
-          <td>${(m.recall*100).toFixed(2)}%</td>
-          <td>${(m.f1*100).toFixed(2)}%</td>
-          <td>${(m.accuracy*100).toFixed(2)}%</td>
-          <td>${(m.top5_accuracy*100).toFixed(2)}%</td>
-        </tr>`;
-      }).join('');
+        const summary = await safeFetchJson(summaryPath);
+        if (summary && summary.experiment_name) {
+          MODEL_SUMMARIES[summary.experiment_name] = summary;
+        }
 
-      // Resource table
-      const resSorted = names.sort((a, b) => exps[a].resource_metrics.inference_time_ms - exps[b].resource_metrics.inference_time_ms);
-      const resTbody = document.getElementById('resource-tbody');
-      resTbody.innerHTML = resSorted.map(name => {
-        const r = exps[name].resource_metrics;
-        return `<tr>
-          <td><strong>${name}</strong></td>
-          <td>${exps[name].training_time_minutes.toFixed(1)}</td>
-          <td>${r.inference_time_ms.toFixed(2)}</td>
-          <td>${(r.parameters/1e6).toFixed(1)}</td>
-          <td>${r.model_size_mb.toFixed(1)}</td>
-        </tr>`;
-      }).join('');
+        const historyText = await safeFetchText(historyPath);
+        if (historyText && summary && summary.experiment_name) {
+          const historyRows = parseSimpleCsv(historyText);
+          if (historyRows.length) {
+            MODEL_HISTORIES[summary.experiment_name] = buildLearningCurves(historyRows);
+          }
+        }
+      }
+    }
 
-      // Architecture table
-      const seen = new Set();
-      const archTbody = document.getElementById('arch-tbody');
-      archTbody.innerHTML = names.filter(name => {
-        const bb = exps[name].backbone;
-        if (seen.has(bb)) return false;
-        seen.add(bb); return true;
-      }).map(name => {
-        const e = exps[name];
-        const mc = e.model_config;
-        return `<tr>
-          <td><strong>${name.split(' (')[0]}</strong></td>
-          <td>${mc.family}</td>
-          <td><code>${mc.timm_name}</code></td>
-          <td>${mc.pretrained_source}</td>
-          <td>${(e.resource_metrics.parameters/1e6).toFixed(1)}</td>
-          <td>${(e.resource_metrics.trainable_parameters/1e6).toFixed(2)}</td>
-        </tr>`;
-      }).join('');
+    function setText(id, value) {
+      const element = document.getElementById(id);
+      if (element) element.textContent = String(value);
+    }
 
-      // Populate learning curve selectors
-      const lcSelect = document.getElementById('lc-model-select');
-      const cmSelect = document.getElementById('cm-model-select');
-      names.forEach(name => {
-        lcSelect.add(new Option(name, name));
-        cmSelect.add(new Option(name, name));
+    function renderSummary(modelNames) {
+      if (!modelNames.length) return;
+      const sortedByAcc = [...modelNames].sort((a, b) => MODEL_METRICS[b].accuracy - MODEL_METRICS[a].accuracy);
+
+      const bestName = sortedByAcc[0];
+
+      setText('hero-acc', (MODEL_METRICS[bestName].accuracy * 100).toFixed(1) + '%');
+      setText('hero-models', modelNames.length);
+
+      const sampleSummary = MODEL_SUMMARIES[bestName] || MODEL_SUMMARIES[modelNames[0]];
+      if (sampleSummary) {
+        const split = sampleSummary.split_sizes || {};
+        const totalImages = (split.train || 0) + (split.val || 0) + (split.test || 0);
+        if (totalImages > 0) setText('hero-images', totalImages.toLocaleString());
+        if (Array.isArray(sampleSummary.class_names) && sampleSummary.class_names.length > 0) {
+          setText('hero-classes', sampleSummary.class_names.length);
+        }
+      }
+    }
+
+    function renderClassificationResultsSummary(modelNames) {
+      if (!modelNames.length) return;
+
+      const sortedByAccuracy = [...modelNames].sort((left, right) => MODEL_METRICS[right].accuracy - MODEL_METRICS[left].accuracy);
+      const sortedByInference = [...modelNames].sort((left, right) => MODEL_METRICS[left].inference_time - MODEL_METRICS[right].inference_time);
+      const sortedByTop5 = [...modelNames].sort((left, right) => MODEL_METRICS[right].top5_accuracy - MODEL_METRICS[left].top5_accuracy);
+
+      const bestModel = sortedByAccuracy[0];
+      const fastestModel = sortedByInference[0];
+      const bestTop5Model = sortedByTop5[0];
+      const secondModel = sortedByAccuracy[1] || bestModel;
+      const slowestModel = sortedByInference[sortedByInference.length - 1] || fastestModel;
+
+      const mobileCandidates = modelNames.filter((name) => /MobileNet/i.test(name));
+      const mobileModel = mobileCandidates.length
+        ? [...mobileCandidates].sort((left, right) => MODEL_METRICS[left].inference_time - MODEL_METRICS[right].inference_time)[0]
+        : fastestModel;
+
+      const accuracies = modelNames.map((name) => MODEL_METRICS[name].accuracy);
+      const f1Scores = modelNames.map((name) => MODEL_METRICS[name].f1_score);
+      const top5Scores = modelNames.map((name) => MODEL_METRICS[name].top5_accuracy);
+
+      const formatPercent = (value) => `${(value * 100).toFixed(1)}%`;
+      const formatDeltaPoints = (value) => `${value >= 0 ? '+' : ''}${(value * 100).toFixed(1)} pp`;
+
+      const normalize = (value, minValue, maxValue) => {
+        if (maxValue === minValue) return 1;
+        return (value - minValue) / (maxValue - minValue);
+      };
+
+      const accuracyMin = Math.min(...accuracies);
+      const accuracyMax = Math.max(...accuracies);
+      const inferenceValues = modelNames.map((name) => MODEL_METRICS[name].inference_time);
+      const inferenceMin = Math.min(...inferenceValues);
+      const inferenceMax = Math.max(...inferenceValues);
+
+      const balancedCandidates = modelNames.filter((name) => name !== bestModel && name !== fastestModel);
+      const pool = balancedCandidates.length ? balancedCandidates : modelNames;
+      const balancedModel = [...pool].sort((left, right) => {
+        const leftAcc = normalize(MODEL_METRICS[left].accuracy, accuracyMin, accuracyMax);
+        const rightAcc = normalize(MODEL_METRICS[right].accuracy, accuracyMin, accuracyMax);
+        const leftSpeed = normalize(inferenceMax - MODEL_METRICS[left].inference_time, 0, inferenceMax - inferenceMin);
+        const rightSpeed = normalize(inferenceMax - MODEL_METRICS[right].inference_time, 0, inferenceMax - inferenceMin);
+        const leftScore = (0.65 * leftAcc) + (0.35 * leftSpeed);
+        const rightScore = (0.65 * rightAcc) + (0.35 * rightSpeed);
+        return rightScore - leftScore;
+      })[0];
+
+      const bestMetrics = MODEL_METRICS[bestModel];
+      const fastestMetrics = MODEL_METRICS[fastestModel];
+      const balancedMetrics = MODEL_METRICS[balancedModel];
+      const mobileMetrics = MODEL_METRICS[mobileModel];
+
+      setText('results-overview-line', `Key findings and insights from ${modelNames.length} saved Food-101 experiments.`);
+
+      setText('results-best-model', bestModel);
+      setText('results-best-accuracy', `${formatPercent(bestMetrics.accuracy)} Accuracy`);
+      setText('results-best-f1', `${formatPercent(bestMetrics.f1_score)} F1-Score`);
+      setText('results-best-comment', `${bestModel} achieved the highest overall performance on the Food-101 test set.`);
+
+      setText(
+        'results-range-accuracy',
+        `Accuracy: ${formatPercent(Math.min(...accuracies))} - ${formatPercent(Math.max(...accuracies))}`
+      );
+      setText(
+        'results-range-f1',
+        `F1-score: ${formatPercent(Math.min(...f1Scores))} - ${formatPercent(Math.max(...f1Scores))}`
+      );
+      setText(
+        'results-range-top5',
+        `Top-5 accuracy: ${formatPercent(Math.min(...top5Scores))} - ${formatPercent(Math.max(...top5Scores))}`
+      );
+
+      setText('results-fastest-model', fastestModel);
+      setText('results-fastest-profile', /MobileNet/i.test(fastestModel) ? 'Mobile optimized' : 'Latency optimized');
+      setText('results-fastest-accuracy', `${formatPercent(fastestMetrics.accuracy)} Accuracy`);
+      setText(
+        'results-fastest-comment',
+        `${fastestModel} provides the lowest inference latency at ${fastestMetrics.inference_time.toFixed(2)} ms per sample.`
+      );
+
+      const backbonePairs = {};
+      modelNames.forEach((name) => {
+        const baseName = name.replace(/\s+\((?:NoAug|Aug)\)$/, '');
+        if (!backbonePairs[baseName]) backbonePairs[baseName] = {};
+        if (name.includes('(Aug)')) backbonePairs[baseName].aug = name;
+        if (name.includes('(NoAug)')) backbonePairs[baseName].noAug = name;
       });
 
-      // Auto-select first model for LC
-      if (names.length > 0) {
-        lcSelect.value = sorted[0];
-        renderSelectedLC();
+      const augmentationSummaries = [];
+      let augmentationImproved = 0;
+      let augmentationReduced = 0;
+      const improvedBackbones = [];
+      const reducedBackbones = [];
+
+      Object.entries(backbonePairs).forEach(([baseName, pair]) => {
+        if (!pair.aug || !pair.noAug) return;
+        const delta = MODEL_METRICS[pair.aug].accuracy - MODEL_METRICS[pair.noAug].accuracy;
+        if (delta > 0) augmentationImproved += 1;
+        if (delta < 0) augmentationReduced += 1;
+        if (delta > 0) improvedBackbones.push(baseName);
+        if (delta < 0) reducedBackbones.push(baseName);
+        augmentationSummaries.push(`${baseName}: ${formatDeltaPoints(delta)}`);
+      });
+
+      const workedList = [
+        `Transfer Learning: Pretrained timm backbones reached up to ${formatPercent(bestMetrics.accuracy)} test accuracy in this setup.`,
+        `Architecture Choice: ${bestModel} and ${secondModel} were consistently top performers by both accuracy and F1-score.`,
+        `Feature Extraction: Top-5 accuracy reached ${formatPercent(MODEL_METRICS[bestTop5Model].top5_accuracy)} with ${bestTop5Model}.`,
+      ];
+
+      if (augmentationImproved > 0) {
+        workedList.push(`Data Augmentation: Helped ${augmentationImproved} backbone(s), especially ${improvedBackbones.join(', ')}.`);
+      } else {
+        workedList.push('Data Augmentation: Did not improve accuracy in the current training configuration.');
       }
+
+      const notWorkedList = [
+        `Small Models: ${mobileModel} had lower accuracy (${formatPercent(mobileMetrics.accuracy)}) and F1 (${formatPercent(mobileMetrics.f1_score)}) on Food-101.`,
+        `Latency vs Accuracy: ${slowestModel} is much slower (${MODEL_METRICS[slowestModel].inference_time.toFixed(2)} ms) than ${fastestModel} (${fastestMetrics.inference_time.toFixed(2)} ms).`,
+      ];
+
+      if (augmentationReduced > 0) {
+        notWorkedList.push(`Data Augmentation: Reduced performance for ${reducedBackbones.join(', ')} in this experiment.`);
+      }
+
+      const takeawaysList = [
+        `Transfer Learning is Essential: All experiments rely on pretrained backbones and show strong convergence with head training.`,
+        `Architecture Matters: Transformer backbones (Swin/ViT) outperformed CNN baselines on this dataset.`,
+        `Data Augmentation is Model-Specific: Accuracy delta varied by backbone (${augmentationSummaries.join('; ')}).`,
+        `Deployment Trade-off: ${fastestModel} is fastest, while ${bestModel} gives maximum accuracy.`,
+      ];
+
+      const renderList = (elementId, items) => {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        element.innerHTML = items.map((item) => `<li>${item}</li>`).join('');
+      };
+
+      renderList('results-worked-list', workedList);
+      renderList('results-not-worked-list', notWorkedList);
+      renderList('results-takeaways-list', takeawaysList);
+
+      setText('results-rec-best-model', bestModel);
+      setText(
+        'results-rec-best-detail',
+        `Highest accuracy (${formatPercent(bestMetrics.accuracy)}) with F1-score ${formatPercent(bestMetrics.f1_score)}.`
+      );
+      setText('results-rec-best-use', 'Use for: Research and high-accuracy requirements.');
+
+      setText('results-rec-mobile-model', mobileModel);
+      setText(
+        'results-rec-mobile-detail',
+        `Lowest inference latency (${mobileMetrics.inference_time.toFixed(2)} ms) with accuracy ${formatPercent(mobileMetrics.accuracy)}.`
+      );
+      setText('results-rec-mobile-use', 'Use for: Mobile apps, edge devices, and latency-sensitive inference.');
+
+      setText('results-rec-balanced-model', balancedModel);
+      setText(
+        'results-rec-balanced-detail',
+        `Balanced score choice with accuracy ${formatPercent(balancedMetrics.accuracy)} and inference ${balancedMetrics.inference_time.toFixed(2)} ms.`
+      );
+      setText('results-rec-balanced-use', 'Use for: General-purpose deployment with balanced speed and accuracy.');
+    }
+
+    function renderPerformanceTable(modelNames) {
+      const tbody = document.getElementById('perf-tbody');
+      const sorted = [...modelNames].sort((a, b) => MODEL_METRICS[b].accuracy - MODEL_METRICS[a].accuracy);
+      tbody.innerHTML = sorted.map((name, idx) => {
+        const metrics = MODEL_METRICS[name];
+        const rowClass = idx === 0 ? ' class="best-row"' : '';
+        const safeName = name.replace(/'/g, '&#39;');
+        return `<tr${rowClass} onclick="selectModelForConfusion('${safeName}', 'performance')">
+          <td><strong>${name}</strong></td>
+          <td>${(metrics.precision * 100).toFixed(2)}%</td>
+          <td>${(metrics.recall * 100).toFixed(2)}%</td>
+          <td>${(metrics.f1_score * 100).toFixed(2)}%</td>
+          <td>${(metrics.accuracy * 100).toFixed(2)}%</td>
+          <td>${(metrics.top5_accuracy * 100).toFixed(2)}%</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderResourceTable(modelNames) {
+      const tbody = document.getElementById('resource-tbody');
+      const sorted = [...modelNames].sort((a, b) => MODEL_METRICS[a].inference_time - MODEL_METRICS[b].inference_time);
+      tbody.innerHTML = sorted.map((name) => {
+        const metrics = MODEL_METRICS[name];
+        const safeName = name.replace(/'/g, '&#39;');
+        return `<tr>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')"><strong>${name}</strong></td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${metrics.training_time.toFixed(2)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${metrics.inference_time.toFixed(3)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${(metrics.flops / 1e9).toFixed(3)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${metrics.parameters.toFixed(3)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${metrics.model_size.toFixed(3)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderArchitectureTable(modelNames) {
+      const seen = new Set();
+      const tbody = document.getElementById('arch-tbody');
+      tbody.innerHTML = modelNames.filter((name) => {
+        const summary = MODEL_SUMMARIES[name];
+        if (!summary) return false;
+        if (seen.has(summary.backbone)) return false;
+        seen.add(summary.backbone);
+        return true;
+      }).map((name) => {
+        const summary = MODEL_SUMMARIES[name];
+        const modelCfg = summary.model_config || {};
+        const resources = summary.resource_metrics || {};
+        return `<tr>
+          <td><strong>${name.split(' (')[0]}</strong></td>
+          <td>${modelCfg.family || '-'}</td>
+          <td><code>${modelCfg.timm_name || '-'}</code></td>
+          <td>${modelCfg.pretrained_source || '-'}</td>
+          <td>${((resources.parameters || 0) / 1e6).toFixed(3)}</td>
+          <td>${((resources.trainable_parameters || 0) / 1e6).toFixed(3)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderConfiguration(sampleModelName) {
+      setText('cfg-batch-size', NOTEBOOK_CONFIG.batch_size);
+      setText('cfg-num-workers', NOTEBOOK_CONFIG.num_workers);
+      setText('cfg-learning-rate', NOTEBOOK_CONFIG.learning_rate);
+      setText('cfg-max-epochs', NOTEBOOK_CONFIG.max_epochs);
+      setText('cfg-early-stopping', `patience=${NOTEBOOK_CONFIG.patience}, min_delta=${NOTEBOOK_CONFIG.min_delta}`);
+      setText('cfg-benchmark-runs', `${NOTEBOOK_CONFIG.benchmark_runs} (warmup ${NOTEBOOK_CONFIG.warmup_runs})`);
+      setText('cfg-results-root', NOTEBOOK_CONFIG.results_root);
+      setText('cfg-device', `torch.device("${NOTEBOOK_CONFIG.device}")`);
+
+      const summary = MODEL_SUMMARIES[sampleModelName];
+      if (!summary) return;
+      const split = summary.split_sizes || {};
+      const train = Number(split.train || 0);
+      const val = Number(split.val || 0);
+      const test = Number(split.test || 0);
+      const total = train + val + test;
+
+      if (total > 0) {
+        const trainPct = ((train / total) * 100).toFixed(0);
+        const valPct = ((val / total) * 100).toFixed(0);
+        const testPct = ((test / total) * 100).toFixed(0);
+        setText('cfg-split', `${trainPct}% Train / ${valPct}% Val / ${testPct}% Test`);
+      }
+
+      setText('cfg-split-sizes', `Train ${train.toLocaleString()} | Val ${val.toLocaleString()} | Test ${test.toLocaleString()}`);
+      setText('cfg-num-classes', Array.isArray(summary.class_names) ? summary.class_names.length : '-');
+
+      const input = (summary.data_config && summary.data_config.input_size) || [3, 224, 224];
+      setText('cfg-input-size', `${input[0]} x ${input[1]} x ${input[2]}`);
+    }
+
+    function populateSelectors(modelNames) {
+      const lcSelect = document.getElementById('lc-model-select');
+      lcSelect.innerHTML = '<option value="">- Select Model -</option>';
+
+      modelNames.forEach((name) => {
+        lcSelect.add(new Option(name, name));
+      });
+
+      const best = [...modelNames].sort((a, b) => MODEL_METRICS[b].accuracy - MODEL_METRICS[a].accuracy)[0];
+      if (best) {
+        lcSelect.value = best;
+      }
+    }
+
+    function resolveLearningCurves(modelName) {
+      if (MODEL_HISTORIES[modelName]) return MODEL_HISTORIES[modelName];
+      if (FALLBACK_RESULTS && FALLBACK_RESULTS.learning_curves && FALLBACK_RESULTS.learning_curves[modelName]) {
+        return FALLBACK_RESULTS.learning_curves[modelName];
+      }
+      return null;
     }
 
     function renderSelectedLC() {
-      const name = document.getElementById('lc-model-select').value;
-      if (!name || !RESULTS_DATA?.learning_curves?.[name]) return;
-      const lc = RESULTS_DATA.learning_curves[name];
+      const modelName = document.getElementById('lc-model-select').value;
+      if (!modelName) return;
+      const curves = resolveLearningCurves(modelName);
+      if (!curves) {
+        return;
+      }
 
       Plotly.newPlot('chart-lc-loss', [
-        { x: lc.epochs, y: lc.train_loss, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#6B9BD1' } },
-        { x: lc.epochs, y: lc.val_loss, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#E8C49A' } },
-      ], { ...PLOTLY_LAYOUT, title: `${name} — Loss`, xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' }, yaxis: { title: 'Loss', gridcolor: '#f0f0f0' } }, PLOTLY_CONFIG);
+        { x: curves.epochs, y: curves.train_loss, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#4a90d9' } },
+        { x: curves.epochs, y: curves.val_loss, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#f59e0b' } },
+      ], {
+        ...PLOTLY_LAYOUT,
+        title: `${modelName} - Loss`,
+        xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Loss', gridcolor: '#f0f0f0' },
+      }, PLOTLY_CONFIG);
 
       Plotly.newPlot('chart-lc-accuracy', [
-        { x: lc.epochs, y: lc.train_accuracy, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#6B9BD1' } },
-        { x: lc.epochs, y: lc.val_accuracy, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#E8C49A' } },
-      ], { ...PLOTLY_LAYOUT, title: `${name} — Accuracy`, xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' }, yaxis: { title: 'Accuracy', gridcolor: '#f0f0f0' } }, PLOTLY_CONFIG);
+        { x: curves.epochs, y: curves.train_accuracy, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#4a90d9' } },
+        { x: curves.epochs, y: curves.val_accuracy, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#f59e0b' } },
+      ], {
+        ...PLOTLY_LAYOUT,
+        title: `${modelName} - Accuracy`,
+        xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Accuracy', gridcolor: '#f0f0f0' },
+      }, PLOTLY_CONFIG);
 
       Plotly.newPlot('chart-lc-f1', [
-        { x: lc.epochs, y: lc.train_f1, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#6B9BD1' } },
-        { x: lc.epochs, y: lc.val_f1, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#E8C49A' } },
-      ], { ...PLOTLY_LAYOUT, title: `${name} — F1-Score`, xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' }, yaxis: { title: 'F1-Score', gridcolor: '#f0f0f0' } }, PLOTLY_CONFIG);
+        { x: curves.epochs, y: curves.train_f1, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#4a90d9' } },
+        { x: curves.epochs, y: curves.val_f1, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#f59e0b' } },
+      ], {
+        ...PLOTLY_LAYOUT,
+        title: `${modelName} - F1-Score`,
+        xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'F1-Score', gridcolor: '#f0f0f0' },
+      }, PLOTLY_CONFIG);
     }
 
-    function renderConfusionMatrix() {
-      const name = document.getElementById('cm-model-select').value;
-      if (!name || !COMPARISON_DATA?.models?.[name]) return;
-      const cm = COMPARISON_DATA.models[name].confusion_matrix;
-      const classes = RESULTS_DATA.experiments[name]?.class_names || [];
+    function resolveClassNames(modelName) {
+      const summary = MODEL_SUMMARIES[modelName];
+      if (summary && Array.isArray(summary.class_names)) return summary.class_names;
+      if (FALLBACK_RESULTS && FALLBACK_RESULTS.experiments && FALLBACK_RESULTS.experiments[modelName]) {
+        return FALLBACK_RESULTS.experiments[modelName].class_names || [];
+      }
+      return [];
+    }
 
-      Plotly.newPlot('chart-confusion', [{
-        z: cm, x: classes, y: classes,
+    function plotConfusionMatrix(targetId, modelName, cm, classes) {
+      Plotly.newPlot(targetId, [{
+        z: cm,
+        x: classes,
+        y: classes,
         type: 'heatmap',
         colorscale: 'Blues',
         hovertemplate: 'True: %{y}<br>Predicted: %{x}<br>Count: %{z}<extra></extra>',
       }], {
         ...PLOTLY_LAYOUT,
-        title: `${name} — Confusion Matrix`,
+        title: `${modelName} - Confusion Matrix`,
         xaxis: { title: 'Predicted Label', tickangle: -45, gridcolor: '#f0f0f0' },
         yaxis: { title: 'True Label', autorange: 'reversed', gridcolor: '#f0f0f0' },
-        margin: { l: 120, r: 20, t: 50, b: 120 },
-        height: 700,
+        margin: { l: 120, r: 20, t: 54, b: 120 },
+        height: 720,
       }, PLOTLY_CONFIG);
     }
 
+    function setConfusionPaneEmpty(emptyId, chartId) {
+      const emptyBlock = document.getElementById(emptyId);
+      const chartBlock = document.getElementById(chartId);
+      if (emptyBlock) emptyBlock.style.display = 'flex';
+      if (chartBlock) {
+        chartBlock.style.display = 'none';
+        if (typeof Plotly !== 'undefined' && Plotly.purge) Plotly.purge(chartBlock);
+      }
+    }
+
+    function setConfusionPaneChart(emptyId, chartId) {
+      const emptyBlock = document.getElementById(emptyId);
+      const chartBlock = document.getElementById(chartId);
+      if (emptyBlock) emptyBlock.style.display = 'none';
+      if (chartBlock) chartBlock.style.display = 'block';
+    }
+
+    function renderConfusionMatrixForPane(modelName, emptyId, chartId) {
+      if (!modelName || !MODEL_METRICS[modelName]) {
+        setConfusionPaneEmpty(emptyId, chartId);
+        return;
+      }
+      const cm = MODEL_METRICS[modelName].confusion_matrix;
+      const classes = resolveClassNames(modelName);
+
+      setConfusionPaneChart(emptyId, chartId);
+      plotConfusionMatrix(chartId, modelName, cm, classes);
+    }
+
+    function renderConfusionMatrices() {
+      renderConfusionMatrixForPane(
+        SELECTED_CONFUSION_MODEL,
+        'chart-confusion-performance-empty',
+        'chart-confusion-performance'
+      );
+      renderConfusionMatrixForPane(
+        SELECTED_CONFUSION_MODEL,
+        'chart-confusion-resource-empty',
+        'chart-confusion-resource'
+      );
+    }
+
+    function selectModelForConfusion(modelName, sourceTab) {
+      SELECTED_CONFUSION_MODEL = modelName;
+      renderConfusionMatrices();
+      if (sourceTab) switchCompareTab(sourceTab);
+    }
+
+    async function loadAllData() {
+      try {
+        const comparisonPayload = await safeFetchJson('../results/food101_classification/model-classification-comparison-data.json');
+        if (!comparisonPayload || !comparisonPayload.models) {
+          throw new Error('Missing model comparison payload in results folder.');
+        }
+        MODEL_METRICS = comparisonPayload.models;
+
+        await Promise.all([
+          loadExperimentArtifacts(),
+          loadNotebookConfig(),
+        ]);
+
+        FALLBACK_RESULTS = await safeFetchJson('data/results_data.json');
+
+        const modelNames = Object.keys(MODEL_METRICS);
+        if (!modelNames.length) return;
+
+        renderSummary(modelNames);
+        renderClassificationResultsSummary(modelNames);
+        renderPerformanceTable(modelNames);
+        renderResourceTable(modelNames);
+        renderArchitectureTable(modelNames);
+        populateSelectors(modelNames);
+
+        const best = [...modelNames].sort((a, b) => MODEL_METRICS[b].accuracy - MODEL_METRICS[a].accuracy)[0];
+        renderConfiguration(best);
+        renderSelectedLC();
+        renderConfusionMatrices();
+      } catch (error) {
+        console.error('Failed to load classification data:', error);
+      }
+    }
+
+    applyEditorStyleHighlighting();
+    selectPipelineStep(getInitialPipelineStep());
     loadAllData();
   </script>
-
 </body>
 </html>
