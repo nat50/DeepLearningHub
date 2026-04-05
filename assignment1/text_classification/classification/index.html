@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classification Results — Yahoo Answers | DL Hub</title>
+  <meta name="description" content="Text classification results for Yahoo Answers: LSTM and BERT model comparison, learning curves, confusion matrices, and performance analysis.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <style>
+    .menu-actions { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 20px; }
+    .menu-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: 0.2s; color: #374151; }
+    .btn-tutorial { background: #F9B2D7; }
+    .btn-tutorial:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-code { background: #CFECF3; }
+    .btn-code:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-copy { background: #DAF9DE; }
+    .btn-copy:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .tutorial-panel, .code-panel { display: none; background: #F6FFDC; border-left: 5px solid #F9B2D7; border-radius: 8px; padding: 20px; margin: 20px 0px; }
+    .code-panel { border-left-color: #CFECF3; background: #fafff5; }
+    .tutorial-panel.active, .code-panel.active { display: block; }
+    .tutorial-explanation h3 { margin-top: 0; color: #7c3d5a; }
+    .explanation-item { margin-bottom: 12px; }
+    .explanation-item strong { color: #b8567a; font-size: 1.05rem; }
+    .code-tab-content pre { margin-top: 15px; background: #282c34; color: #abb2bf; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    .code-tab-content pre code { background: transparent !important; color: inherit !important; padding: 0 !important; font-family: monospace !important; border: none !important; }
+    .pending-box { text-align:center; padding:3rem 2rem; background:var(--bg-section); border-radius:var(--radius-lg); border:2px dashed var(--border); margin:1.5rem 0; }
+    .pending-box h3 { color:var(--text-secondary); margin-bottom:0.5rem; }
+    .pending-box p { color:var(--text-muted); font-size:0.9rem; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../../../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Assignment 1</a></li>
+        <li><a href="../eda/index.html">EDA</a></li>
+        <li><a href="index.html" class="active">Classification</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Banner -->
+  <header class="hero-banner">
+    <h1>📝 Text Classification Results</h1>
+    <p class="subtitle">LSTM and BERT-based models for Yahoo Answers topic classification</p>
+    <div class="stat-cards">
+      <div class="stat-card">
+        <span class="stat-value" id="hero-acc">—</span>
+        <span class="stat-label">Best Accuracy</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="hero-models">2</span>
+        <span class="stat-label">Models Compared</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">10</span>
+        <span class="stat-label">Classes</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="section">
+
+    <!-- Pipeline Flow -->
+    <div class="content-block">
+      <h3>NLP Classification Pipeline</h3>
+      <div class="pipeline-flow">
+        <div class="pipeline-step green">
+          <span class="step-icon">📄</span>
+          <span class="step-title">Raw Text</span>
+          <span class="step-desc">Yahoo Answers Q&A</span>
+        </div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step yellow">
+          <span class="step-icon">🧹</span>
+          <span class="step-title">Cleaning</span>
+          <span class="step-desc">Lowercase, URLs, punctuation</span>
+        </div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step blue">
+          <span class="step-icon">🔤</span>
+          <span class="step-title">Tokenization</span>
+          <span class="step-desc">Vocab / BERT WordPiece</span>
+        </div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step purple">
+          <span class="step-icon">🧠</span>
+          <span class="step-title">Backbone</span>
+          <span class="step-desc">LSTM / BERT</span>
+        </div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step indigo">
+          <span class="step-icon">🎯</span>
+          <span class="step-title">Prediction</span>
+          <span class="step-desc">10-class softmax</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="tutorials" onclick="switchTab('tutorials')">📚 Tutorials</button>
+      <button class="tab-btn" data-tab="results" onclick="switchTab('results')">📊 Results</button>
+      <button class="tab-btn" data-tab="config" onclick="switchTab('config')">⚙️ Configuration</button>
+    </div>
+
+    <!-- Tutorials Tab -->
+    <div class="tab-content active" id="tab-tutorials">
+
+      <!-- Text Preprocessing -->
+      <div class="accordion open">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          <h3>🧹 Text Preprocessing</h3>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="menu-actions">
+            <button class="menu-btn btn-tutorial" onclick="toggleTutorial('preprocess'); event.stopPropagation();">📚 Tutorial</button>
+            <button class="menu-btn btn-code" onclick="toggleCode('preprocess'); event.stopPropagation();">💻 Code</button>
+            <button class="menu-btn btn-copy" onclick="copyAllCode('preprocess'); event.stopPropagation();">📋 Copy All</button>
+          </div>
+          <div class="tutorial-panel" id="preprocess-tutorial">
+            <div class="tutorial-explanation">
+              <h3>📚 Text Preprocessing Pipeline</h3>
+              <div class="explanation-item"><strong>Step 1: Lowercase</strong><p>Convert all text to lowercase for consistency — "Cat" and "cat" become the same token.</p></div>
+              <div class="explanation-item"><strong>Step 2: Remove URLs & HTML</strong><p>Strip http/https links and HTML tags — they carry no semantic meaning for topic classification.</p></div>
+              <div class="explanation-item"><strong>Step 3: Remove Punctuation</strong><p>Keep only alphanumeric characters and spaces — reduces vocabulary size without losing meaning.</p></div>
+              <div class="explanation-item"><strong>Step 4: Normalize Whitespace</strong><p>Collapse multiple spaces and trim — produces consistent token boundaries.</p></div>
+              <div class="explanation-item"><strong>Impact:</strong><p>Reduces total words from 128M to 57M (55% reduction) while preserving semantic content.</p></div>
+            </div>
+          </div>
+          <div class="code-panel" id="preprocess-code">
+            <div class="code-tab-content active" id="preprocess-plotly">
+              <pre class="language-python"><code>import re
+
+def clean_text(text):
+    if not isinstance(text, str):
+        return ""
+    text = text.lower()
+    text = text.replace('\\n', ' ').replace('\\r', ' ').replace('\\t', ' ')
+    text = re.sub(r'https?://\S+|www\.\S+', '', text)
+    text = re.sub(r'<[^>]+>', '', text)
+    text = re.sub(r'[^\w\s]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+df['cleaned_text'] = df['full_text'].apply(clean_text)</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LSTM Architecture -->
+      <div class="accordion open">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          <h3>🧠 LSTM Architecture</h3>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="menu-actions">
+            <button class="menu-btn btn-tutorial" onclick="toggleTutorial('lstm'); event.stopPropagation();">📚 Tutorial</button>
+            <button class="menu-btn btn-code" onclick="toggleCode('lstm'); event.stopPropagation();">💻 Code</button>
+            <button class="menu-btn btn-copy" onclick="copyAllCode('lstm'); event.stopPropagation();">📋 Copy All</button>
+          </div>
+          <div class="tutorial-panel" id="lstm-tutorial">
+            <div class="tutorial-explanation">
+              <h3>📚 Bidirectional LSTM Classifier</h3>
+              <div class="explanation-item"><strong>Embedding Layer:</strong><p><code>Embedding(50,002, 128)</code> — maps integer tokens to 128-dimensional dense vectors. Trained from scratch.</p></div>
+              <div class="explanation-item"><strong>Bidirectional LSTM:</strong><p>2-layer Bi-LSTM with 256 hidden units per direction. Bidirectional means it reads text left→right AND right→left, capturing context from both directions. Hidden state: 256 × 2 = 512 dimensions.</p></div>
+              <div class="explanation-item"><strong>Classification Head:</strong><p>Concatenate final forward & backward hidden states → Dropout(0.3) → FC(512 → 10)</p></div>
+              <div class="explanation-item"><strong>Pack Padded Sequences:</strong><p>Variable-length inputs are packed so the LSTM ignores padding tokens — more efficient and accurate.</p></div>
+            </div>
+          </div>
+          <div class="code-panel" id="lstm-code">
+            <div class="code-tab-content active" id="lstm-plotly">
+              <pre class="language-python"><code>import torch.nn as nn
+
+class myLSTM(nn.Module):
+    def __init__(self, vocab_size, embedding_dim=128, hidden_dim=256,
+                 output_dim=10, n_layers=2, bidirectional=True,
+                 dropout=0.3, pad_idx=0):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=pad_idx)
+        self.lstm = nn.LSTM(
+            embedding_dim, hidden_dim,
+            num_layers=n_layers, bidirectional=bidirectional,
+            dropout=dropout if n_layers > 1 else 0.0, batch_first=True,
+        )
+        direction_factor = 2 if bidirectional else 1
+        self.fc = nn.Linear(hidden_dim * direction_factor, output_dim)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, text, lengths):
+        embedded = self.dropout(self.embedding(text))
+        packed = nn.utils.rnn.pack_padded_sequence(
+            embedded, lengths.cpu().clamp(min=1),
+            batch_first=True, enforce_sorted=False)
+        _, (hidden, _) = self.lstm(packed)
+        combined = torch.cat([hidden[-2], hidden[-1]], dim=1)
+        return self.fc(self.dropout(combined))</code></pre>
+            </div>
+          </div>
+
+          <div class="model-info-grid">
+            <div class="model-info-card"><h5>Embedding</h5><p>50,002 → 128 dim</p><p style="font-size:0.75rem;">Trained from scratch</p></div>
+            <div class="model-info-card"><h5>LSTM</h5><p>2-layer, 256 hidden</p><p style="font-size:0.75rem;">Bidirectional</p></div>
+            <div class="model-info-card"><h5>Classifier</h5><p>FC(512 → 10)</p><p style="font-size:0.75rem;">Dropout: 0.3</p></div>
+            <div class="model-info-card"><h5>Training</h5><p>Adam, lr=1e-3</p><p style="font-size:0.75rem;">3 epochs, batch=64</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transformer Architecture -->
+      <div class="accordion open">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          <h3>🤖 BERT Transformer Architecture</h3>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="menu-actions">
+            <button class="menu-btn btn-tutorial" onclick="toggleTutorial('bert'); event.stopPropagation();">📚 Tutorial</button>
+            <button class="menu-btn btn-code" onclick="toggleCode('bert'); event.stopPropagation();">💻 Code</button>
+            <button class="menu-btn btn-copy" onclick="copyAllCode('bert'); event.stopPropagation();">📋 Copy All</button>
+          </div>
+          <div class="tutorial-panel" id="bert-tutorial">
+            <div class="tutorial-explanation">
+              <h3>📚 BERT Base Uncased Classifier</h3>
+              <div class="explanation-item"><strong>Backbone:</strong><p><code>bert-base-uncased</code> — 12 Transformer layers, 768 hidden dimensions, 12 attention heads, ~110M parameters. Pre-trained on English Wikipedia + BookCorpus.</p></div>
+              <div class="explanation-item"><strong>Tokenizer:</strong><p>WordPiece tokenizer (30,522 vocab). Handles out-of-vocabulary words by splitting into subword units (e.g., "playing" → ["play", "##ing"]).</p></div>
+              <div class="explanation-item"><strong>Classification Head:</strong><p>[CLS] token → Dropout(0.3) → FC(768 → 10). The [CLS] token captures the entire sequence representation.</p></div>
+              <div class="explanation-item"><strong>Fine-tuning:</strong><p>All BERT parameters updated (no backbone freezing). AdamW optimizer with lr=2e-5, the standard BERT fine-tuning recipe.</p></div>
+            </div>
+          </div>
+          <div class="code-panel" id="bert-code">
+            <div class="code-tab-content active" id="bert-plotly">
+              <pre class="language-python"><code>import torch.nn as nn
+from transformers import AutoModel, AutoConfig
+
+class myTransformer(nn.Module):
+    def __init__(self, checkpoint="bert-base-uncased",
+                 num_classes=10, dropout_rate=0.3, freeze_backbone=False):
+        super().__init__()
+        config = AutoConfig.from_pretrained(checkpoint)
+        self.bert = AutoModel.from_pretrained(checkpoint, config=config)
+        self.dropout = nn.Dropout(dropout_rate)
+        self.classifier = nn.Linear(config.hidden_size, num_classes)
+        if freeze_backbone:
+            for param in self.bert.parameters():
+                param.requires_grad = False
+
+    def forward(self, input_ids, attention_mask=None):
+        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        cls_output = outputs.last_hidden_state[:, 0, :]
+        return self.classifier(self.dropout(cls_output))</code></pre>
+            </div>
+          </div>
+
+          <div class="model-info-grid">
+            <div class="model-info-card"><h5>Backbone</h5><p>bert-base-uncased</p><p style="font-size:0.75rem;">12 layers, 768 hidden</p></div>
+            <div class="model-info-card"><h5>Tokenizer</h5><p>WordPiece (30,522)</p><p style="font-size:0.75rem;">Subword tokenization</p></div>
+            <div class="model-info-card"><h5>Classifier</h5><p>FC(768 → 10)</p><p style="font-size:0.75rem;">Dropout: 0.3</p></div>
+            <div class="model-info-card"><h5>Training</h5><p>AdamW, lr=2e-5</p><p style="font-size:0.75rem;">2 epochs, batch=16</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Results Tab -->
+    <div class="tab-content" id="tab-results">
+
+      <div id="results-ready" style="display:none;">
+        <!-- Summary Cards -->
+        <div class="stat-cards-colored" style="margin-bottom:2rem;">
+          <div class="stat-card-color blue"><span class="stat-value" id="best-model-name">—</span><span class="stat-label">Best Model</span></div>
+          <div class="stat-card-color teal"><span class="stat-value" id="best-acc">—</span><span class="stat-label">Best Accuracy</span></div>
+          <div class="stat-card-color purple"><span class="stat-value" id="best-f1">—</span><span class="stat-label">Best F1</span></div>
+          <div class="stat-card-color orange"><span class="stat-value" id="fastest-model">—</span><span class="stat-label">Fastest Model</span></div>
+        </div>
+
+        <!-- Performance Table -->
+        <div class="accordion open">
+          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>📊 Performance Comparison</h3>
+            <span class="accordion-toggle">▼</span>
+          </div>
+          <div class="accordion-body">
+            <div style="overflow-x:auto;">
+              <table class="comparison-table" id="perf-table">
+                <thead><tr>
+                  <th>Model</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Accuracy</th>
+                </tr></thead>
+                <tbody id="perf-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resource Table -->
+        <div class="accordion open">
+          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>⚡ Resource Comparison</h3>
+            <span class="accordion-toggle">▼</span>
+          </div>
+          <div class="accordion-body">
+            <div style="overflow-x:auto;">
+              <table class="comparison-table" id="resource-table">
+                <thead><tr>
+                  <th>Model</th><th>Training Time (min)</th><th>Inference (ms)</th><th>Parameters (M)</th><th>Size (MB)</th>
+                </tr></thead>
+                <tbody id="resource-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Learning Curves -->
+        <div class="accordion open">
+          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>📈 Learning Curves</h3>
+            <span class="accordion-toggle">▼</span>
+          </div>
+          <div class="accordion-body">
+            <label for="lc-model-select" style="font-weight:600; font-size:0.9rem; margin-right:0.5rem;">Select Model:</label>
+            <select id="lc-model-select" onchange="renderSelectedLC()" style="padding:0.4rem 0.8rem; border-radius:6px; border:1px solid var(--border); font-family:var(--font);"></select>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-top:1rem;">
+              <div class="chart-container" id="chart-lc-loss" style="height:300px;"></div>
+              <div class="chart-container" id="chart-lc-accuracy" style="height:300px;"></div>
+              <div class="chart-container" id="chart-lc-f1" style="height:300px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confusion Matrix -->
+        <div class="accordion open">
+          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>🔍 Confusion Matrix</h3>
+            <span class="accordion-toggle">▼</span>
+          </div>
+          <div class="accordion-body">
+            <label for="cm-model-select" style="font-weight:600; font-size:0.9rem; margin-right:0.5rem;">Select Model:</label>
+            <select id="cm-model-select" onchange="renderConfusionMatrix()" style="padding:0.4rem 0.8rem; border-radius:6px; border:1px solid var(--border); font-family:var(--font);"></select>
+            <div class="chart-container confusion-container" id="chart-confusion" style="height:600px; margin-top:1rem;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending State -->
+      <div id="results-pending">
+        <div class="pending-box">
+          <h3>⏳ Training Not Yet Complete</h3>
+          <p>Run the training pipeline to generate results:</p>
+          <div class="code-block" style="text-align:left; max-width:600px; margin:1rem auto;">
+            <code>cd assignment1/text_classification<br>
+python training_pipeline.py --backbone lstm bert</code>
+          </div>
+          <p style="margin-top:1rem;">After training, regenerate website data:</p>
+          <div class="code-block" style="text-align:left; max-width:600px; margin:0.5rem auto;">
+            <code>python generate_website_data.py --pipeline text_classification</code>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Configuration Tab -->
+    <div class="tab-content" id="tab-config">
+
+      <div class="accordion open">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          <h3>📐 Training Configuration</h3>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+          <table class="info-table">
+            <tbody>
+              <tr><td style="font-weight:600;">Dataset</td><td>Yahoo Answers (1,400,000 samples)</td></tr>
+              <tr><td style="font-weight:600;">Classes</td><td>10 topic categories</td></tr>
+              <tr><td style="font-weight:600;">Split</td><td>70% train / 15% val / 15% test (stratified)</td></tr>
+              <tr><td style="font-weight:600;">Preprocessing</td><td>Lowercase → Remove URLs/HTML → Remove punctuation → Normalize whitespace</td></tr>
+              <tr><td style="font-weight:600;">Metrics</td><td>Accuracy, Precision, Recall, F1 (weighted)</td></tr>
+              <tr><td style="font-weight:600;">Early Stopping</td><td>Patience=3, monitoring val F1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="accordion open">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          <h3>🏗️ Model Architectures</h3>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div style="overflow-x:auto;">
+            <table class="comparison-table" id="arch-table">
+              <thead><tr>
+                <th>Model</th><th>Family</th><th>Pretrained Source</th><th>Architecture</th>
+              </tr></thead>
+              <tbody id="arch-tbody">
+                <tr>
+                  <td><strong>Bidirectional LSTM</strong></td>
+                  <td>RNN</td>
+                  <td>Random (embedding trained from scratch)</td>
+                  <td>Embedding(50K, 128) → Bi-LSTM(256, 2 layers) → FC(512→10)</td>
+                </tr>
+                <tr>
+                  <td><strong>BERT Base Uncased</strong></td>
+                  <td>Transformer</td>
+                  <td>HuggingFace / bert-base-uncased</td>
+                  <td>BERT(12 layers, 768 hidden) → Dropout(0.3) → FC(768→10)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="margin-top:1.5rem;">Hyperparameters Comparison</h4>
+          <div style="overflow-x:auto;">
+            <table class="comparison-table">
+              <thead><tr><th>Parameter</th><th>LSTM</th><th>BERT</th></tr></thead>
+              <tbody>
+                <tr><td>Batch Size</td><td>64</td><td>16</td></tr>
+                <tr><td>Learning Rate</td><td>1e-3</td><td>2e-5</td></tr>
+                <tr><td>Max Epochs</td><td>3</td><td>2</td></tr>
+                <tr><td>Max Sequence Length</td><td>256</td><td>256</td></tr>
+                <tr><td>Optimizer</td><td>Adam</td><td>AdamW</td></tr>
+                <tr><td>Dropout</td><td>0.3</td><td>0.3</td></tr>
+                <tr><td>Loss Function</td><td colspan="2">CrossEntropyLoss</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <script>
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      const pane = document.getElementById('tab-' + tabName);
+      if (pane) pane.classList.add('active');
+      const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
+      if (btn) btn.classList.add('active');
+    }
+
+    function toggleTutorial(id) {
+      const p = document.getElementById(id + '-tutorial');
+      const c = document.getElementById(id + '-code');
+      if (!p) return;
+      const active = p.classList.toggle('active');
+      if (active && c) c.classList.remove('active');
+    }
+    function toggleCode(id) {
+      const c = document.getElementById(id + '-code');
+      const p = document.getElementById(id + '-tutorial');
+      if (!c) return;
+      const active = c.classList.toggle('active');
+      if (active && p) p.classList.remove('active');
+    }
+    function copyAllCode(id) {
+      const block = document.querySelector('#' + id + '-plotly code');
+      if (block) { navigator.clipboard.writeText(block.innerText); alert('Code copied!'); }
+    }
+
+    const PLOTLY_LAYOUT = {
+      font: { family: 'Inter, sans-serif' },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { l: 50, r: 20, t: 40, b: 50 },
+    };
+    const PLOTLY_CONFIG = { responsive: true, displayModeBar: true, displaylogo: false };
+
+    let RESULTS_DATA = null;
+    let COMPARISON_DATA = null;
+
+    async function loadAllData() {
+      try {
+        const resp1 = await fetch('data/results_data.json');
+        RESULTS_DATA = await resp1.json();
+
+        // Try loading comparison data
+        try {
+          const resp2 = await fetch('../results/yahoo_answers_classification/model-classification-comparison-data.json');
+          COMPARISON_DATA = await resp2.json();
+        } catch(e) { console.log('No comparison data available yet.'); }
+
+        renderAllResults();
+      } catch (err) {
+        console.error('Failed to load results data:', err);
+      }
+    }
+
+    function renderAllResults() {
+      if (!RESULTS_DATA) return;
+
+      if (RESULTS_DATA.status === 'pending') {
+        document.getElementById('results-pending').style.display = 'block';
+        document.getElementById('results-ready').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('results-pending').style.display = 'none';
+      document.getElementById('results-ready').style.display = 'block';
+
+      const exps = RESULTS_DATA.experiments;
+      const names = Object.keys(exps);
+      if (names.length === 0) return;
+
+      // Find best model
+      let bestName = names[0], bestAcc = 0, fastestName = names[0], fastestTime = Infinity;
+      for (const name of names) {
+        const acc = exps[name].test_metrics.accuracy;
+        const inf = exps[name].resource_metrics.inference_time_ms;
+        if (acc > bestAcc) { bestAcc = acc; bestName = name; }
+        if (inf < fastestTime) { fastestTime = inf; fastestName = name; }
+      }
+
+      document.getElementById('hero-acc').textContent = (bestAcc * 100).toFixed(1) + '%';
+      document.getElementById('best-model-name').textContent = bestName;
+      document.getElementById('best-acc').textContent = (bestAcc * 100).toFixed(1) + '%';
+      document.getElementById('best-f1').textContent = (exps[bestName].test_metrics.f1 * 100).toFixed(1) + '%';
+      document.getElementById('fastest-model').textContent = fastestName;
+
+      // Performance table
+      const sorted = names.sort((a, b) => exps[b].test_metrics.accuracy - exps[a].test_metrics.accuracy);
+      const perfTbody = document.getElementById('perf-tbody');
+      perfTbody.innerHTML = sorted.map((name, i) => {
+        const m = exps[name].test_metrics;
+        const cls = i === 0 ? ' class="best-row"' : '';
+        return `<tr${cls}>
+          <td><strong>${name}</strong></td>
+          <td>${(m.precision*100).toFixed(2)}%</td>
+          <td>${(m.recall*100).toFixed(2)}%</td>
+          <td>${(m.f1*100).toFixed(2)}%</td>
+          <td>${(m.accuracy*100).toFixed(2)}%</td>
+        </tr>`;
+      }).join('');
+
+      // Resource table
+      const resSorted = names.sort((a, b) => exps[a].resource_metrics.inference_time_ms - exps[b].resource_metrics.inference_time_ms);
+      const resTbody = document.getElementById('resource-tbody');
+      resTbody.innerHTML = resSorted.map(name => {
+        const r = exps[name].resource_metrics;
+        return `<tr>
+          <td><strong>${name}</strong></td>
+          <td>${exps[name].training_time_minutes.toFixed(1)}</td>
+          <td>${r.inference_time_ms.toFixed(2)}</td>
+          <td>${(r.parameters/1e6).toFixed(1)}</td>
+          <td>${r.model_size_mb.toFixed(1)}</td>
+        </tr>`;
+      }).join('');
+
+      // Learning curve selectors
+      const lcSelect = document.getElementById('lc-model-select');
+      const cmSelect = document.getElementById('cm-model-select');
+      names.forEach(name => {
+        lcSelect.add(new Option(name, name));
+        cmSelect.add(new Option(name, name));
+      });
+      if (sorted.length > 0) {
+        lcSelect.value = sorted[0];
+        renderSelectedLC();
+      }
+    }
+
+    function renderSelectedLC() {
+      const name = document.getElementById('lc-model-select').value;
+      if (!name || !RESULTS_DATA?.learning_curves?.[name]) return;
+      const lc = RESULTS_DATA.learning_curves[name];
+
+      Plotly.newPlot('chart-lc-loss', [
+        { x: lc.epochs, y: lc.train_loss, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#6B9BD1' } },
+        { x: lc.epochs, y: lc.val_loss, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#E8C49A' } },
+      ], { ...PLOTLY_LAYOUT, title: `${name} — Loss`, xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' }, yaxis: { title: 'Loss', gridcolor: '#f0f0f0' } }, PLOTLY_CONFIG);
+
+      Plotly.newPlot('chart-lc-accuracy', [
+        { x: lc.epochs, y: lc.train_accuracy, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#6B9BD1' } },
+        { x: lc.epochs, y: lc.val_accuracy, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#E8C49A' } },
+      ], { ...PLOTLY_LAYOUT, title: `${name} — Accuracy`, xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' }, yaxis: { title: 'Accuracy', gridcolor: '#f0f0f0' } }, PLOTLY_CONFIG);
+
+      Plotly.newPlot('chart-lc-f1', [
+        { x: lc.epochs, y: lc.train_f1, name: 'Train', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#6B9BD1' } },
+        { x: lc.epochs, y: lc.val_f1, name: 'Validation', mode: 'lines+markers', marker: { size: 4 }, line: { color: '#E8C49A' } },
+      ], { ...PLOTLY_LAYOUT, title: `${name} — F1-Score`, xaxis: { title: 'Epoch', gridcolor: '#f0f0f0' }, yaxis: { title: 'F1', gridcolor: '#f0f0f0' } }, PLOTLY_CONFIG);
+    }
+
+    function renderConfusionMatrix() {
+      const name = document.getElementById('cm-model-select').value;
+      if (!name || !COMPARISON_DATA?.models?.[name]) return;
+      const cm = COMPARISON_DATA.models[name].confusion_matrix;
+      const classes = RESULTS_DATA.experiments[name]?.class_names || [];
+
+      Plotly.newPlot('chart-confusion', [{
+        z: cm, x: classes, y: classes,
+        type: 'heatmap', colorscale: 'Blues',
+        hovertemplate: 'True: %{y}<br>Predicted: %{x}<br>Count: %{z}<extra></extra>',
+      }], {
+        ...PLOTLY_LAYOUT,
+        title: `${name} — Confusion Matrix`,
+        xaxis: { title: 'Predicted', tickangle: -45, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'True', autorange: 'reversed', gridcolor: '#f0f0f0' },
+        margin: { l: 150, r: 20, t: 50, b: 150 },
+        height: 600,
+      }, PLOTLY_CONFIG);
+    }
+
+    loadAllData();
+  </script>
+
+</body>
+</html>

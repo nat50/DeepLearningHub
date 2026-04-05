@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EDA — Yahoo Answers | DL Hub</title>
+  <meta name="description" content="Exploratory Data Analysis for the Yahoo Answers topic classification dataset: class distributions, text statistics, and vocabulary analysis.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../../../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Assignment 1</a></li>
+        <li><a href="index.html" class="active">EDA</a></li>
+        <li><a href="../classification/index.html">Classification</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero-banner">
+    <h1>📝 Yahoo Answers EDA</h1>
+    <p class="subtitle">Comprehensive Exploratory Data Analysis of the Yahoo Answers topic classification dataset</p>
+    <div class="stat-cards">
+      <div class="stat-card"><span class="stat-value">1,400,000</span><span class="stat-label">Total Samples</span></div>
+      <div class="stat-card"><span class="stat-value">10</span><span class="stat-label">Topic Classes</span></div>
+      <div class="stat-card"><span class="stat-value">140,000</span><span class="stat-label">Samples/Class</span></div>
+    </div>
+  </header>
+
+  <section class="section">
+
+    <!-- Report Cards -->
+    <h2 class="section-title">EDA Reports</h2>
+    <p class="section-subtitle">Click each card to explore detailed analysis</p>
+
+    <div class="model-info-grid" style="margin-top:1.5rem;">
+
+      <!-- Core EDA Card -->
+      <a href="eda_core.html" class="model-info-card" style="text-decoration:none; cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+        <h5 style="font-size:1.1rem; margin-bottom:0.8rem;">📊 Core Dataset Analysis</h5>
+        <p style="margin-bottom:0.5rem;">Comprehensive analysis of text properties and vocabulary</p>
+        <ul style="font-size:0.82rem; text-align:left; margin-top:0.5rem;">
+          <li>10-class distribution & balance</li>
+          <li>Word count distributions (raw & cleaned)</li>
+          <li>Stop word analysis (50.25% removed)</li>
+          <li>Vocabulary richness per category</li>
+          <li>Top keywords per class</li>
+        </ul>
+        <span style="display:inline-block; margin-top:0.8rem; color:var(--primary); font-weight:600; font-size:0.85rem;">View Report →</span>
+      </a>
+
+      <!-- Classification EDA Card -->
+      <a href="eda_classification.html" class="model-info-card" style="text-decoration:none; cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
+        <h5 style="font-size:1.1rem; margin-bottom:0.8rem;">📊 Classification Analysis</h5>
+        <p style="margin-bottom:0.5rem;">Class balance, splits, and cross-class analysis</p>
+        <ul style="font-size:0.82rem; text-align:left; margin-top:0.5rem;">
+          <li>10-class distribution & balance curve</li>
+          <li>Train/Val/Test split analysis (70/15/15)</li>
+          <li>Vocabulary richness comparison</li>
+          <li>Text length statistics per class</li>
+          <li>Preprocessing impact analysis</li>
+        </ul>
+        <span style="display:inline-block; margin-top:0.8rem; color:var(--primary); font-weight:600; font-size:0.85rem;">View Report →</span>
+      </a>
+
+    </div>
+
+    <!-- Dataset Quick Facts -->
+    <div class="accordion open" style="margin-top:2.5rem;">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📋 Dataset Quick Facts</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="model-info-grid">
+          <div class="model-info-card">
+            <h5>Dataset Source</h5>
+            <p>Yahoo Answers (Kaggle)</p>
+            <p style="font-size:0.75rem;">10 topic classes, 140K samples each</p>
+            <a href="https://www.kaggle.com/datasets/soumikrakshit/yahoo-answers-dataset" target="_blank" style="font-size:0.8rem;">🔗 Kaggle Page</a>
+          </div>
+          <div class="model-info-card">
+            <h5>Text Format</h5>
+            <p>CSV with 4 columns</p>
+            <p style="font-size:0.75rem;">title + content + best answer</p>
+          </div>
+          <div class="model-info-card">
+            <h5>Split Strategy</h5>
+            <p>70/15/15 Stratified</p>
+            <p style="font-size:0.75rem;">Class-balanced across splits</p>
+          </div>
+          <div class="model-info-card">
+            <h5>Challenge Level</h5>
+            <p>Multi-class NLP</p>
+            <p style="font-size:0.75rem;">Noisy user-generated text, overlapping categories</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</body>
+</html>
