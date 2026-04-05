@@ -1574,37 +1574,6 @@
       display: block;
     }
 
-    .fm-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.6rem;
-      margin-top: 0.75rem;
-    }
-
-    .fm-stat-card {
-      border: 1px solid #d6e1f4;
-      border-radius: 9px;
-      background: #f5f9ff;
-      padding: 0.55rem 0.6rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
-    .fm-stat-label {
-      color: #496080;
-      font-size: 0.73rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .fm-stat-value {
-      color: #12365e;
-      font-size: 0.88rem;
-      font-weight: 800;
-    }
-
     .lc-control-grid {
       display: grid;
       grid-template-columns: 1.45fr 1fr;
@@ -1740,7 +1709,7 @@
 
     .arch-overview-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.6rem;
       margin-bottom: 0.72rem;
     }
@@ -1769,74 +1738,198 @@
     }
 
     .arch-flow {
-      display: flex;
-      align-items: stretch;
-      gap: 0.5rem;
+      border: 1px solid #d7e2f2;
+      border-radius: 12px;
+      background: linear-gradient(160deg, #fcfdff 0%, #f4f8ff 100%);
       overflow-x: auto;
-      padding-bottom: 0.5rem;
+      padding: 0.28rem 0.26rem 0.66rem;
+      margin-bottom: 0.68rem;
     }
 
-    .arch-node {
-      min-width: 170px;
-      border: 1px solid #d5ddeb;
-      border-top-width: 4px;
-      border-radius: 10px;
-      background: #ffffff;
-      padding: 0.52rem 0.58rem;
+    .arch-layer-track {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.56rem;
+      min-width: max-content;
+      padding: 0.46rem 0.48rem 0.38rem;
+    }
+
+    .arch-layer-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.34rem;
       flex-shrink: 0;
     }
 
-    .arch-node h5 {
-      margin: 0 0 0.24rem;
+    .arch-layer-block {
+      --arch-color: #4f46e5;
+      --arch-width: 88px;
+      --arch-height: 70px;
+      --arch-depth: 14px;
+      position: relative;
+      width: var(--arch-width);
+      min-width: var(--arch-width);
+      height: var(--arch-height);
+      border: 1px solid var(--arch-color);
+      border-radius: 4px;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.94) 0%, rgba(230, 241, 255, 0.95) 100%);
+      box-shadow: 0 7px 18px rgba(15, 23, 42, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0.28rem;
+      text-align: center;
+      padding: 0.35rem 0.34rem;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease;
       color: #0f2743;
-      font-size: 0.82rem;
+      z-index: 1;
+    }
+
+    .arch-layer-block::before {
+      content: '';
+      position: absolute;
+      left: 100%;
+      top: 7px;
+      width: var(--arch-depth);
+      height: 100%;
+      border: 1px solid color-mix(in srgb, var(--arch-color) 58%, #ffffff 42%);
+      border-left: none;
+      border-radius: 0 4px 4px 0;
+      background: linear-gradient(180deg, rgba(169, 199, 255, 0.52) 0%, rgba(123, 164, 238, 0.58) 100%);
+      transform: skewY(-42deg);
+      transform-origin: top left;
+      z-index: -1;
+    }
+
+    .arch-layer-block::after {
+      content: '';
+      position: absolute;
+      left: 8px;
+      bottom: 100%;
+      width: 100%;
+      height: var(--arch-depth);
+      border: 1px solid color-mix(in srgb, var(--arch-color) 60%, #ffffff 40%);
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(180deg, rgba(214, 230, 255, 0.74) 0%, rgba(176, 206, 255, 0.66) 100%);
+      transform: skewX(-48deg);
+      transform-origin: bottom left;
+      z-index: -1;
+    }
+
+    .arch-layer-block:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(30, 64, 175, 0.2);
+    }
+
+    .arch-layer-block.active {
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35), 0 12px 26px rgba(29, 78, 216, 0.28);
+      transform: translateY(-3px);
+    }
+
+    .arch-layer-name {
+      font-size: 0.74rem;
       font-weight: 800;
+      line-height: 1.2;
+      color: #102744;
     }
 
-    .arch-node p {
-      margin: 0;
-      color: #475569;
-      font-size: 0.77rem;
-      line-height: 1.4;
+    .arch-layer-shape {
+      font-size: 0.67rem;
+      line-height: 1.2;
+      color: #334155;
+      font-weight: 700;
+      word-break: break-word;
     }
 
-    .arch-arrow {
+    .arch-layer-step-index {
+      color: #64748b;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .arch-layer-connector {
       align-self: center;
       color: #64748b;
-      font-size: 1.15rem;
+      font-size: 1.04rem;
       font-weight: 800;
+      margin-bottom: 1.44rem;
       flex-shrink: 0;
     }
 
-    .arch-stage-table-wrap {
-      margin-top: 0.75rem;
-      overflow-x: auto;
+    .arch-layer-detail {
+      border: 1px solid #d8e2f3;
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 0.7rem 0.76rem;
+      margin-bottom: 0.72rem;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
     }
 
-    .arch-stage-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 680px;
-      font-size: 0.8rem;
+    .arch-detail-head {
+      display: flex;
+      align-items: center;
+      gap: 0.54rem;
+      margin-bottom: 0.55rem;
+      flex-wrap: wrap;
     }
 
-    .arch-stage-table th,
-    .arch-stage-table td {
-      border: 1px solid #d5ddea;
-      padding: 0.4rem 0.48rem;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    .arch-stage-table th {
-      background: #eaf1ff;
-      color: #1a365d;
+    .arch-detail-head h4 {
+      margin: 0;
+      color: #102744;
+      font-size: 0.9rem;
       font-weight: 800;
+    }
+
+    .arch-detail-chip {
+      border: 1px solid #bfd2f5;
+      border-radius: 999px;
+      padding: 0.15rem 0.52rem;
+      font-size: 0.69rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       white-space: nowrap;
     }
 
-    .arch-stage-table tbody tr:nth-child(even) {
+    .arch-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.54rem;
+    }
+
+    .arch-detail-item {
+      border: 1px solid #d8e4f6;
+      border-radius: 9px;
       background: #f8fbff;
+      padding: 0.44rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+    }
+
+    .arch-detail-item span {
+      color: #4a607f;
+      font-size: 0.69rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .arch-detail-item strong {
+      color: #102744;
+      font-size: 0.82rem;
+      line-height: 1.32;
+      font-weight: 800;
+    }
+
+    .arch-detail-item-wide {
+      grid-column: span 2;
     }
 
     .viz-hint {
@@ -2107,8 +2200,16 @@
         min-width: 100%;
       }
 
-      .arch-node {
-        min-width: 148px;
+      .arch-layer-block {
+        min-width: 120px;
+      }
+
+      .arch-detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .arch-detail-item-wide {
+        grid-column: span 1;
       }
     }
   </style>
@@ -3359,14 +3460,6 @@ val_result = run_epoch(
             </div>
           </div>
 
-          <div class="fm-stats-grid">
-            <div class="fm-stat-card"><span class="fm-stat-label">Mean Activation</span><span class="fm-stat-value" id="fm-stat-mean">-</span></div>
-            <div class="fm-stat-card"><span class="fm-stat-label">Peak Activation</span><span class="fm-stat-value" id="fm-stat-max">-</span></div>
-            <div class="fm-stat-card"><span class="fm-stat-label">Sparsity (&lt; 0.2)</span><span class="fm-stat-value" id="fm-stat-sparsity">-</span></div>
-            <div class="fm-stat-card"><span class="fm-stat-label">Attention Focus</span><span class="fm-stat-value" id="fm-stat-focus">-</span></div>
-          </div>
-
-          <p class="viz-hint">Feature maps are exported from real checkpoint inference on key layers (NoAug models), with all filters available through the slider.</p>
         </div>
 
         <div class="viz-section">
@@ -3432,21 +3525,7 @@ val_result = run_epoch(
 
           <div class="arch-overview-grid" id="arch-overview-grid"></div>
           <div class="arch-flow" id="arch-flow"></div>
-
-          <div class="arch-stage-table-wrap">
-            <table class="arch-stage-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Stage</th>
-                  <th>Operation</th>
-                  <th>Output</th>
-                  <th>Purpose</th>
-                </tr>
-              </thead>
-              <tbody id="arch-stage-tbody"></tbody>
-            </table>
-          </div>
+          <div class="arch-layer-detail" id="arch-layer-detail"></div>
         </div>
       </div>
     </div>
@@ -3652,6 +3731,13 @@ val_result = run_epoch(
       playbackTimer: null,
       playbackActive: false,
     };
+
+    const ARCHITECTURE_STATE = {
+      modelName: '',
+      selectedStageIndex: 0,
+    };
+
+    let ARCHITECTURE_ACTIVE_BLUEPRINT = [];
 
     const EXPERIMENT_SLUGS = [
       'resnet50_no_aug', 'resnet50_aug',
@@ -4350,7 +4436,7 @@ val_result = run_epoch(
       const sorted = sortModelsByReleaseDate(modelNames);
 
       const toNum = (value) => Number(value);
-      const getFlopsB = (name) => toNum(MODEL_METRICS[name].flops) / 1e9;
+      const getFlopsB = (name) => normalizeFlopsValue(MODEL_METRICS[name].flops, name) / 1e9;
       const bestValues = {
         training_time: Math.min(...sorted.map((name) => toNum(MODEL_METRICS[name].training_time))),
         inference_time: Math.min(...sorted.map((name) => toNum(MODEL_METRICS[name].inference_time))),
@@ -4371,7 +4457,7 @@ val_result = run_epoch(
       tbody.innerHTML = sorted.map((name) => {
         const metrics = MODEL_METRICS[name];
         const safeName = name.replace(/'/g, '&#39;');
-        const flopsB = toNum(metrics.flops) / 1e9;
+        const flopsB = normalizeFlopsValue(metrics.flops, name) / 1e9;
         return `<tr>
           <td onclick="selectModelForConfusion('${safeName}', 'resources')"><strong>${name}</strong></td>
           <td onclick="selectModelForConfusion('${safeName}', 'resources')">${renderResourceMetric(metrics.training_time, bestValues.training_time, 2)}</td>
@@ -4534,6 +4620,19 @@ val_result = run_epoch(
       if (!Number.isFinite(numeric)) return '-';
       if (metricKey === 'loss') return numeric.toFixed(4);
       return `${(numeric * 100).toFixed(2)}%`;
+    }
+
+    function normalizeFlopsValue(rawFlops, modelName) {
+      const numeric = Number(rawFlops);
+      if (!Number.isFinite(numeric) || numeric <= 0) return 0;
+
+      const backboneKey = normalizeModelBackboneKey(modelName || '');
+      // Legacy ResNet exports in this project may be stored in kilo-FLOPs.
+      if (backboneKey === 'resnet50' && numeric < 1e8) {
+        return numeric * 1e3;
+      }
+
+      return numeric;
     }
 
     function getFeatureMapModelPayload(modelName) {
@@ -4864,13 +4963,6 @@ val_result = run_epoch(
       ];
     }
 
-    function mapCentroidToRegion(x, y) {
-      const horizontal = x < 0.33 ? 'left' : x > 0.66 ? 'right' : 'center';
-      const vertical = y < 0.33 ? 'top' : y > 0.66 ? 'bottom' : 'middle';
-      if (horizontal === 'center' && vertical === 'middle') return 'center';
-      return `${vertical}-${horizontal}`;
-    }
-
     function generateFeatureActivationMap(imageElement, modelName, layerConfig, filterIndex, mapSize = 128) {
       const sourceCanvas = document.createElement('canvas');
       sourceCanvas.width = mapSize;
@@ -4976,29 +5068,11 @@ val_result = run_epoch(
 
       const normalized = new Float32Array(activations.length);
       const denominator = Math.max(1e-7, max - min);
-      let sum = 0;
-      let peak = 0;
-      let sparseCount = 0;
-      let weightedX = 0;
-      let weightedY = 0;
-      let weightSum = 0;
 
       for (let i = 0; i < activations.length; i += 1) {
         const normalizedValue = clampNumber((activations[i] - min) / denominator, 0, 1);
         normalized[i] = normalizedValue;
-        sum += normalizedValue;
-        if (normalizedValue > peak) peak = normalizedValue;
-        if (normalizedValue < 0.2) sparseCount += 1;
-
-        const x = i % mapSize;
-        const y = (i - x) / mapSize;
-        weightedX += x * normalizedValue;
-        weightedY += y * normalizedValue;
-        weightSum += normalizedValue;
       }
-
-      const centroidX = weightSum > 0 ? (weightedX / weightSum) / mapSize : 0.5;
-      const centroidY = weightSum > 0 ? (weightedY / weightSum) / mapSize : 0.5;
 
       const backboneKey = normalizeModelBackboneKey(modelName);
       const palette = FEATURE_MAP_PALETTES[backboneKey] || FEATURE_MAP_PALETTES.default;
@@ -5015,12 +5089,6 @@ val_result = run_epoch(
 
       return {
         imageData,
-        stats: {
-          mean: sum / normalized.length,
-          peak,
-          sparsity: sparseCount / normalized.length,
-          focus: mapCentroidToRegion(centroidX, centroidY),
-        },
       };
     }
 
@@ -5035,13 +5103,6 @@ val_result = run_epoch(
       context.imageSmoothingEnabled = false;
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.drawImage(stagingCanvas, 0, 0, canvas.width, canvas.height);
-    }
-
-    function renderFeatureMapStats(stats) {
-      setText('fm-stat-mean', stats ? stats.mean.toFixed(3) : '-');
-      setText('fm-stat-max', stats ? stats.peak.toFixed(3) : '-');
-      setText('fm-stat-sparsity', stats ? `${(stats.sparsity * 100).toFixed(1)}%` : '-');
-      setText('fm-stat-focus', stats ? stats.focus : '-');
     }
 
     function decodeFeatureFilterValues(filterRecord) {
@@ -5097,47 +5158,11 @@ val_result = run_epoch(
       return imageData;
     }
 
-    function computeFeatureStatsFromFilterRecord(filterRecord) {
-      const width = Number(filterRecord && filterRecord.width ? filterRecord.width : 0);
-      const height = Number(filterRecord && filterRecord.height ? filterRecord.height : 0);
-      const data = decodeFeatureFilterValues(filterRecord);
-      if (!width || !height || !data.length) return null;
-
-      let sum = 0;
-      let peak = 0;
-      let sparseCount = 0;
-      let weightedX = 0;
-      let weightedY = 0;
-      let weightSum = 0;
-
-      for (let idx = 0; idx < width * height; idx += 1) {
-        const value = clampNumber(Number(data[idx] || 0) / 255, 0, 1);
-        sum += value;
-        if (value > peak) peak = value;
-        if (value < 0.2) sparseCount += 1;
-
-        const x = idx % width;
-        const y = (idx - x) / width;
-        weightedX += x * value;
-        weightedY += y * value;
-        weightSum += value;
-      }
-
-      const centroidX = weightSum > 0 ? (weightedX / weightSum) / width : 0.5;
-      const centroidY = weightSum > 0 ? (weightedY / weightSum) / height : 0.5;
-
-      return {
-        mean: sum / (width * height),
-        peak,
-        sparsity: sparseCount / (width * height),
-        focus: mapCentroidToRegion(centroidX, centroidY),
-      };
-    }
-
     async function renderFeatureMapExplorer() {
       if (!FEATURE_MAP_STATE.modelName) return;
       const layerConfig = getSelectedFeatureLayerConfig();
       if (!layerConfig) return;
+      const layerSet = getFeatureLayerSet(FEATURE_MAP_STATE.modelName);
 
       const imageSelect = document.getElementById('fm-image-select');
       if (imageSelect && imageSelect.value) FEATURE_MAP_STATE.imagePath = imageSelect.value;
@@ -5174,22 +5199,17 @@ val_result = run_epoch(
 
           const selectedRecord = realFilters[FEATURE_MAP_STATE.filterIndex - 1];
           const selectedImageData = buildImageDataFromFilterRecord(selectedRecord, FEATURE_MAP_STATE.modelName);
-          const selectedStats = computeFeatureStatsFromFilterRecord(selectedRecord);
-
           if (selectedImageData) {
             renderFeatureMapToCanvas('fm-canvas', selectedImageData);
           }
-          renderFeatureMapStats(selectedStats);
 
           const mapTitle = document.getElementById('fm-map-title');
           if (mapTitle) {
             const backboneKey = normalizeModelBackboneKey(FEATURE_MAP_STATE.modelName);
-            const spatial = Array.isArray(realBundle.spatial_shape) ? realBundle.spatial_shape : [];
-            const spatialLabel = spatial.length === 3 ? ` (${spatial[1]}x${spatial[2]})` : '';
-            mapTitle.textContent = `${getBackboneDisplayName(backboneKey, FEATURE_MAP_STATE.modelName)} - ${layerConfig.label}${spatialLabel} - Filter #${selectedRecord.filter_id}`;
+            mapTitle.textContent = `${getBackboneDisplayName(backboneKey, FEATURE_MAP_STATE.modelName)} - ${layerConfig.label} - Filter #${selectedRecord.filter_id}`;
           }
 
-          setFeatureMapStatus(`Inference data: ${FEATURE_MAP_STATE.modelName} | ${layerConfig.label} | Filter #${selectedRecord.filter_id} (${FEATURE_MAP_STATE.filterIndex}/${maxFilters})`);
+          setFeatureMapStatus(`${layerConfig.label} | Filter #${selectedRecord.filter_id} (${FEATURE_MAP_STATE.filterIndex}/${maxFilters})`);
           return;
         }
 
@@ -5201,7 +5221,6 @@ val_result = run_epoch(
         );
 
         renderFeatureMapToCanvas('fm-canvas', featureMap.imageData);
-        renderFeatureMapStats(featureMap.stats);
 
         const mapTitle = document.getElementById('fm-map-title');
         if (mapTitle) {
@@ -5209,10 +5228,9 @@ val_result = run_epoch(
           mapTitle.textContent = `${getBackboneDisplayName(backboneKey, FEATURE_MAP_STATE.modelName)} - ${layerConfig.label} - Filter #${FEATURE_MAP_STATE.filterIndex}`;
         }
 
-        setFeatureMapStatus(`Ready: ${FEATURE_MAP_STATE.modelName} | ${layerConfig.label} | Filter #${FEATURE_MAP_STATE.filterIndex}`);
+        setFeatureMapStatus(`${layerConfig.label} | Filter #${FEATURE_MAP_STATE.filterIndex}`);
       } catch (error) {
         console.error('Feature map rendering failed:', error);
-        renderFeatureMapStats(null);
         setFeatureMapStatus('Unable to render feature map for the selected image.');
       }
     }
@@ -5373,9 +5391,9 @@ val_result = run_epoch(
         ...PLOTLY_LAYOUT,
         title: `${metricCfg.label} Replay - Epoch ${LEARNING_CURVE_STATE.currentEpoch}/${LEARNING_CURVE_STATE.maxEpoch}`,
         xaxis: {
-          title: 'Epoch',
           gridcolor: '#e5e7eb',
           dtick: 1,
+          automargin: true,
           range: [0.8, LEARNING_CURVE_STATE.maxEpoch + 0.2],
         },
         yaxis: {
@@ -5536,6 +5554,44 @@ val_result = run_epoch(
       return ARCHITECTURE_BLUEPRINTS[backboneKey] || ARCHITECTURE_BLUEPRINTS.resnet50;
     }
 
+    function getArchitectureInputShape(blueprint, index) {
+      const stage = blueprint[index] || {};
+      if (stage.input) return stage.input;
+      if (index <= 0) return stage.output || '-';
+      const previousStage = blueprint[index - 1] || {};
+      return previousStage.output || '-';
+    }
+
+    function getArchitectureBlockMetrics(stage) {
+      const stageType = String((stage && stage.type) || '').toLowerCase();
+
+      if (stageType === 'input') return { width: 118, height: 108, depth: 24 };
+      if (stageType === 'head') return { width: 86, height: 36, depth: 10 };
+
+      const numbers = String((stage && stage.output) || '')
+        .match(/\d+/g);
+      const dims = (numbers || [])
+        .map((value) => Number(value))
+        .filter((value) => Number.isFinite(value));
+
+      let spatial = dims.length >= 2 ? Math.max(dims[0], dims[1]) : (dims[0] || 32);
+      const channels = dims.length >= 3 ? dims[dims.length - 1] : (dims[dims.length - 1] || 64);
+
+      if (stageType === 'token') {
+        spatial = Math.sqrt(Math.max(1, spatial));
+      }
+
+      const width = clampNumber(40 + (Math.log2(channels + 1) * 8), 56, 132);
+      const height = clampNumber(34 + (Math.log2(spatial + 1) * 12), 46, 104);
+      const depth = clampNumber(9 + (Math.log2(channels + 1) * 2.5), 10, 30);
+
+      return {
+        width: Math.round(width),
+        height: Math.round(height),
+        depth: Math.round(depth),
+      };
+    }
+
     function populateArchitectureSelector(modelNames) {
       const select = document.getElementById('arch-model-select');
       if (!select) return;
@@ -5564,10 +5620,8 @@ val_result = run_epoch(
       );
 
       const overviewItems = [
-        { label: 'Backbone', value: getBackboneDisplayName(backboneKey, modelName) },
         { label: 'Family', value: getBackboneTypeLabel(backboneKey, modelConfig.family) },
         { label: 'Parameters', value: resourceMetrics.parameters ? `${(Number(resourceMetrics.parameters) / 1e6).toFixed(2)}M` : '-' },
-        { label: 'FLOPs', value: resourceMetrics.flops ? `${(Number(resourceMetrics.flops) / 1e9).toFixed(2)}B` : '-' },
         { label: 'Inference', value: Number.isFinite(inferenceMs) && inferenceMs > 0 ? `${inferenceMs.toFixed(2)} ms` : '-' },
         { label: 'Pretrained', value: modelConfig.pretrained_source || '-' },
         { label: 'Input', value: Array.isArray(dataConfig.input_size) ? `${dataConfig.input_size[1]}x${dataConfig.input_size[2]}x${dataConfig.input_size[0]}` : '-' },
@@ -5580,33 +5634,97 @@ val_result = run_epoch(
       </article>`).join('');
     }
 
+    function renderArchitectureLayerDetail(blueprint) {
+      const panel = document.getElementById('arch-layer-detail');
+      if (!panel) return;
+      if (!Array.isArray(blueprint) || !blueprint.length) {
+        panel.innerHTML = '';
+        return;
+      }
+
+      const selectedIndex = clampNumber(
+        ARCHITECTURE_STATE.selectedStageIndex,
+        0,
+        Math.max(0, blueprint.length - 1)
+      );
+      ARCHITECTURE_STATE.selectedStageIndex = selectedIndex;
+
+      const stage = blueprint[selectedIndex];
+      const stageType = String(stage.type || 'stage').toUpperCase();
+      const stageColor = ARCHITECTURE_TYPE_COLORS[stage.type] || '#4f46e5';
+      const inputShape = getArchitectureInputShape(blueprint, selectedIndex);
+
+      panel.innerHTML = `<div class="arch-detail-head">
+        <span class="arch-detail-chip" style="border-color:${rgbaFromHex(stageColor, 0.34)};background:${rgbaFromHex(stageColor, 0.12)};color:${stageColor};">${escapeHtml(stageType)}</span>
+        <h4>${escapeHtml(stage.name)} - Layer ${selectedIndex + 1}/${blueprint.length}</h4>
+      </div>
+      <div class="arch-detail-grid">
+        <div class="arch-detail-item">
+          <span>Input Shape</span>
+          <strong>${escapeHtml(inputShape)}</strong>
+        </div>
+        <div class="arch-detail-item">
+          <span>Output Shape</span>
+          <strong>${escapeHtml(stage.output || '-')}</strong>
+        </div>
+        <div class="arch-detail-item arch-detail-item-wide">
+          <span>Operation</span>
+          <strong>${escapeHtml(stage.operation || '-')}</strong>
+        </div>
+        <div class="arch-detail-item arch-detail-item-wide">
+          <span>Purpose</span>
+          <strong>${escapeHtml(stage.purpose || '-')}</strong>
+        </div>
+      </div>`;
+    }
+
+    function selectArchitectureStage(index) {
+      if (!Array.isArray(ARCHITECTURE_ACTIVE_BLUEPRINT) || !ARCHITECTURE_ACTIVE_BLUEPRINT.length) return;
+
+      ARCHITECTURE_STATE.selectedStageIndex = clampNumber(
+        index,
+        0,
+        ARCHITECTURE_ACTIVE_BLUEPRINT.length - 1
+      );
+
+      renderArchitectureFlow(ARCHITECTURE_ACTIVE_BLUEPRINT);
+      renderArchitectureLayerDetail(ARCHITECTURE_ACTIVE_BLUEPRINT);
+    }
+
     function renderArchitectureFlow(blueprint) {
       const flow = document.getElementById('arch-flow');
       if (!flow) return;
 
-      flow.innerHTML = blueprint.map((stage, index) => {
+      const selectedIndex = clampNumber(
+        ARCHITECTURE_STATE.selectedStageIndex,
+        0,
+        Math.max(0, blueprint.length - 1)
+      );
+      ARCHITECTURE_STATE.selectedStageIndex = selectedIndex;
+
+      const items = blueprint.map((stage, index) => {
         const color = ARCHITECTURE_TYPE_COLORS[stage.type] || '#4f46e5';
-        const node = `<article class="arch-node" style="border-top-color:${color};">
-          <h5>${escapeHtml(stage.name)}</h5>
-          <p><strong>Op:</strong> ${escapeHtml(stage.operation)}</p>
-          <p><strong>Out:</strong> ${escapeHtml(stage.output)}</p>
-        </article>`;
+        const metrics = getArchitectureBlockMetrics(stage);
+        const inputShape = getArchitectureInputShape(blueprint, index);
 
-        if (index === blueprint.length - 1) return node;
-        return `${node}<div class="arch-arrow">&rarr;</div>`;
-      }).join('');
-    }
+        const block = `<div class="arch-layer-step" style="margin-right:${metrics.depth + 2}px;">
+          <button
+            type="button"
+            class="arch-layer-block${index === selectedIndex ? ' active' : ''}"
+            style="--arch-color:${color};--arch-width:${metrics.width}px;--arch-height:${metrics.height}px;--arch-depth:${metrics.depth}px;"
+            onclick="selectArchitectureStage(${index})"
+            title="${escapeHtml(stage.name)} | Input ${escapeHtml(inputShape)} | Output ${escapeHtml(stage.output || '-')}">
+            <span class="arch-layer-name">${escapeHtml(stage.name)}</span>
+            <span class="arch-layer-shape">${escapeHtml(stage.output || '-')}</span>
+          </button>
+          <span class="arch-layer-step-index">Layer ${index + 1}</span>
+        </div>`;
 
-    function renderArchitectureStageTable(blueprint) {
-      const tbody = document.getElementById('arch-stage-tbody');
-      if (!tbody) return;
-      tbody.innerHTML = blueprint.map((stage, index) => `<tr>
-        <td>${index + 1}</td>
-        <td>${escapeHtml(stage.name)}</td>
-        <td>${escapeHtml(stage.operation)}</td>
-        <td>${escapeHtml(stage.output)}</td>
-        <td>${escapeHtml(stage.purpose)}</td>
-      </tr>`).join('');
+        if (index === blueprint.length - 1) return block;
+        return `${block}<div class="arch-layer-connector" aria-hidden="true">&rarr;</div>`;
+      });
+
+      flow.innerHTML = `<div class="arch-layer-track">${items.join('')}</div>`;
     }
 
     function renderArchitectureVisualizer() {
@@ -5620,13 +5738,25 @@ val_result = run_epoch(
       }
 
       if (!modelName) return;
+      if (ARCHITECTURE_STATE.modelName !== modelName) {
+        ARCHITECTURE_STATE.modelName = modelName;
+        ARCHITECTURE_STATE.selectedStageIndex = 0;
+      }
+
       const summary = getArchitectureSummary(modelName);
       const backboneKey = normalizeModelBackboneKey(modelName);
       const blueprint = getArchitectureBlueprint(backboneKey);
+      ARCHITECTURE_ACTIVE_BLUEPRINT = blueprint;
+
+      ARCHITECTURE_STATE.selectedStageIndex = clampNumber(
+        ARCHITECTURE_STATE.selectedStageIndex,
+        0,
+        Math.max(0, blueprint.length - 1)
+      );
 
       renderArchitectureOverview(modelName, summary);
       renderArchitectureFlow(blueprint);
-      renderArchitectureStageTable(blueprint);
+      renderArchitectureLayerDetail(blueprint);
     }
 
     async function populateSelectors(modelNames) {

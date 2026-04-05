@@ -24,40 +24,32 @@ META_TEST = DATA_ROOT / "meta" / "test.txt"
 OUTPUT_JSON = ROOT_DIR / "classification" / "data" / "feature_maps_data.json"
 
 SAMPLE_COUNT = 6
+FILTERS_PER_LAYER = 16
 RANDOM_SEED = 42
 
-# Only key layers for illustration, not all layers.
 MODEL_LAYER_SPECS = {
     "resnet50_no_aug": [
         {"key": "conv_stem", "label": "Conv Stem", "module": "stem"},
-        {"key": "stage1", "label": "Stage 1", "module": "stages.0.blocks"},
         {"key": "stage2", "label": "Stage 2", "module": "stages.1.blocks"},
         {"key": "stage3", "label": "Stage 3", "module": "stages.2.blocks"},
         {"key": "stage4", "label": "Stage 4", "module": "stages.3.blocks"},
-        {"key": "stage4_last", "label": "Stage 4 Last Block", "module": "stages.3.blocks.2"},
     ],
     "mobilenet_v3_no_aug": [
         {"key": "conv_stem", "label": "Conv Stem", "module": "conv_stem"},
         {"key": "mbconv_early", "label": "MBConv Block 2", "module": "blocks.2"},
         {"key": "mbconv_mid", "label": "MBConv Block 3", "module": "blocks.3"},
-        {"key": "mbconv_deep", "label": "MBConv Block 4", "module": "blocks.4"},
         {"key": "mbconv_late", "label": "MBConv Block 5", "module": "blocks.5"},
-        {"key": "mbconv_final", "label": "MBConv Block 6", "module": "blocks.6"},
     ],
     "vit_b16_no_aug": [
         {"key": "patch_embed", "label": "Patch Embedding", "module": "patch_embed"},
-        {"key": "encoder3", "label": "Encoder Block 3", "module": "blocks.2"},
         {"key": "encoder6", "label": "Encoder Block 6", "module": "blocks.5"},
         {"key": "encoder9", "label": "Encoder Block 9", "module": "blocks.8"},
-        {"key": "encoder10", "label": "Encoder Block 10", "module": "blocks.9"},
         {"key": "encoder12", "label": "Encoder Block 12", "module": "blocks.11"},
     ],
     "swin_b_no_aug": [
         {"key": "patch_embed", "label": "Patch Embedding", "module": "patch_embed"},
-        {"key": "stage1", "label": "Stage 1", "module": "layers.0.blocks"},
         {"key": "stage2", "label": "Stage 2", "module": "layers.1.blocks"},
         {"key": "stage3", "label": "Stage 3", "module": "layers.2.blocks"},
-        {"key": "stage3_last", "label": "Stage 3 Last Block", "module": "layers.2.blocks.17"},
         {"key": "stage4", "label": "Stage 4", "module": "layers.3.blocks"},
     ],
 }
@@ -170,6 +162,17 @@ def _normalize_map_to_uint8(feature_map: torch.Tensor) -> np.ndarray:
     normalized = (array - min_value) / (max_value - min_value)
     normalized = np.clip(normalized, 0.0, 1.0)
     return (normalized * 255.0).astype(np.uint8)
+
+
+def _select_filter_indices(spatial_maps: torch.Tensor, top_k: int) -> list[int]:
+    channels = int(spatial_maps.shape[0])
+    if channels <= top_k:
+        return list(range(channels))
+
+    flattened = spatial_maps.reshape(channels, -1)
+    variances = torch.var(flattened, dim=1, unbiased=False)
+    top_indices = torch.topk(variances, k=top_k, largest=True).indices.tolist()
+    return sorted(int(idx) for idx in top_indices)
 
 
 def _collect_sample_paths(sample_count: int) -> list[dict[str, str]]:
@@ -299,12 +302,13 @@ def _run_single_model_export(
 
                 raw_activation = captured[layer_key]
                 spatial_maps = _to_spatial_feature_map(raw_activation)
+                filter_indices = _select_filter_indices(spatial_maps, top_k=FILTERS_PER_LAYER)
 
-                all_filters: list[dict[str, Any]] = []
-                for filter_id in range(int(spatial_maps.shape[0])):
+                selected_filters: list[dict[str, Any]] = []
+                for filter_id in filter_indices:
                     map_uint8 = _normalize_map_to_uint8(spatial_maps[filter_id])
                     height, width = map_uint8.shape
-                    all_filters.append(
+                    selected_filters.append(
                         {
                             "filter_id": int(filter_id),
                             "height": int(height),
@@ -314,19 +318,15 @@ def _run_single_model_export(
                     )
 
                 sample_payload[layer_key] = {
-                    "shape": [
-                        int(raw_activation.shape[0]),
-                        int(raw_activation.shape[1]) if raw_activation.ndim > 1 else 1,
-                        int(raw_activation.shape[2]) if raw_activation.ndim > 2 else 1,
-                        int(raw_activation.shape[3]) if raw_activation.ndim > 3 else 1,
-                    ],
+                    "shape": [int(dim) for dim in raw_activation.shape],
                     "spatial_shape": [
                         int(spatial_maps.shape[0]),
                         int(spatial_maps.shape[1]),
                         int(spatial_maps.shape[2]),
                     ],
                     "total_filters": int(spatial_maps.shape[0]),
-                    "filters": all_filters,
+                    "exported_filters": int(len(selected_filters)),
+                    "filters": selected_filters,
                 }
 
             model_payload["activations"][sample["id"]] = sample_payload
@@ -344,11 +344,12 @@ def export_feature_maps_data() -> Path:
     payload: dict[str, Any] = {
         "meta": {
             "generated_at": datetime.now(timezone.utc).isoformat(),
-            "filter_scope": "all",
+            "filter_scope": "topk_by_variance",
+            "filters_per_layer": FILTERS_PER_LAYER,
             "data_encoding": "base64_uint8",
             "sample_count": len(samples),
             "device": str(device),
-            "note": "Real feature maps exported from saved NoAug checkpoints (key layers, all filters).",
+            "note": "Real feature maps exported from saved NoAug checkpoints.",
         },
         "samples": [
             {
