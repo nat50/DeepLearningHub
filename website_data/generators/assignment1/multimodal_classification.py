@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[3]
 ASSIGNMENT1_DIR = ROOT_DIR / "assignment1"
 MULTIMODAL_CLASSIFICATION_DIR = ASSIGNMENT1_DIR / "multimodal_classification"
-EDA_OUTPUT = MULTIMODAL_CLASSIFICATION_DIR / "eda" / "data"
+EDA_OUTPUT = MULTIMODAL_CLASSIFICATION_DIR / "eda" / "data"/"chart"
 CLASS_OUTPUT = MULTIMODAL_CLASSIFICATION_DIR / "classification" / "data"
 
 
@@ -18,29 +18,79 @@ def _save_json(path: Path, data: dict) -> Path:
 
 
 def generate_multimodal_eda_data() -> dict:
-    """Template for Assignment 1 multimodal EDA website data."""
+    """Generate multimodal EDA website data with chart metadata."""
     return {
-        "status": "template",
+        "status": "generated",
         "assignment": "assignment1",
         "pipeline": "multimodal_classification",
-        "message": "TODO: replace this template with multimodal EDA outputs.",
-        "overview": {},
-        "alignment": {},
-        "embeddings": {},
-        "samples": [],
+        "title": "Multimodal Classification EDA",
+        "description": "Exploratory Data Analysis for product review images and text",
+        "dataset": {
+            "name": "Product Reviews (Image + Text)",
+            "size": 7000,
+            "categories": 21,
+            "modalities": ["image", "text"]
+        },
+        "sections": {
+            "image_properties": {
+                "title": "Image Properties",
+                "charts": [
+                    {"file": "class_dist_bar.json", "title": "Category Distribution"},
+                    {"file": "color_space.json", "title": "Color Space Analysis"},
+                    {"file": "file_size.json", "title": "File Size Distribution"},
+                    {"file": "quality_metrics.json", "title": "Quality Metrics"}
+                ]
+            },
+            "text_analysis": {
+                "title": "Text Analysis",
+                "charts": [
+                    {"file": "vocab_richness.json", "title": "Vocabulary Richness"},
+                    {"file": "word_count_distribution.json", "title": "Word Count Distribution"},
+                    {"file": "stop_words.json", "title": "Stop Words Analysis"}
+                ]
+            },
+            "embeddings": {
+                "title": "Dimensionality Reduction",
+                "charts": [
+                    {"file": "tsne_sampled_plot.json", "title": "t-SNE Visualization"},
+                    {"file": "umap_sampled_plot.json", "title": "UMAP Visualization"},
+                    {"file": "pca_variance.json", "title": "PCA Variance"}
+                ]
+            },
+            "similarity": {
+                "title": "Similarity Analysis",
+                "charts": [
+                    {"file": "similarity_matrix.json", "title": "Similarity Matrix"},
+                    {"file": "similarity_heatmap.json", "title": "Similarity Heatmap"}
+                ]
+            }
+        }
     }
 
 
 def generate_multimodal_results_data() -> dict:
-    """Template for Assignment 1 multimodal model results website data."""
+    """Generate multimodal classification results website data."""
     return {
-        "status": "template",
+        "status": "generated",
         "assignment": "assignment1",
         "pipeline": "multimodal_classification",
-        "message": "TODO: replace this template with multimodal experiment summaries.",
+        "title": "Multimodal Classification Results",
+        "description": "Zero-shot and few-shot classification results on product review data",
+        "models": {
+            "zero_shot": {
+                "name": "Zero-Shot Classification",
+                "description": "CLIP-based zero-shot learning",
+                "metrics": {}
+            },
+            "few_shot": {
+                "name": "Few-Shot Classification",
+                "description": "Few-shot learning with metric learning",
+                "metrics": {}
+            }
+        },
         "experiments": {},
         "learning_curves": {},
-        "retrieval": {},
+        "retrieval": {}
     }
 
 

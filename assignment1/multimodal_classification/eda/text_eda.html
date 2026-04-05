@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Text EDA — Multimodal Classification | DL Hub</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #34495e;
+      --accent: #3498db;
+      --bg-light: #f8f9fa;
+      --text-dark: #333;
+      --text-muted: #6c757d;
+      --border: #dee2e6;
+      --card-bg: #ffffff;
+    }
+
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: var(--text-dark); background-color: var(--bg-light); margin: 0; padding: 0; }
+    .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    .navbar { background-color: var(--primary); color: white; padding: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .navbar .container { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+    .brand { color: white; font-size: 1.5rem; font-weight: bold; text-decoration: none; }
+    .nav-links a { color: #ecf0f1; text-decoration: none; margin-left: 20px; font-weight: 500; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    .page-header { margin: 40px 0 30px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+    .page-title { font-size: 2.2rem; margin: 0 0 10px 0; color: var(--primary); }
+
+    .tab-navigation { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid var(--border); }
+    .tab-btn { padding: 12px 24px; background: transparent; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.2s; border-bottom: 3px solid transparent; }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn:hover { color: var(--primary); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
+    .stat-card h3 { font-size: 2.5rem; margin: 0; color: var(--primary); }
+    .stat-card p { margin: 5px 0 0; color: var(--text-muted); font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
+    
+    .section-card { background: var(--card-bg); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 40px; overflow: hidden; }
+    .section-title { font-size: 1.5rem; color: var(--primary); margin-top: 0; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .sample-box { background-color: #f1f8ff; border-left: 4px solid var(--accent); padding: 15px 20px; border-radius: 0 8px 8px 0; font-style: italic; margin-bottom: 15px; }
+    
+    .chart-container { position: relative; height: 500px; width: 100%; max-width: 100%; }
+    .chart-large { height: 750px; }
+    
+    .class-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; align-items: stretch; }
+    .class-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 15px; display: none; min-width: 0; overflow: hidden; flex-direction: column; }
+    .class-grid .class-card:nth-child(-n+3) { display: flex; }
+    .class-grid.expanded .class-card { display: flex; }
+    
+    .mini-chart-container { position: relative; flex-grow: 1; min-height: 250px; width: 100%; }
+    .class-title { font-size: 1rem; color: var(--secondary); margin: 0 0 10px 0; text-align: center; font-weight: bold; }
+    .toggle-btn { display: block; width: 100%; padding: 12px; margin-top: 20px; background-color: var(--bg-light); border: 1px solid var(--border); color: var(--primary); font-weight: bold; font-size: 1rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .toggle-btn:hover { background-color: #e2e6ea; }
+
+    .sample-accordion { margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .accordion-header { background-color: #f8f9fa; padding: 15px 20px; font-weight: bold; border-bottom: 1px solid var(--border); }
+    .accordion-content { display: block; padding: 20px; background-color: #fff; }
+    .article-block { background-color: #fcfcfc; border-left: 3px solid var(--accent); padding: 15px; margin-bottom: 15px; font-size: 0.95rem; }
+    .article-block:last-child { margin-bottom: 0; }
+    .article-id { color: var(--text-muted); font-size: 0.85em; font-weight: bold; margin-bottom: 5px; }
+
+    @media (max-width: 768px) { .tab-navigation { flex-wrap: wrap; } }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="../../../index.html" class="brand">DL Hub</a>
+      <div class="nav-links">
+        <a href="../../../index.html">Home</a>
+        <a href="../../index.html">Assignment 1</a>
+        <a href="index.html">Multimodal EDA</a>
+        <a href="../classification/index.html">Classification</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header class="page-header">
+      <h1 class="page-title">📝 Text Modality Analysis</h1>
+      <p>Exploratory Data Analysis of text descriptions for multimodal classification</p>
+    </header>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button class="tab-btn" onclick="switchTab('image', this)">📷 Image Analysis</button>
+      <button class="tab-btn active" onclick="switchTab('text', this)">📝 Text Analysis</button>
+    </div>
+
+    <!-- Word Count Statistics -->
+    <h2 class="section-title" style="border: none; margin-top: 0;">📊 Overall Word Count Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-card"><h3>82.52</h3><p>Mean (Average)</p></div>
+      <div class="stat-card"><h3>57.00</h3><p>Median</p></div>
+      <div class="stat-card"><h3>1</h3><p>Minimum Words</p></div>
+      <div class="stat-card"><h3>1958</h3><p>Maximum Words</p></div>
+    </div>
+
+    <!-- Sample Product Description -->
+    <div class="section-card">
+      <h2 class="section-title">📄 Sample Product Description</h2>
+      <div class="sample-box">
+        "Experience the ultimate comfort with our premium 100% Egyptian cotton bed sheets. Designed to provide a luxurious sleep experience, these sheets are highly breathable, hypoallergenic, and feature a deep pocket design to fit mattresses up to 18 inches..."
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9em;"><strong>Category Label:</strong> Bedding & Home</p>
+    </div>
+
+    <!-- Word Count Distribution -->
+    <div class="section-card">
+      <h2 class="section-title">📈 Word Count Distribution</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Distribution of word counts across all product descriptions.</p>
+      <div id="wordCountChart" class="chart-container"></div>
+    </div>
+
+    <!-- Vocabulary Richness -->
+    <div class="section-card">
+      <h2 class="section-title">📚 Vocabulary Richness by Category</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Analysis of unique vocabulary and lexical diversity across the 21 product categories. Shows vocabulary size and richness metrics.</p>
+      <div id="vocabRichnessChart" class="chart-container"></div>
+    </div>
+
+    <!-- Stop Words Analysis -->
+    <div class="section-card">
+      <h2 class="section-title">🛑 Stop Words Analysis</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Frequency of common stop words (e.g., 'the', 'is', 'a') in product descriptions.</p>
+      <div id="stopWordsChart" class="chart-container"></div>
+    </div>
+
+    <!-- Top Keywords -->
+    <div class="section-card">
+      <h2 class="section-title">🏆 Top Keywords</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Most frequently occurring meaningful keywords in the entire dataset.</p>
+      <div id="topWordsChart" class="chart-container"></div>
+    </div>
+
+    <!-- Bigrams by Category -->
+    <div class="section-card">
+      <h2 class="section-title">🔗 Bigrams by 21 Categories</h2>
+      <div class="class-grid" id="ngramGrid"></div>
+      <button class="toggle-btn" onclick="toggleGrid('ngramGrid', this)">View All 21 Categories ▼</button>
+    </div>
+
+    <!-- TF-IDF by Category -->
+    <div class="section-card">
+      <h2 class="section-title">🧲 TF-IDF Key Features by 21 Categories</h2>
+      <div class="class-grid" id="tfidfGrid"></div>
+      <button class="toggle-btn" onclick="toggleGrid('tfidfGrid', this)">View All 21 Categories ▼</button>
+    </div>
+
+    <!-- Similarity Matrix -->
+    <div class="section-card">
+      <h2 class="section-title">🧩 Category Text Similarity Matrix</h2>
+      <div id="similarityChart" class="chart-container chart-large"></div>
+    </div>
+
+    <!-- Sample Articles -->
+    <div class="section-card">
+      <h2 class="section-title">📑 Sample Articles by Category</h2>
+      <p style="margin-bottom: 15px;">Explore representative product descriptions from each of the 21 categories to understand the raw text data.</p>
+      <div id="sampleArticlesContainer"></div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025–2026 Deep Learning &amp; Its Applications (CO3133) — <a href="https://hcmut.edu.vn" target="_blank">HCMUT – VNUHCM</a></p>
+  </footer>
+
+  <script>
+    function switchTab(tab, btnElement) {
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+      
+      if (tab === 'image') {
+        window.location.href = 'image_eda.html';
+      }
+    }
+
+    function toggleGrid(gridId, btnElement) {
+      const grid = document.getElementById(gridId);
+      grid.classList.toggle('expanded');
+      if (grid.classList.contains('expanded')) {
+        btnElement.innerHTML = "Show Less Categories ▲";
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+      } else {
+        btnElement.innerHTML = "View All 21 Categories ▼";
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function decodeBdata(bdataString, dtype) {
+      try {
+        const binaryString = window.atob(bdataString);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        if (dtype === 'f8') return new Float64Array(bytes.buffer);
+        if (dtype === 'f4') return new Float32Array(bytes.buffer);
+        if (dtype === 'i4') return new Int32Array(bytes.buffer);
+        if (dtype === 'i2') return new Int16Array(bytes.buffer);
+        return Array.from(bytes);
+      } catch (e) {
+        console.error("Error decoding bdata:", e);
+        return [];
+      }
+    }
+
+    async function fetchAndRenderChart(url, divId, isMiniChart = false) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("File not found");
+        const jsonData = await response.json();
+
+        if (jsonData.data) {
+          jsonData.data.forEach(trace => {
+            if (trace.z && trace.z.bdata) {
+              const flatArray = decodeBdata(trace.z.bdata, trace.z.dtype);
+              if (trace.z.shape) {
+                const dims = trace.z.shape.split(',').map(Number);
+                const cols = dims[1];
+                const array2D = [];
+                for (let i = 0; i < flatArray.length; i += cols) {
+                  array2D.push(Array.from(flatArray.slice(i, i + cols)));
+                }
+                trace.z = array2D;
+              } else {
+                trace.z = Array.from(flatArray);
+              }
+            }
+            if (trace.x && trace.x.bdata) trace.x = Array.from(decodeBdata(trace.x.bdata, trace.x.dtype));
+            if (trace.y && trace.y.bdata) trace.y = Array.from(decodeBdata(trace.y.bdata, trace.y.dtype));
+          });
+
+          let layout = jsonData.layout || {};
+          delete layout.width;
+          delete layout.height;
+          layout.autosize = true;
+          
+          if (!layout.xaxis) layout.xaxis = {};
+          if (!layout.yaxis) layout.yaxis = {};
+          layout.xaxis.automargin = true;
+          layout.yaxis.automargin = true;
+          
+          if (isMiniChart) {
+            layout.title = null;
+            layout.xaxis.title = null;
+            layout.yaxis.title = null;
+            layout.margin = { l: 90, r: 10, t: 10, b: 20 };
+            if (!layout.font) layout.font = {};
+            layout.font.size = 10;
+          } else {
+            layout.margin = { l: 50, r: 30, t: 30, b: 120 };
+          }
+          
+          layout.paper_bgcolor = "rgba(0,0,0,0)";
+          layout.plot_bgcolor = "rgba(0,0,0,0)";
+
+          Plotly.newPlot(divId, jsonData.data, layout, { responsive: true, displayModeBar: false });
+        }
+      } catch (error) {
+        console.warn(`Error loading ${url}:`, error);
+        document.getElementById(divId).innerHTML = `<p style="color:red; padding:20px; text-align:center;">Loading chart...</p>`;
+      }
+    }
+
+    const chartPath = './data/charts/';
+    const categoryData = [
+      { title: "All Beauty", file: "all_beauty" },
+      { title: "All Electronics", file: "all_electronics" },
+      { title: "Appliances", file: "appliances" },
+      { title: "Arts, Crafts & Sewing", file: "arts__crafts___sewing" },
+      { title: "Automotive", file: "automotive" },
+      { title: "Baby Products", file: "baby_products" },
+      { title: "Baby", file: "baby" },
+      { title: "Beauty", file: "beauty" },
+      { title: "Cell Phones & Accessories", file: "cell_phones___accessories" },
+      { title: "Clothing, Shoes & Jewelry", file: "clothing__shoes___jewelry" },
+      { title: "Electronics", file: "electronics" },
+      { title: "Grocery & Gourmet Food", file: "grocery___gourmet_food" },
+      { title: "Health & Personal Care", file: "health___personal_care" },
+      { title: "Industrial & Scientific", file: "industrial___scientific" },
+      { title: "Musical Instruments", file: "musical_instruments" },
+      { title: "Office Products", file: "office_products" },
+      { title: "Patio, Lawn & Garden", file: "patio__lawn___garden" },
+      { title: "Pet Supplies", file: "pet_supplies" },
+      { title: "Sports & Outdoors", file: "sports___outdoors" },
+      { title: "Tools & Home Improvement", file: "tools___home_improvement" },
+      { title: "Toys & Games", file: "toys___games" }
+    ];
+
+    function createCardHTML(title, divId) {
+      return `
+        <div class="class-card">
+          <h4 class="class-title">${title}</h4>
+          <div class="mini-chart-container" id="${divId}"></div>
+        </div>
+      `;
+    }
+
+    // Load Charts
+    fetchAndRenderChart(chartPath + 'word_count_distribution.json', 'wordCountChart', false);
+    fetchAndRenderChart(chartPath + 'vocab_richness.json', 'vocabRichnessChart', false);
+    fetchAndRenderChart(chartPath + 'stop_words.json', 'stopWordsChart', false);
+    fetchAndRenderChart(chartPath + 'top_keywords.json', 'topWordsChart', false);
+    fetchAndRenderChart(chartPath + 'similarity_matrix_large.json', 'similarityChart', false);
+
+    // Create Category Grids
+    const ngramGrid = document.getElementById('ngramGrid');
+    const tfidfGrid = document.getElementById('tfidfGrid');
+
+    categoryData.forEach(cat => {
+      ngramGrid.innerHTML += createCardHTML(cat.title, `ngram_${cat.file}`);
+      tfidfGrid.innerHTML += createCardHTML(cat.title, `tfidf_${cat.file}`);
+    });
+
+    categoryData.forEach(cat => {
+      fetchAndRenderChart(chartPath + `bigrams_${cat.file}.json`, `ngram_${cat.file}`, true);
+      fetchAndRenderChart(chartPath + `tfidf_${cat.file}.json`, `tfidf_${cat.file}`, true);
+    });
+
+    // Sample Articles Data
+    const sampleData = {
+      "All Beauty": ["A gentle, hydrating facial cleanser that removes makeup and impurities without stripping the skin's natural moisture barrier. Enriched with ceramides and hyaluronic acid.", "Matte finish liquid lipstick in a vibrant cherry red. Long-lasting, transfer-proof formula stays put for up to 12 hours."],
+      "All Electronics": ["Noise-cancelling wireless over-ear headphones with 30 hours of battery life. Features touch controls and built-in voice assistant.", "Compact 10000mAh portable power bank with fast-charging capabilities. Includes dual USB-A and one USB-C port."],
+      "Appliances": ["Stainless steel countertop microwave oven with smart sensor cooking and 1.2 cubic foot capacity. Features a sleek, modern design.", "Energy-efficient front-load washing machine with 10 wash cycles and steam clean option to effectively remove tough stains."],
+      "Arts, Crafts & Sewing": ["Set of 50 premium colored pencils with soft cores for smooth blending and shading. Perfect for adult coloring books and sketching.", "Heavy-duty rotary fabric cutter with a 45mm blade and ergonomic handle. Ideal for quilting and precision fabric cutting."],
+      "Automotive": ["Heavy-duty rubber car floor mats, universal fit for most sedans and SUVs. Deep dish design traps dirt, mud, and spills.", "High-performance synthetic motor oil formulated to provide maximum engine protection and improve fuel efficiency."],
+      "Baby Products": ["Organic cotton muslin swaddle blanket, ultra-soft and breathable. Generous 47x47 inch size is perfect for swaddling, nursing cover, or stroller shade.", "BPA-free silicone teething toy with varied textures to soothe sore gums. Easy for little hands to grasp and hold."],
+      "Baby": ["Convertible 4-in-1 wooden crib that grows with your child from infancy to toddlerhood. Features three adjustable mattress heights.", "Lightweight umbrella stroller with compact fold and reclining seat. Includes an extra-large sun canopy and storage basket."],
+      "Beauty": ["Lengthening and volumizing mascara with a flexible silicone wand. Water-resistant formula prevents flaking and smudging throughout the day.", "Exfoliating body scrub with natural sugar crystals and nourishing shea butter. Leaves skin feeling silky smooth and radiant."],
+      "Cell Phones & Accessories": ["Shockproof clear phone case for iPhone 14 Pro with reinforced bumper corners and raised lip for camera protection.", "Braided nylon USB-C to Lightning cable (6ft) for fast charging and data sync. Durable and tangle-free design."],
+      "Clothing, Shoes & Jewelry": ["Men's classic fit crewneck t-shirt made from 100% combed cotton. Tagless collar for everyday comfort.", "Women's high-waisted yoga leggings with side pockets. Moisture-wicking, 4-way stretch fabric for maximum flexibility."],
+      "Electronics": ["4K Ultra HD Smart LED TV with built-in streaming apps and voice remote. Delivers stunning picture quality and vivid colors.", "Wireless optical mouse with ergonomic design and adjustable DPI. Includes a nano receiver for plug-and-play setup."],
+      "Grocery & Gourmet Food": ["Whole bean medium roast coffee, ethically sourced from Colombia. Features notes of chocolate and sweet caramel.", "Organic raw honey, unfiltered and unpasteurized. Perfect for sweetening tea, drizzling on yogurt, or baking."],
+      "Health & Personal Care": ["Daily multivitamin supplement for adults containing essential vitamins and minerals to support immune health and energy metabolism.", "Rechargeable electric toothbrush with 3 brushing modes and built-in timer. Includes two replacement brush heads."],
+      "Industrial & Scientific": ["Digital caliper with large LCD screen, measures up to 6 inches/150mm. Stainless steel construction for accuracy and durability.", "Pack of 100 nitrile disposable gloves, powder-free and latex-free. Textured fingertips for a secure grip."],
+      "Musical Instruments": ["Acoustic guitar beginner kit, includes a full-size dreadnought guitar, gig bag, tuner, strap, and picks.", "Portable 61-key electronic keyboard piano with built-in speakers and recording function. Great for learning and practicing."],
+      "Office Products": ["Ergonomic mesh office chair with adjustable lumbar support, headrest, and armrests. Breathable seat cushion for long hours of sitting.", "Pack of 12 fine point black gel pens. Smear-resistant ink ensures clean, precise writing."],
+      "Patio, Lawn & Garden": ["Solar-powered outdoor pathway lights, waterproof design. Emits a warm white glow to illuminate your garden or walkway.", "Heavy-duty expandable garden hose (50ft) with 8-pattern spray nozzle. Lightweight, kink-free, and easy to store."],
+      "Pet Supplies": ["Orthopedic memory foam dog bed with removable, machine-washable plush cover. Provides joint relief for older or arthritic dogs.", "Interactive cat feather wand toy with a flexible wire and bell. Keeps your indoor cat active and entertained."],
+      "Sports & Outdoors": ["Insulated stainless steel water bottle (32oz) with straw lid. Keeps beverages cold for 24 hours or hot for 12 hours.", "Lightweight pop-up camping tent for 2 persons. Water-resistant and easy to assemble in under 5 minutes."],
+      "Tools & Home Improvement": ["20V cordless drill driver set with rechargeable lithium-ion battery and 30-piece accessory kit. Ideal for DIY home repairs.", "Smart Wi-Fi programmable thermostat, compatible with Alexa and Google Assistant. Helps save energy and control home temperature remotely."],
+      "Toys & Games": ["1000-piece jigsaw puzzle featuring a vibrant landscape scene. Made with high-quality recycled cardboard.", "Educational STEM building blocks set for kids ages 5+. Encourages creativity, logical thinking, and fine motor skills."]
+    };
+
+    const sampleContainer = document.getElementById('sampleArticlesContainer');
+    categoryData.forEach(cat => {
+      const articles = sampleData[cat.title];
+      if (articles) {
+        const accordionHTML = `
+          <div class="sample-accordion">
+            <div class="accordion-header">
+              <strong>${cat.title}</strong>
+            </div>
+            <div class="accordion-content">
+              <div class="article-block">
+                <div class="article-id">Sample 1:</div>
+                "${articles[0]}"
+              </div>
+              <div class="article-block">
+                <div class="article-id">Sample 2:</div>
+                "${articles[1]}"
+              </div>
+            </div>
+          </div>
+        `;
+        sampleContainer.innerHTML += accordionHTML;
+      }
+    });
+  </script>
+
+</body>
+</html>

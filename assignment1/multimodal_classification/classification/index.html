@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Multimodal Classification — Models & Results</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #34495e;
+      --accent: #3498db;
+      --bg-light: #f8f9fa;
+      --text-dark: #333;
+      --text-muted: #6c757d;
+      --border: #dee2e6;
+      --card-bg: #ffffff;
+    }
+
+    /* Style cho box chứa code - Dark Theme */
+    .code-example { 
+      background: #1e1e1e !important; 
+      border-left: 4px solid var(--accent); 
+      border-radius: 6px; 
+      overflow: hidden; 
+      margin: 15px 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .code-example pre { 
+      margin: 0 !important; 
+      padding: 15px !important; 
+      overflow-x: auto; 
+      background: transparent !important; 
+    }
+    .code-example code { 
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important; 
+      font-size: 0.9rem !important; 
+      color: #d4d4d4 !important; 
+      line-height: 1.6 !important;
+      text-shadow: none !important;
+    }
+    .code-example .token.comment { color: #6a9955 !important; font-style: italic; }
+    .code-example .token.keyword { color: #c586c0 !important; font-weight: bold; }
+    .code-example .token.string { color: #ce9178 !important; }
+    .code-example .token.number { color: #b5cea8 !important; }
+    .code-example .token.function, .code-example .token.class-name { color: #dcdcaa !important; }
+    .code-example .token.builtin { color: #4ec9b0 !important; }
+    .code-example .token.operator, .code-example .token.punctuation { color: #d4d4d4 !important; }
+
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: var(--text-dark); background-color: var(--bg-light); margin: 0; padding: 0; }
+    .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    .navbar { background-color: var(--primary); color: white; padding: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .navbar .container { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+    .brand { color: white; font-size: 1.5rem; font-weight: bold; text-decoration: none; }
+    .nav-links a { color: #ecf0f1; text-decoration: none; margin-left: 20px; font-weight: 500; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    .page-header { margin: 40px 0 30px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+    .page-title { font-size: 2.2rem; margin: 0 0 10px 0; color: var(--primary); }
+
+    .tab-navigation { display: flex; gap: 0; margin-bottom: 30px; border-bottom: 2px solid var(--border); }
+    .tab-btn { padding: 14px 28px; background: transparent; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn:hover { color: var(--primary); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
+    .stat-card h3 { font-size: 2.5rem; margin: 0; color: var(--primary); }
+    .stat-card p { margin: 5px 0 0; color: var(--text-muted); font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
+    
+    .section-card { background: var(--card-bg); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 40px; overflow: hidden; }
+    .section-title { font-size: 1.5rem; color: var(--primary); margin-top: 0; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    
+    .chart-container { position: relative; height: 500px; width: 100%; max-width: 100%; }
+    .chart-large { height: 750px; }
+
+    .model-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+    @media (max-width: 900px) { .model-comparison { grid-template-columns: 1fr; } }
+
+    .model-card { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 8px; padding: 20px; }
+    .model-card h4 { color: var(--primary); margin-top: 0; margin-bottom: 15px; }
+    .model-metric { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+    .model-metric:last-child { border-bottom: none; }
+    .metric-label { color: var(--text-muted); font-weight: 600; }
+    .metric-value { color: var(--primary); font-weight: bold; }
+
+    .feature-list { list-style: none; padding: 0; margin: 0; }
+    .feature-list li { padding: 10px 0; border-bottom: 1px solid var(--border); padding-left: 25px; position: relative; }
+    .feature-list li:before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: bold; font-size: 1.1rem; }
+    .feature-list li:last-child { border-bottom: none; }
+
+    /* Visual Pipeline Styles */
+    .pipeline-visual-container { margin: 30px 0; overflow-x: auto; padding: 20px 0; }
+    .pipeline-flow { display: flex; align-items: center; justify-content: center; gap: 15px; min-width: max-content; }
+    /* --- Styles cho Model Comparison Dashboard --- */
+    .dashboard-card { background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-top: 30px; overflow: hidden; border: 1px solid var(--border); }
+    
+    .dash-tabs { display: flex; border-bottom: 1px solid var(--border); background: #f8f9fa; }
+    .dash-tab-btn { flex: 1; padding: 15px 20px; text-align: center; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: transparent; transition: all 0.3s; font-size: 1rem; border-right: 1px solid var(--border); }
+    .dash-tab-btn:last-child { border-right: none; }
+    .dash-tab-btn:hover { background: #f1f3f5; color: var(--primary); }
+    .dash-tab-btn.active { background: #4a47a3; color: white; border-bottom: 3px solid #322f80; }
+    
+    .dash-content { display: none; padding: 30px; }
+    .dash-content.active { display: block; animation: fadeIn 0.3s ease-in; }
+    
+    .comparison-table { width: 100%; border-collapse: collapse; text-align: center; }
+    .comparison-table th { padding: 15px 10px; font-size: 0.85rem; color: #555; text-transform: uppercase; border-bottom: 2px solid #eee; font-weight: 700; }
+    .comparison-table th:first-child { text-align: left; }
+    .comparison-table td { padding: 15px 10px; border-bottom: 1px solid #f0f0f0; font-weight: 600; font-size: 0.95rem; }
+    .comparison-table td:first-child { text-align: left; color: var(--primary); font-weight: 700; }
+    
+    /* Màu xanh lá cho các chỉ số tốt */
+    .metric-good { color: #2ecc71; }
+    
+    /* Style riêng cho Config block */
+    .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .config-group { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid var(--accent); }
+    .config-group h4 { margin-top: 0; color: var(--primary); margin-bottom: 15px; font-size: 1.1rem; }
+    .pipeline-box {
+      color: white;
+      padding: 12px;
+      border-radius: 12px;
+      min-width: 120px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .pipeline-box.box-1 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .pipeline-box.box-2 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .pipeline-box.box-3 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .pipeline-box.box-4 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .pipeline-box.box-5 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+    .pipeline-box:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+    }
+    .pipeline-box:active { transform: translateY(-4px); }
+    .box-icon { font-size: 1.2rem; margin-bottom: 3px; }
+    .box-title { font-weight: 700; font-size: 0.8rem; margin-bottom: 3px; }
+    .box-desc { font-size: 0.65rem; opacity: 0.9; }
+
+    .pipeline-arrow { font-size: 1.5rem; font-weight: bold; color: var(--accent); min-width: 30px; text-align: center; }
+
+    .pipeline-detail-content { margin-top: 25px; }
+    .pipeline-detail-tab-content { display: none; }
+    .pipeline-detail-tab-content.active { display: block; animation: fadeIn 0.3s ease-in; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .pipeline-detail-tab-content h3 { color: var(--primary); font-size: 1.3rem; margin-top: 0; margin-bottom: 10px; }
+    .pipeline-detail-intro { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .detail-group { margin-bottom: 25px; }
+    .detail-group h4 { color: var(--primary); margin: 0 0 12px 0; font-size: 1.05rem; }
+    .detail-group p { color: var(--text-muted); margin: 0; font-size: 0.9rem; }
+
+    @media (max-width: 768px) {
+      .tab-navigation { flex-wrap: wrap; }
+      .pipeline-flow { gap: 10px; }
+      .pipeline-box { min-width: 100px; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="../../../index.html" class="brand">DL Hub</a>
+      <div class="nav-links">
+        <a href="../../../index.html">Home</a>
+        <a href="../../index.html">Assignment 1</a>
+        <a href="../eda/image_eda.html">Multimodal EDA</a>
+        <a href="index.html" class="active">Classification</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header class="page-header">
+      <h1 class="page-title">🎯 Multimodal Classification Models</h1>
+      <p>Zero-shot vs. Few-shot learning approaches for product classification using image + text modalities</p>
+    </header>
+
+    <div class="tab-navigation">
+      <button class="tab-btn active" onclick="switchTab('zeroshot', this)">🔹 Zero-shot Learning</button>
+      <button class="tab-btn" onclick="switchTab('fewshot', this)">🎓 Few-shot Learning</button>
+    </div>
+
+    <div id="zeroshot-content" class="tab-content active">
+
+      <div class="section-card">
+        <h2 class="section-title">📊 Zero-shot Classification Overview</h2>
+        <p style="color: var(--text-muted); margin-bottom: 15px;">Zero-shot learning is a learning paradigm in which a model predicts classes that were not observed during task-specific training by transferring knowledge from previously learned semantic representations.</p>
+        <div class="stats-grid">
+          <div class="stat-card"><h3>21</h3><p>Categories</p></div>
+          <div class="stat-card"><h3>CLIP</h3><p>Encoder Model</p></div>
+          <div class="stat-card"><h3>Image + Text</h3><p>Modalities</p></div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h2 class="section-title">🔧 Zero-shot Pipeline Architecture</h2>
+        
+        <div class="pipeline-visual-container">
+          <div class="pipeline-flow">
+            <div class="pipeline-box box-1" onclick="switchPipelineTab('zeroshot', 'input')">
+              <div class="box-icon">📷</div>
+              <div class="box-title">Input</div>
+              <div class="box-desc">100x100 RGB Image,Text Description</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            
+            <div class="pipeline-box box-2" onclick="switchPipelineTab('zeroshot', 'encoding')">
+              <div class="box-icon">🧠</div>
+              <div class="box-title">Preprocessing</div>
+              <div class="box-desc">Hybrid text-image feature fusion</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            
+            <div class="pipeline-box box-3" onclick="switchPipelineTab('zeroshot', 'category')">
+              <div class="box-icon">🏷️</div>
+              <div class="box-title">Backbone</div>
+              <div class="box-desc">CLIP Multimodal Feature</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            
+            <div class="pipeline-box box-4" onclick="switchPipelineTab('zeroshot', 'similarity')">
+              <div class="box-icon">📏</div>
+              <div class="box-title">Classifier Head</div>
+              <div class="box-desc">Similarity-based</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            
+            <div class="pipeline-box box-5">
+              <div class="box-icon">⭐</div>
+              <div class="box-title">Classifier Result</div>
+              <div class="box-desc">21 Categories</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline-detail-content">
+          <div id="zeroshot-input-detail" class="pipeline-detail-tab-content active">
+            <h3>1️⃣ Input Preparation</h3>
+            <p class="pipeline-detail-intro">Prepare product images, clean and concatenate text descriptions, and apply descriptive label mapping to maximize CLIP's capabilities.</p>
+            
+            <div class="detail-group">
+              <h4>📋 The Label Map Strategy (Prompt Engineering)</h4>
+              <p>In zero-shot learning, CLIP performs better when target classes are descriptive sentences rather than single words. We map raw category names to rich textual prompts for later feature encoding.</p>
+              <div class="code-example">
+                <pre><code class="language-python"># Define detailed descriptions for all 21 categories
+LABEL_MAP = {
+    "All Beauty": "Professional salon hair care, luxury perfumes, essential oils, and premium cosmetics",
+    "Beauty": "Daily personal care, hair styling tools, tanning lotions, and grooming products",
+    "Health & Personal Care": "Vitamins, dietary supplements, over-the-counter medicine, and wellness products",
+    "All Electronics": "Computer cables, blank media like DVDs, replacement batteries, and tech accessories",
+    "Electronics": "Consumer electronics, portable radios, scanners, and office electronic supplies",
+    "Cell Phones & Accessories": "Mobile phone screen protectors, cell phone cases, chargers, and handset accessories",
+    "Baby": "Baby furniture, cribs, strollers, and large infant travel gear",
+    "Baby Products": "Baby diapers, nursing pads, toddler toys, and everyday infant care accessories",
+    "Appliances": "Kitchen appliances, ice makers, cooktop accessories, and large household machines",
+    "Tools & Home Improvement": "Power tools, bathroom lighting fixtures, saw blades, and home repair hardware",
+    "Patio, Lawn & Garden": "Outdoor cooking tools, hydroponic supplies, gardening gear, and patio accessories",
+    "Pet Supplies": "Pet feeding bowls, aquarium breeding nets, animal grooming powder, and pet accessories",
+    "Arts, Crafts & Sewing": "Crafting tools, sewing supplies, painting kits, and DIY art materials",
+    "Automotive": "Car floor mats, automotive seat covers, vehicle accessories, and car care products",
+    "Clothing, Shoes & Jewelry": "Apparel, wristwatches, Halloween costumes, footwear, and fashion accessories",
+    "Grocery & Gourmet Food": "Packaged food, tea bags, cooking ingredients, and grocery snacks",
+    "Industrial & Scientific": "Industrial hardware, strong adhesives, lab equipment, and specialized scientific tools",
+    "Musical Instruments": "Drum accessories, speaker enclosures, guitars, and music performance gear",
+    "Office Products": "Office supplies, printer ink cartridges, wall calendars, and classroom bulletin boards",
+    "Sports & Outdoors": "Sports team apparel, weightlifting equipment, outdoor hunting gear, and fitness items",
+    "Toys & Games": "Remote control cars, puzzles, children's toys, and board games"
+}
+
+# Inside Dataset initialization:
+self.original_class_names = sorted(self.df['categories'].unique().tolist())
+
+# Apply LABEL_MAP specifically for Zero-shot approach
+if self.use_label_map:  # True when num_shots == 0
+    self.class_names = [LABEL_MAP.get(cat, cat) for cat in self.original_class_names]</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>🔄 Custom Dataset & Tensor Formatting</h4>
+              <p>The <code>RetailDataset</code> class handles on-the-fly preprocessing. It converts images to RGB tensors and tokenizes the concatenated title and description into fixed-length token arrays.</p>
+              <div class="code-example">
+                <pre><code class="language-python">class RetailDataset(Dataset):
+    # ... initialization ...
+
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        
+        # 1. Image Preprocessing
+        # Loads image and applies CLIP's native transform (Resize, Crop, Normalize)
+        img_path = os.path.join(self.images_path, f"{row['ImgId']}.jpg")
+        image_tensor = preprocess_image(img_path, self.preprocess_model)
+        
+        # 2. Text Preprocessing
+        # Combines title & description, cleans text, and tokenizes (max 77 tokens)
+        text_token = preprocess_text(
+            row.get('title', ''), 
+            row.get('description', '')
+        )
+        
+        # 3. Label Target
+        label = torch.tensor(self.cat_to_idx[row['categories']], dtype=torch.long)
+        
+        # Output formats per sample:
+        # image_tensor: [3, 224, 224] (Float)
+        # text_token:   [77] (Int)
+        # label:        [1] (Long)
+        return image_tensor, text_token, label</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>📦 DataLoader Configuration</h4>
+              <div class="code-example">
+                <pre><code class="language-python">from torch.utils.data import DataLoader
+
+# Initialize the unified dataset
+dataset = RetailDataset(
+    dataframe=df, 
+    images_path=IMAGES_DIR, 
+    preprocess_model=clip_preprocess, 
+    num_shots=0  # Triggers Zero-shot logic & LABEL_MAP
+)
+
+# Create DataLoader
+loader = DataLoader(
+    dataset, 
+    batch_size=32, 
+    shuffle=False, 
+    num_workers=2
+)
+
+# A single batch iteration yields:
+# batch_images: torch.Size([32, 3, 224, 224])
+# batch_texts:  torch.Size([32, 77])
+# batch_labels: torch.Size([32])</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="zeroshot-encoding-detail" class="pipeline-detail-tab-content">
+            <h3>2️⃣ Multimodal Preprocessing</h3>
+            <p class="pipeline-detail-intro">
+              <strong>🎯 Objective:</strong> Standardize diverse raw images and noisy, long text descriptions into clean, uniform tensor formats. This ensures the CLIP encoders extract high-quality, aligned embeddings without exceeding token limits or crashing due to memory constraints or corrupted data.
+            </p>
+            
+            <div class="detail-group">
+              <h4>📸 Image Processing</h4>
+              <p>Before entering the Vision Transformer (ViT), images must be standardized to match CLIP's exact pre-training conditions.</p>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>RGB Conversion:</strong> Ensures consistent 3-channel input, removing alpha channels (RGBA) or grayscale (1-channel).</li>
+                <li><strong>Resize & Center Crop:</strong> Scales the shortest edge to 224 pixels, then extracts a 224x224 square from the center.</li>
+                <li><strong>Normalization:</strong> Scales pixel values using CLIP's pre-calculated Mean <code>(0.481, 0.458, 0.408)</code> and Standard Deviation <code>(0.268, 0.261, 0.275)</code>.</li>
+              </ul>
+              <div class="code-example">
+                <pre><code class="language-python">def preprocess_image(image_path, clip_preprocess_fn):
+    try:
+        # 1. Standardize format to 3-Channel RGB
+        image = Image.open(image_path).convert("RGB")
+        
+        # 2. Apply CLIP's native transforms automatically:
+        # - Resize(224, interpolation=BICUBIC)
+        # - CenterCrop(224)
+        # - ToTensor()
+        # - Normalize(mean=[0.4814, 0.4578, 0.4082], 
+        #             std=[0.2686, 0.2613, 0.2757])
+        return clip_preprocess_fn(image)
+        
+    except Exception as e:
+        # Fallback for corrupted images to prevent DataLoader crashes
+        return torch.zeros(3, 224, 224)</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>📝 Text Processing & Cleaning</h4>
+              <p>E-commerce product descriptions are often noisy, containing HTML links, brackets, and numbers. We apply aggressive cleaning to extract pure semantic keywords before tokenization.</p>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>Concatenation:</strong> Fuses the Product Title and Description.</li>
+                <li><strong>Noise Removal:</strong> Strips URLs, brackets, punctuation, and digits.</li>
+                <li><strong>Stopword Filtering:</strong> Removes common English stopwords (NLTK) and isolated single characters to maximize embedding density.</li>
+              </ul>
+              <div class="code-example">
+                <pre><code class="language-python">import string, re
+from nltk.corpus import stopwords
+stop_words = set(stopwords.words('english'))
+
+def clean_text(text):
+    if not isinstance(text, str) or text == "": return "product"
+    
+    text = text.lower()
+    text = re.sub(r'\[.*?\]', '', text) # Remove brackets
+    text = re.sub(r'https?://\S+|www\.\S+', '', text) # Remove URLs
+    text = re.sub(r'[%s]' % re.escape(string.punctuation), '', text) # Remove punctuation
+    text = re.sub(r'\w*\d\w*', '', text) # Remove words with numbers
+    
+    # Filter stopwords and words shorter than 2 chars
+    words = text.split()
+    cleaned_words = [w for w in words if w not in stop_words and len(w) > 2]
+    
+    return " ".join(cleaned_words)</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>✂️ Overcoming CLIP's Token Limit (Chunking)</h4>
+              <p><strong>The Problem:</strong> CLIP's Text Encoder is strictly limited to 77 tokens. Long product descriptions get truncated, causing the model to lose valuable semantic context.</p>
+              <p><strong>The Solution:</strong> We chunk long text into segments of ~60 words, encode each chunk independently, and compute the <strong>mean embedding</strong>. This hybrid approach perfectly preserves long-context data.</p>
+              <div class="code-example">
+                <pre><code class="language-python">def encode_long_text_wrapper(model, category, description, device):
+    # Split description into manageable ~60 word chunks
+    words = description.split()
+    chunk_size = 60
+    str_chunks = [" ".join(words[i:i+chunk_size]) for i in range(0, len(words), chunk_size)]
+    if not str_chunks: str_chunks = [""] 
+
+    chunk_features = []
+    for s in str_chunks:
+        prompt = f"Category: {category}. {s}"
+        
+        # Tokenize (Fits comfortably under the 77-token limit)
+        tokens = clip.tokenize(prompt, truncate=True).to(device)
+        
+        with torch.no_grad():
+            feat = model.encode_text(tokens).float()
+            # Normalize each chunk's embedding
+            feat /= feat.norm(dim=-1, keepdim=True)
+            chunk_features.append(feat)
+
+    # Calculate average embedding across all chunks
+    final_feat = torch.mean(torch.stack(chunk_features), dim=0)
+    
+    # Final L2 Normalization to ensure valid Cosine Similarity matching
+    return final_feat / final_feat.norm(dim=-1, keepdim=True)</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="zeroshot-category-detail" class="pipeline-detail-tab-content">
+            <h3>3️⃣ Backbone: CLIP Feature Extraction</h3>
+            <p class="pipeline-detail-intro">
+              <strong>🎯 Objective:</strong> Pass the preprocessed images and the text prompts through CLIP's parallel encoders to extract 512-dimensional feature vectors.
+            </p>
+
+            <div class="detail-group">
+              <h4>📸 Image Encoding</h4>
+              <p>The preprocessed image tensor is passed through CLIP's Vision Transformer (ViT-L14). This outputs a single, global feature vector representing the visual content of the product. Notice that we perform L2 Normalization immediately after extraction to prepare for the similarity matching step.</p>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>Input Shape:</strong> <code>[Batch, 3, 224, 224]</code></li>
+                <li><strong>Output Shape:</strong> <code>[Batch, 768]</code></li>
+              </ul>
+              <div class="code-example">
+                <pre><code class="language-python"># --- ENCODE IMAGE ---
+with torch.no_grad():
+    # Pass image batch through Vision Transformer
+    # Output shape: [Batch, 768]
+    image_features = self.clip.encode_image(image).float()
+    
+    # L2 Normalization (Crucial for computing Cosine Similarity later)
+    image_features = image_features / image_features.norm(dim=-1, keepdim=True)</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>📝 Text Encoding & The Power of LABEL_MAP</h4>
+              <p><strong>Why use LABEL_MAP?</strong> Raw category names (e.g., "Beauty", "Baby") are too abstract for CLIP. By concatenating the rich descriptive prompt (from our <code>LABEL_MAP</code>) with the product's actual description chunks, we provide explicit semantic context to the Text Encoder.</p>
+              
+              <p>Below is the wrapper function showing exactly how the category mapping is concatenated with the text chunk (<code>prompt = f"Category: {category}. {s}"</code>):</p>
+              <div class="code-example">
+                <pre><code class="language-python">def encode_long_text_wrapper(model, category, description, device):
+    words = description.split()
+    chunk_size = 60
+    str_chunks = [" ".join(words[i:i+chunk_size]) for i in range(0, len(words), chunk_size)]
+    if not str_chunks: str_chunks = [""] 
+
+    chunk_features = []
+    for s in str_chunks:
+        # 🔑 Core Prompt Engineering: 
+        # Inject the LABEL_MAP category description alongside the item description
+        prompt = f"Category: {category}. {s}"
+        
+        tokens = clip.tokenize(prompt, truncate=True).to(device)
+        with torch.no_grad():
+            feat = model.encode_text(tokens).float()
+            feat /= feat.norm(dim=-1, keepdim=True)
+            chunk_features.append(feat)
+
+    # Average chunk embeddings to bypass the 77-token limit
+    final_feat = torch.mean(torch.stack(chunk_features), dim=0)
+    return final_feat / final_feat.norm(dim=-1, keepdim=True)</code></pre>
+              </div>
+
+              <p style="margin-top: 15px;">During the forward pass, the model dynamically iterates and encodes 21 distinct text vectors (one for each class) for <em>each</em> image sample in the batch.</p>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>Final Output Shape:</strong> <code><div Batch,="" Num_Classes,="" 768=""></div></code> (where Num_Classes = 21)</li>
+              </ul>
+              <div class="code-example">
+                <pre><code class="language-python"># --- ENCODE TEXT FOR 21 CLASSES ---
+all_text_features = []
+
+for i in range(batch_size):
+    desc = text[i] if isinstance(text[i], str) else ""
+    
+    # Iterate over all 21 mapped classes and encode them using the wrapper
+    cls_feats = [encode_long_text_wrapper(self.clip, cls, desc, image.device) 
+                 for cls in class_names]
+    
+    # Stack into shape: [21, 768]
+    feat = torch.stack(cls_feats).squeeze(1) 
+    all_text_features.append(feat)
+
+# Final text_features shape: [Batch, 21, 768]
+text_features = torch.stack(all_text_features)</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="zeroshot-similarity-detail" class="pipeline-detail-tab-content">
+            <h3>4️⃣ Classifier Head: Similarity & Prediction</h3>
+            <p class="pipeline-detail-intro">
+              <strong>🎯 Objective:</strong> Calculate the Cosine Similarity between the image vector and the 21 text vectors, then apply Softmax to determine the final predicted class.
+            </p>
+
+            <div style="text-align: center; margin: 30px 0; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+              <img src="src/zero.jpg" alt="CLIP Zero-Shot Similarity Match" style="max-width: 100%; border-radius: 6px;">
+              <p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 15px; line-height: 1.5;">
+                <i><strong>Similarity Matching Process:</strong> The encoded Image vector (I1) is multiplied by each of the encoded Text vectors (T1, T2, T3...) via dot product. The text prompt that yields the highest similarity score represents the predicted class.</i>
+              </p>
+            </div>
+
+            <div class="detail-group">
+              <h4>✖️ Similarity Matching (Batch Matrix Multiplication)</h4>
+              <p>Because both our image and text tensors are already L2 normalized, taking their Dot Product mathematically equates to their Cosine Similarity. We use <code>torch.bmm</code> to execute this multiplication efficiently across the entire batch.</p>
+              <div class="code-example">
+                <pre><code class="language-python"># Reshape for matrix multiplication
+# image_features shape: [Batch, 1, 768]
+# text_features transposed shape: [Batch, 768, 21]
+
+# Compute Cosine Similarity (Logits)
+# Resulting logits shape: [Batch, 21]
+logits = torch.bmm(image_features.unsqueeze(1), text_features.transpose(1, 2)).squeeze(1)</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>🎯 Softmax & Argmax (Final Prediction)</h4>
+              <p>The raw similarity scores (logits) are passed through a Softmax function to convert them into a valid probability distribution. Finally, Argmax extracts the index of the class with the highest probability score.</p>
+              <div class="code-example">
+                <pre><code class="language-python"># 1. Convert similarity scores to probabilities (Sum to 1.0)
+probabilities = torch.softmax(logits, dim=-1)
+
+# 2. Get the final predicted class index
+predicted_class_idx = torch.argmax(probabilities, dim=-1)
+
+return probabilities, predicted_class_idx</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="zeroshot-prediction-detail" class="pipeline-detail-tab-content">
+            <h3>5️⃣ Prediction & Evaluation</h3>
+            <p class="pipeline-detail-intro">Compute accuracy, precision, recall, and F1-scores across all categories.</p>
+            
+            <div class="detail-group">
+              <h4>📈 Metrics Computation</h4>
+              <div class="code-example">
+                <pre><code class="language-python">from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
+
+# Get predictions on full test set
+predictions = []
+ground_truth = []
+
+with torch.no_grad():
+    for batch_images, batch_texts, batch_labels in test_loader:
+        # Forward pass
+        img_feats = model.get_image_features(batch_images)
+        txt_feats = model.get_text_features(**batch_texts)
+        
+        # Fuse and normalize
+        fused = (img_feats + txt_feats) / 2.0
+        fused = fused / fused.norm(p=2, dim=-1, keepdim=True)
+        
+        # Compute similarity and predict
+        scores = torch.matmul(fused, category_embeddings.T)
+        preds = torch.argmax(scores, dim=1)
+        
+        predictions.extend(preds.cpu().numpy())
+        ground_truth.extend(batch_labels.cpu().numpy())
+
+# Compute metrics
+accuracy = accuracy_score(ground_truth, predictions)
+precision, recall, f1, _ = precision_recall_fscore_support(
+    ground_truth, predictions, average='macro'
+)
+
+print(f"Accuracy: {accuracy:.4f}")
+print(f"Precision: {precision:.4f}")
+print(f"Recall: {recall:.4f}")
+print(f"F1-Score: {f1:.4f}")</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>🗂️ Per-Category Analysis</h4>
+              <div class="code-example">
+                <pre><code class="language-python"># Per-category metrics
+from sklearn.metrics import classification_report
+
+report = classification_report(ground_truth, predictions, 
+                              target_names=categories,
+                              output_dict=True)
+
+# Confusion matrix
+conf_matrix = confusion_matrix(ground_truth, predictions)
+# Shape: (21, 21)
+
+# Identify problematic categories
+for cat_idx, category in enumerate(categories):
+    cat_precision = report[str(cat_idx)]['precision']
+    cat_recall = report[str(cat_idx)]['recall']
+    cat_f1 = report[str(cat_idx)]['f1-score']
+    print(f"{category}: P={cat_precision:.3f}, R={cat_recall:.3f}, F1={cat_f1:.3f}")</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+      <h2 class="section-title">📊 Comprehensive Model Comparison</h2>
+      <p style="color: var(--text-muted); margin-bottom: 20px;">Compare performance metrics, computational resources, and configurations across all Zero-shot and Few-shot variations.</p>
+      
+      <div class="dashboard-card">
+        <div class="dash-tabs">
+          <button class="dash-tab-btn active" onclick="switchDashTab('perf')">📈 Performance</button>
+          <button class="dash-tab-btn" onclick="switchDashTab('resources')">⚡ Resources</button>
+          <button class="dash-tab-btn" onclick="switchDashTab('config')">⚙️ Configuration</button>
+        </div>
+
+        <div id="dash-perf" class="dash-content active">
+          <div style="overflow-x: auto;">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>MODEL</th>
+                  <th>PRECISION ↑</th>
+                  <th>RECALL ↑</th>
+                  <th>F1-SCORE ↑</th>
+                  <th>ACCURACY ↑</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Zero-shot (No Aug)</td>
+                  <td class="metric-good">40.14%</td>
+                  <td class="metric-good">29.94%</td>
+                  <td class="metric-good">26.73%</td>
+                  <td class="metric-good">29.92%</td>
+                </tr>
+                <tr>
+                  <td>Zero-shot (Aug)</td>
+                  <td class="metric-good">39.05%</td>
+                  <td class="metric-good">33.28%</td>
+                  <td class="metric-good">32.55%</td>
+                  <td class="metric-good">33.28%</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (3 Shots)</td>
+                  <td class="metric-good">42.54%</td>
+                  <td class="metric-good">37.62%</td>
+                  <td class="metric-good">35.87%</td>
+                  <td class="metric-good">37.62%</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (5 Shots)</td>
+                  <td class="metric-good">46.74%</td><td class="metric-good">44.4%</td><td class="metric-good">42.7%</td><td class="metric-good">44.4%</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (10 Shots)</td>
+                  <td class="metric-good">54.31%</td><td class="metric-good">52.34%</td><td class="metric-good">51.38%</td><td class="metric-good">52.34%</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (16 Shots)</td>
+                  <td class="metric-good">55.94%</td><td class="metric-good">55.62%</td><td class="metric-good">54.04%</td><td class="metric-good">55.62%</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (32 Shots)</td>
+                  <td class="metric-good">61.57%</td>
+                  <td class="metric-good">62.29%</td>
+                  <td class="metric-good">60.29%</td>
+                  <td class="metric-good">62.29%</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (64 Shots)</td>
+                  <td class="metric-good">68.31%</td><td class="metric-good">68.65%</td><td class="metric-good">68.39%</td><td class="metric-good">68.65%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="dash-resources" class="dash-content">
+          <div style="overflow-x: auto;">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>MODEL</th>
+                  <th>INFERENCE TIME ↓ (MS)</th>
+                  <th>PARAMETERS ↓ (M)</th>
+                  <th>MODEL SIZE ↓ (MB)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Zero-shot (No Aug)</td>
+                  <td class="metric-good">110.1</td>
+                  <td class="metric-good">428.01</td>
+                  <td class="metric-good">890.38</td>
+                </tr>
+                <tr>
+                  <td>Zero-shot (Aug)</td>
+                  <td class="metric-good">120.24</td>
+                  <td class="metric-good">428.01</td>
+                  <td class="metric-good">890.38</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (3 Shots)</td>
+                  <td class="metric-good">10.7512</td>
+                  <td class="metric-good">428.3</td>
+                  <td class="metric-good">891.42</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (5 Shots)</td>
+                  <td class="metric-good">11.0503</td>
+                  <td class="metric-good">428.28</td>
+                  <td class="metric-good">891.42</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (10 Shots)</td>
+                  <td class="metric-good">11.0081</td>
+                  <td class="metric-good">428.28</td>
+                  <td class="metric-good">891.42</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (16 Shots)</td>
+                  <td class="metric-good">10.9995</td>
+                  <td class="metric-good">428.28</td>
+                  <td class="metric-good">891.42</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (32 Shots)</td>
+                  <td class="metric-good">10.9940</td>
+                  <td class="metric-good">428.28</td>
+                  <td class="metric-good">891.42</td>
+                </tr>
+                <tr>
+                  <td>Few-shot (64 Shots)</td>
+                  <td class="metric-good">10.9873</td>
+                  <td class="metric-good">428.28</td>
+                  <td class="metric-good">891.42</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size: 0.85rem; color: #888; margin-top: 15px; font-style: italic;">📝 Note: Inference time is calculated as average time per sample. Parameters count reflects trainable parameters (MLP head for Few-shot, 0 for Zero-shot backbone).</p>
+        </div>
+
+        <div id="dash-config" class="dash-content">
+          <div class="config-grid">
+            
+            <div class="config-group">
+              <h4>⚙️ Training Hyperparameters</h4>
+              <div class="code-example">
+                <pre><code class="language-python">EPOCHS = 10
+TRAIN_BATCH_SIZE = 32
+OPTIMIZER = 'Adam'
+LEARNING_RATE = 1e-3
+PATIENCE = 5</code></pre>
+              </div>
+            </div>
+
+            <div class="config-group">
+              <h4>📦 DataLoader Setup</h4>
+              <div class="code-example">
+                <pre><code class="language-python">TRAIN_SIZE = 0.6
+VAL_SIZE = 0.2
+TEST_SIZE = 0.2
+RANDOM_STATE = 42
+NUM_SHOTS = 5  # Dynamic in loop</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    
+    </div> <div id="fewshot-content" class="tab-content">
+
+      <div class="section-card">
+        <h2 class="section-title">📊 Few-shot Classification Overview</h2>
+        <p style="color: var(--text-muted); margin-bottom: 15px;">Few-shot learning is an approach designed for scenarios where only a very limited number of labeled examples are available for each target category. Instead of relying on large-scale annotated datasets, the objective is to enable a learning system to generalize effectively from only a few representative samples per class. This setting is particularly important in practical applications where data collection and annotation are expensive, time-consuming, or difficult to obtain for every category.</p>
+        <div class="stats-grid">
+          <div class="stat-card"><h3>21</h3><p>Categories</p></div>
+          <div class="stat-card"><h3>1-64</h3><p>Shots per Category</p></div>
+          <div class="stat-card"><h3>CLIP</h3><p>Frozen Backbone</p></div>
+          <div class="stat-card"><h3>MLP</h3><p>Trainable Classifier Head</p></div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h2 class="section-title">🔧 Few-shot Pipeline Architecture</h2>
+        
+        <div class="pipeline-visual-container">
+          <div class="pipeline-flow">
+            <div class="pipeline-box box-1" onclick="switchPipelineTab('fewshot', 'input')">
+              <div class="box-icon">📊</div>
+              <div class="box-title">Input Preparation</div>
+              <div class="box-desc">1 to 64 shot</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            
+            <div class="pipeline-box box-2" onclick="switchPipelineTab('fewshot', 'preprocess')">
+              <div class="box-icon">⚙️</div>
+              <div class="box-title">Data Preprocessing</div>
+              <div class="box-desc">Hybrid text-image feature fusion</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            
+            <div class="pipeline-box box-3" onclick="switchPipelineTab('fewshot', 'backbone')">
+              <div class="box-icon">🧠</div>
+              <div class="box-title">Backbone</div>
+              <div class="box-desc">CLIP feature extraction</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            
+            <div class="pipeline-box box-4" onclick="switchPipelineTab('fewshot', 'head')">
+              <div class="box-icon">🎯</div>
+              <div class="box-title">Head Classifier</div>
+              <div class="box-desc">Multilayer Perceptron (MLP)</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            
+            <div class="pipeline-box box-5">
+              <div class="box-icon">⭐</div>
+              <div class="box-title">Classifier Result</div>
+              <div class="box-desc">21 categories</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline-detail-content">
+          
+          <div id="fewshot-input-detail" class="pipeline-detail-tab-content active">
+            <h3>1️⃣ Input Preparation</h3>
+            <p class="pipeline-detail-intro">Instead of using the entire training dataset, we randomly sample a strictly limited number of instances (shots) for each of the 21 categories. This data is then formatted into multimodal tensors.</p>
+            
+            <div class="detail-group">
+              <h4>📊 Balanced K-Shot Sampling</h4>
+              <p>We group the training dataframe by categories and sample exactly <code>num_shots</code> (e.g., 5, 16, or 64) examples per class. This dramatically reduces the training data, simulating a true few-shot scenario.</p>
+              <div class="code-example">
+                <pre><code class="language-python"># Randomly sample K-shots per category for the training set
+if num_shots > 0 and 'categories' in train_df.columns:
+    train_df = train_df.groupby('categories', group_keys=False).apply(
+        lambda x: x.sample(n=min(len(x), num_shots), random_state=42)
+    ).reset_index(drop=True)
+
+# Example: 16 shots * 21 categories = 336 total training samples</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>🔄 Custom Dataset & Tensor Formatting</h4>
+              <p>The <code>RetailDataset</code> constructs one multimodal training sample at a time by retrieving a single row from the metadata table and transforming its visual, textual, and categorical information into model-ready tensors. Each sample consists of an image tensor, a text token sequence, and a numerical class label.</p>
+              <div class="code-example">
+                <pre><code class="language-python">class RetailDataset(Dataset):
+    def __init__(self, dataframe, images_path, preprocess_model, num_shots=0):
+        self.df = dataframe.reset_index(drop=True)
+        self.images_path = images_path
+        self.preprocess_model = preprocess_model
+        
+        # Disable LABEL_MAP mapping for Few-shot (num_shots > 0)
+        self.use_label_map = (num_shots == 0)
+        
+        self.original_class_names = sorted(self.df['categories'].unique().tolist())
+        self.cat_to_idx = {cat: i for i, cat in enumerate(self.original_class_names)}
+
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        
+        # 1. Image: [3, 224, 224] Float Tensor
+        img_path = os.path.join(self.images_path, f"{row['ImgId']}.jpg")
+        image_tensor = preprocess_image(img_path, self.preprocess_model)
+        
+        # 2. Text: [77] Integer Tensor (Concatenated Title & Description)
+        text_token = preprocess_text(row.get('title', ''), row.get('description', ''))
+        
+        # 3. Label: [1] Long Tensor (Integer Class Index: 0 -> 20)
+        label = torch.tensor(self.cat_to_idx[row['categories']], dtype=torch.long)
+        
+        return image_tensor, text_token, label</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>📦 DataLoader Configuration</h4>
+              <p>The dataset is wrapped in a PyTorch DataLoader to feed batches of images, text, and labels simultaneously into the backbone.</p>
+              <div class="code-example">
+                <pre><code class="language-python">from torch.utils.data import DataLoader
+
+# Initialize Few-shot Dataset
+dataset = RetailDataset(
+    dataframe=train_df, 
+    images_path=IMAGES_DIR, 
+    preprocess_model=clip_preprocess, 
+    num_shots=16  # K-shot parameter activates few-shot mode
+)
+
+# Create DataLoader
+loader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=2)
+
+# A single batch iteration yields:
+# batch_images: torch.Size([32, 3, 224, 224])
+# batch_texts:  torch.Size([32, 77])
+# batch_labels: torch.Size([32])</code></pre>
+              </div>
+            </div>
+          </div>
+          <div id="fewshot-preprocess-detail" class="pipeline-detail-tab-content">
+            <h3>2️⃣ Data Preprocessing</h3>
+            <p class="pipeline-detail-intro">
+              <strong>🎯 Objective:</strong> Standardize raw images and noisy textual descriptions into clean, uniform tensor formats. This hybrid text-image feature fusion process ensures high-quality feature extraction without exceeding token limits or crashing due to faulty data.
+            </p>
+            
+            <div class="detail-group">
+              <h4>📸 Image Processing</h4>
+              <p>Images must be strictly standardized to match the exact pre-training conditions expected by the feature extractor.</p>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>RGB Conversion:</strong> Ensures a consistent 3-channel input.</li>
+                <li><strong>Resize & Center Crop:</strong> Scales and extracts a uniform 224x224 square.</li>
+                <li><strong>Normalization:</strong> Scales pixels using pre-calculated Mean and Standard Deviation.</li>
+              </ul>
+              <div class="code-example">
+                <pre><code class="language-python">def preprocess_image(image_path, clip_preprocess_fn):
+    try:
+        # 1. Standardize format to 3-Channel RGB
+        image = Image.open(image_path).convert("RGB")
+        
+        # 2. Apply CLIP's native transforms automatically:
+        # - Resize(224, interpolation=BICUBIC)
+        # - CenterCrop(224)
+        # - ToTensor()
+        # - Normalize(mean=[0.4814, 0.4578, 0.4082], 
+        #             std=[0.2686, 0.2613, 0.2757])
+        return clip_preprocess_fn(image)
+        
+    except Exception as e:
+        # Fallback for corrupted images to prevent DataLoader crashes
+        return torch.zeros(3, 224, 224)</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>📝 Text Cleaning & Chunking</h4>
+              <p>Raw e-commerce descriptions are concatenated with titles and heavily cleaned (removing URLs, brackets, digits, and NLTK stopwords).</p>
+              <div class="code-example">
+                <pre><code class="language-python">import re, string
+from nltk.corpus import stopwords
+stop_words = set(stopwords.words('english'))
+
+def clean_text(text):
+    if not isinstance(text, str) or text == "": return "product"
+    
+    text = text.lower()
+    text = re.sub(r'\[.*?\]', '', text) # Remove brackets
+    text = re.sub(r'https?://\S+|www\.\S+', '', text) # Remove URLs
+    text = re.sub(r'[%s]' % re.escape(string.punctuation), '', text) 
+    text = re.sub(r'\w*\d\w*', '', text) # Remove numbers
+    
+    # Filter stopwords
+    words = text.split()
+    cleaned = [w for w in words if w not in stop_words and len(w) > 2]
+    return " ".join(cleaned)
+</code></pre>
+              </div>
+            </div>
+          </div>
+          <div id="fewshot-backbone-detail" class="pipeline-detail-tab-content">
+            <h3>3️⃣ Backbone: Feature Extraction & Fusion</h3>
+            <p class="pipeline-detail-intro">
+            </p>
+            
+            <div class="detail-group">
+              <h4>🧠 Detailed Step-by-Step Breakdown</h4>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>1. Encode Image & Text:</strong> Passes the inputs through CLIP's encoders (ViT-L14). <em>Output Tensor: <code>[Batch, 768]</code> for both image and text.</em></li>
+                <li><strong>2. L2 Normalization:</strong> Normalizes the feature vectors to a length of 1. This is crucial for maintaining the stability of CLIP's vector space and preventing vectors with larger magnitudes from dominating others.</li>
+                <li><strong>3. Concatenation:</strong> Joins the image and text vectors horizontally (dim=1). <strong>Purpose:</strong> Combines visual and semantic information into a unified multimodal block. <em>Output Tensor: <code>[Batch, 1536]</code> (from 768 + 768).</em></li>
+                <li><strong>4. Layer Normalization:</strong> Applies layer normalization to the fused 1536-dim vector. <strong>Purpose:</strong> Brings values to the same scale, preventing image features from dominating text features (or vice versa), which helps the gradients flow through the network more stably and smoothly.</li>
+              </ul>
+              <div class="code-example">
+                <pre><code class="language-python">def forward(self, image, text):
+    # 1. Feature Extraction (Frozen CLIP)
+    with torch.no_grad():
+        image_features = self.model.encode_image(image).float() # [Batch, 768]
+        text_features = self.model.encode_text(text).float()    # [Batch, 768]
+    
+    # 2. L2 Normalization
+    image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+    text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+
+    # 3. Concatenation
+    combined = torch.cat((image_features, text_features), dim=1)  # [Batch, 1536]
+    
+    # 4. Normalize concatenated features
+    combined = self.layer_norm(combined)                        # [Batch, 512]
+    
+    # 5. pass to the Classifier Head
+    return self.classifier(combined)</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="fewshot-head-detail" class="pipeline-detail-tab-content">
+            <h3>4️⃣ Head Classifier & Training Strategies</h3>
+            <p class="pipeline-detail-intro">
+              The multimodal features (512-dim) pass through a Multilayer Perceptron (MLP) for classification. This is accompanied by a strict training cycle within the <code>fit()</code> function to optimize performance, and a <code>predict()</code> function for final inference.
+            </p>
+            
+            <div class="detail-group">
+              <h4>🎯 Classifier Head Architecture (MLP)</h4>
+              <p>The MLP network is designed with 2 linear layers interleaved with regularization mechanisms:</p>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>Linear Layer 1:</strong> Takes an input of <code>[Batch, 1536]</code> and maps it to an output of <code>[Batch, 512]</code> to learn high-level hidden representations.</li>
+                <li><strong>ReLU & Dropout (0.2):</strong> Introduces non-linearity and randomly "turns off" 20% of the neurons. This forces the model to avoid memorization on the dataset with a tiny number of shots.</li>
+                <li><strong>Linear Layer 2 (Output Layer):</strong> Takes an input of <code>[Batch, 512]</code> and maps it directly to unnormalized scores (logits). <em>Output Tensor: <code>[Batch, 21]</code> corresponding to the 21 categories.</em></li>
+              </ul>
+              <div class="code-example">
+                <pre><code class="language-python"># Initialize Classification Head in __init__
+self.classifier = nn.Sequential(
+    nn.Linear(projection_dim * 2, 512), # From 1536 -> 512
+    nn.ReLU(),
+    nn.Dropout(0.2),                    # Prevents Overfitting
+    nn.Linear(512, num_classes)         # From 512 -> Output: 21 logits
+)</code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>⭐ Training Strategies (Inside the <code>fit</code> function)</h4>
+              <p>Detailed breakdown of the computation and weight updates during the training loop:</p>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>Forward Pass:</strong> Returns the <code>outputs</code> (Logits) with shape <code>[Batch, 21]</code>.</li>
+                <li><strong>Calculate Loss:</strong> The <code>CrossEntropyLoss</code> function compares <code>outputs</code> with the ground truth <code>labels</code> to compute an error value (Scalar Loss Tensor).</li>
+                <li><strong>Backward Pass (<code>loss.backward()</code>):</strong> Backpropagation automatically computes the derivative (gradient) for all trainable weights in the MLP. </li>
+                <li><strong>Update Weights (<code>optimizer.step()</code>):</strong> The Adam optimizer uses the computed gradients to update the weights, helping to minimize the Loss for the next batch. </li>
+                <li><strong>Early Stopping & Checkpoint:</strong> Evaluates on the Validation set at every epoch. If <code>val_acc</code> is the highest so far, it saves the Model Weights. If accuracy doesn't improve after <code>PATIENCE</code> epochs, training is halted immediately.</li>
+              </ul>
+              <div class="code-example">
+                <pre><code class="language-python">def fit(self, train_loader, val_loader):
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(self.parameters(), lr=LEARNING_RATE)
+    
+    # ... initialize storage variables ...
+    
+    for epoch in range(EPOCHS):
+        self.train()
+        
+        for images, texts, labels in train_loader:
+            optimizer.zero_grad()            # Clear gradients from previous batch
+            
+            outputs = self(images, texts)    # Forward pass -> [Batch, 21]
+            loss = criterion(outputs, labels)# Compute Scalar Loss
+            
+            loss.backward()                  # Compute Gradients for MLP layers
+            optimizer.step()                 # Update weights
+            
+        # --- EVALUATION & SAVING ---
+        val_loss, val_acc, _ = self.predict(val_loader, criterion, DEVICE)
+        
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            patience_counter = 0
+            torch.save(self.state_dict(), SAVE_MODEL_PATH) # Save checkpoint
+        else:
+            patience_counter += 1
+            
+        if patience_counter >= PATIENCE:
+            print("[Early Stopping] Halted.")
+            break
+            
+  </code></pre>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h4>🔮 Inference (End-to-End Prediction Mechanism)</h4>
+              <p>The <code>predict</code> function is designed to handle a complete end-to-end pipeline for a single raw data sample. Here is the detailed workflow for processing and predicting on new unseen data:</p>
+              <ul class="feature-list" style="margin-bottom: 15px;">
+                <li><strong>Step 1: Image Preprocessing.</strong> Opens the image from the local disk and explicitly converts it to RGB to avoid issues with alpha or grayscale channels. After passing through the CLIP preprocessing function, <code>unsqueeze(0)</code> adds a dummy Batch dimension (since the model always expects batches) before moving the tensor to the active device.</li>
+                <li><strong>Step 2: Text Preprocessing.</strong> Converts the raw text description to lowercase. The <code>clip.tokenize(..., truncate=True)</code> function ensures that long text is automatically truncated so it safely fits within the 77-token limit of the model.</li>
+                <li><strong>Step 3: Model Inference.</strong> The <code>torch.no_grad()</code> context is enabled to turn off gradient tracking (saving memory). The generated logits are passed through a <strong>Softmax</strong> function to convert them into a normalized probability distribution (0.0 to 1.0). Then, <code>torch.max</code> extracts the highest probability score (Top-1) and its corresponding index.</li>
+                <li><strong>Step 4: Post-processing.</strong> Uses the <code>.item()</code> method to pull the numerical values out of the PyTorch Tensors into standard Python data types. It converts the probability to a percentage format (%) and automatically maps the predicted index to its actual human-readable Category Name (if the <code>class_names</code> list is provided).</li>
+              </ul>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h2 class="section-title">📊 Model Comparison</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Compare performance metrics, computational resources, and configurations across Few-shot variations.</p>
+        
+        <div class="dashboard-card">
+          <div class="dash-tabs">
+            <button class="dash-tab-btn active" onclick="switchFewDashTab('dash-few-perf', this)">📈 Performance</button>
+            <button class="dash-tab-btn" onclick="switchFewDashTab('dash-few-resources', this)">⚡ Resources</button>
+            <button class="dash-tab-btn" onclick="switchFewDashTab('dash-few-config', this)">⚙️ Configuration</button>
+          </div>
+
+          <div id="dash-few-perf" class="dash-content active">
+            <div style="overflow-x: auto;">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>MODEL</th>
+                    <th>PRECISION ↑</th>
+                    <th>RECALL ↑</th>
+                    <th>F1-SCORE ↑</th>
+                    <th>ACCURACY ↑</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Zero-shot (No Aug)</td><td class="metric-good">40.14%</td>
+                  <td class="metric-good">29.94%</td>
+                  <td class="metric-good">26.73%</td>
+                  <td class="metric-good">29.92%</td></tr>
+                  <tr><td>Zero-shot (Aug)</td><td class="metric-good">39.05%</td>
+                  <td class="metric-good">33.28%</td>
+                  <td class="metric-good">32.55%</td>
+                  <td class="metric-good">33.28%</td></tr>
+                  <tr><td>Few-shot (3 Shots)</td><td class="metric-good">42.54%</td>
+                  <td class="metric-good">37.62%</td>
+                  <td class="metric-good">35.87% </td>
+                  <td class="metric-good">37.62% </td></tr>
+                  <tr><td>Few-shot (5 Shots)</td><td class="metric-good">46.74%</td><td class="metric-good">44.4%</td><td class="metric-good">42.7%</td><td class="metric-good">44.4%</td></tr>
+                  <tr><td>Few-shot (10 Shots)</td><td class="metric-good">54.31%</td><td class="metric-good">52.34%</td><td class="metric-good">51.38%</td><td class="metric-good">52.34%</td></tr>
+                  <tr><td>Few-shot (16 Shots)</td><td class="metric-good">55.94%</td><td class="metric-good">55.62%</td><td class="metric-good">54.04%</td><td class="metric-good">55.62%</td></tr>
+                  <tr><td>Few-shot (32 Shots)</td><td class="metric-good">61.57%</td>
+                  <td class="metric-good">62.29%</td>
+                  <td class="metric-good">60.29%</td>
+                  <td class="metric-good">62.29%</td></tr>
+                  <tr><td>Few-shot (64 Shots)</td><td class="metric-good">68.31%</td><td class="metric-good">68.65%</td><td class="metric-good">68.39%</td><td class="metric-good">68.65%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="dash-few-resources" class="dash-content">
+            <div style="overflow-x: auto;">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>MODEL</th>
+                    <th>INFERENCE TIME ↓ (MS)</th>
+                    <th>PARAMETERS ↓ (M)</th>
+                    <th>MODEL SIZE ↓ (MB)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Zero-shot (No Aug)</td><td class="metric-good">110.1</td><td class="metric-good">428.01</td>
+                  <td class="metric-good">890.38</td></tr>
+                  <tr><td>Zero-shot (Aug)</td><td class="metric-good">120.24</td><td class="metric-good">428.01</td>
+                  <td class="metric-good">890.38</td></tr>
+                  <tr><td>Few-shot (3 Shots)</td><td class="metric-good">10.7512</td>
+                  <td class="metric-good">428.3</td>
+                  <td class="metric-good">891.42</td></tr>
+                  <tr><td>Few-shot (5 Shots)</td><td class="metric-good">11.0503</td><td class="metric-good">428.28</td><td class="metric-good">891.42</td></tr>
+                  <tr><td>Few-shot (10 Shots)</td><td class="metric-good">11.0081</td><td class="metric-good">428.28</td><td class="metric-good">891.42</td></tr>
+                  <tr><td>Few-shot (16 Shots)</td><td class="metric-good">10.9995</td><td class="metric-good">428.28</td><td class="metric-good">891.42</td></tr>
+                  <tr><td>Few-shot (32 Shots)</td><td class="metric-good">10.9940</td><td class="metric-good">428.28</td><td class="metric-good">891.42</td></tr>
+                  <tr><td>Few-shot (64 Shots)</td><td class="metric-good">10.9873</td><td class="metric-good">428.28</td><td class="metric-good">891.42</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size: 0.85rem; color: #888; margin-top: 15px; font-style: italic;">📝 Note: Parameters count reflects trainable parameters (MLP head for Few-shot).</p>
+          </div>
+
+          <div id="dash-few-config" class="dash-content">
+            
+              <div class="config-group">
+                <h4>⚙️ Training Hyperparameters</h4>
+                <div class="code-example"><pre><code class="language-python">EPOCHS = 10
+TRAIN_BATCH_SIZE = 32
+OPTIMIZER = 'Adam'
+LEARNING_RATE = 1e-3
+PATIENCE = 5</code></pre></div>
+              </div>
+              <div class="config-group">
+                <h4>📦 DataLoader Setup</h4>
+                <div class="code-example"><pre><code class="language-python">TRAIN_SIZE = 0.6
+VAL_SIZE = 0.2
+TEST_SIZE = 0.2
+RANDOM_STATE = 42
+NUM_SHOTS = 5  # Default</code></pre></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+  <script>
+    // Hàm chuyển đổi giữa tab Zero-shot và Few-shot
+    // Hàm chuyển đổi giữa tab Zero-shot và Few-shot
+    function switchTab(tabName, btnElement) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabName + '-content').classList.add('active');
+      btnElement.classList.add('active');
+      
+      // ==========================================
+      // ĐOẠN CODE CHỮA LỖI TÀNG HÌNH BẢNG FEW-SHOT
+      // ==========================================
+      if (tabName === 'fewshot') {
+          // Trễ 10ms để HTML kịp load, sau đó tự động kích hoạt bảng Performance
+          setTimeout(() => {
+              const firstFewShotBtn = document.querySelector('#fewshot-content .dash-tab-btn');
+              if (firstFewShotBtn) firstFewShotBtn.click();
+          }, 10);
+      }
+      
+      // Trigger resize for Plotly charts if any exist inside
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+    }
+
+    // Hàm chuyển đổi nội dung khi click vào các hộp màu Pipeline
+    function switchPipelineTab(approach, stepName) {
+      // Ẩn toàn bộ detail tab của approach hiện tại
+      document.querySelectorAll(`.pipeline-detail-tab-content`).forEach(el => {
+        if (el.id.startsWith(approach)) el.classList.remove('active');
+      });
+      
+      // Hiển thị nội dung tương ứng
+      const targetElement = document.getElementById(`${approach}-${stepName}-detail`);
+      if (targetElement) {
+        targetElement.classList.add('active');
+      }
+    }
+    function switchDashTab(tabId) {
+      // Ẩn tất cả các nội dung tab
+      document.querySelectorAll('.dash-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.dash-tab-btn').forEach(el => el.classList.remove('active'));
+      
+      // Hiển thị tab được chọn
+      document.getElementById('dash-' + tabId).classList.add('active');
+      
+      // Tìm button tương ứng và thêm class active
+      event.currentTarget.classList.add('active');
+    }
+    // HÀM MỚI DÀNH RIÊNG 100% CHO FEW-SHOT
+    // Hàm này thiết kế ĐỘC LẬP chỉ để chuyển tab cho bảng Dashboard của Few-shot
+    function switchFewDashTab(targetId, btnElement) {
+      // 1. Khoanh vùng chỉ tìm trong phạm vi cái bảng chứa nút vừa bấm
+      const dashboard = btnElement.closest('.dashboard-card');
+      
+      // 2. Xóa trạng thái active của nội dung và nút cũ
+      dashboard.querySelectorAll('.dash-content').forEach(el => el.classList.remove('active'));
+      dashboard.querySelectorAll('.dash-tab-btn').forEach(el => el.classList.remove('active'));
+      
+      // 3. Kích hoạt nội dung và nút mới
+      document.getElementById(targetId).classList.add('active');
+      btnElement.classList.add('active');
+    }
+    
+    
+  </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
