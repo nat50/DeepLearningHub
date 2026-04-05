@@ -79,13 +79,13 @@ class ExperimentConfig:
     lstm_epochs: int = 3
 
     # Transformer defaults
-    transformer_batch_size: int = 16
-    transformer_lr: float = 2e-5
-    transformer_max_len: int = 256
+    transformer_batch_size: int = 192
+    transformer_lr: float = 1.6e-4
+    transformer_max_len: int = 128
     transformer_checkpoint: str = "bert-base-uncased"
-    transformer_dropout: float = 0.3
+    transformer_dropout: float = 0.2
     transformer_freeze_backbone: bool = False
-    transformer_epochs: int = 2
+    transformer_epochs: int = 3
 
     @property
     def output_dir(self) -> Path:
