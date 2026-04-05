@@ -20,9 +20,12 @@ TEXT_CLASSIFICATION_DIR = ASSIGNMENT1_DIR / "text_classification"
 RESULTS_ROOT = TEXT_CLASSIFICATION_DIR / "results" / "yahoo_answers_classification"
 EDA_OUTPUT = TEXT_CLASSIFICATION_DIR / "eda" / "data"
 CLASS_OUTPUT = TEXT_CLASSIFICATION_DIR / "classification" / "data"
+BERT_FT_RESULTS_ROOT = TEXT_CLASSIFICATION_DIR / "results" / "yahoo_answers_classification" / "bert_finetuning"
+BERT_FT_OUTPUT = TEXT_CLASSIFICATION_DIR / "bert_finetuning" / "data"
 
 CORE_EDA_JSON = EDA_OUTPUT / "text_eda_data.json"
 RESULTS_JSON = CLASS_OUTPUT / "results_data.json"
+BERT_FT_JSON = BERT_FT_OUTPUT / "bert_finetuning_results.json"
 
 
 def _save_json(path: Path, data: dict) -> Path:
@@ -254,26 +257,63 @@ def _try_reuse_built_json_outputs() -> list[Path] | None:
     return outputs
 
 
+def generate_bert_finetuning_data() -> dict:
+    """Consolidate BERT fine-tuning results from results/ directory."""
+    experiments: dict[str, dict] = {}
+    learning_curves: dict[str, dict] = {}
+
+    if BERT_FT_RESULTS_ROOT.exists():
+        for exp_dir in sorted(BERT_FT_RESULTS_ROOT.iterdir()):
+            if not exp_dir.is_dir():
+                continue
+            summary_path = exp_dir / "experiment_summary.json"
+            history_path = exp_dir / "history.csv"
+            if not summary_path.exists():
+                continue
+            with summary_path.open("r", encoding="utf-8") as f:
+                summary = json.load(f)
+            display_name = summary.get("display_name", exp_dir.name)
+            experiments[display_name] = summary
+            if history_path.exists():
+                with history_path.open("r", encoding="utf-8") as f:
+                    rows = list(csv.DictReader(f))
+                learning_curves[display_name] = {
+                    "epochs": [int(r["epoch"]) for r in rows],
+                    "train_loss": [float(r["train_loss"]) for r in rows],
+                    "train_accuracy": [float(r["train_accuracy"]) for r in rows],
+                    "train_f1": [float(r["train_f1"]) for r in rows],
+                    "val_loss": [float(r["val_loss"]) for r in rows],
+                    "val_accuracy": [float(r["val_accuracy"]) for r in rows],
+                    "val_f1": [float(r["val_f1"]) for r in rows],
+                }
+
+    combined = BERT_FT_RESULTS_ROOT / "bert_finetuning_results.json"
+    if combined.exists() and not experiments:
+        with combined.open("r", encoding="utf-8") as f:
+            return json.load(f)
+
+    return {
+        "experiments": experiments,
+        "learning_curves": learning_curves,
+        "status": "ready" if experiments else "pending",
+        "metadata": {"dataset": "Yahoo Answers", "num_classes": 10, "class_names": CLASS_NAMES},
+    }
+
+
 def generate_assignment1_text_classification_website_data() -> list[Path]:
     """Generate all website data artifacts for Assignment 1 text classification."""
     print("=" * 60)
     print("Generating website data for Assignment 1 / Text Classification")
     print("=" * 60)
 
-    # reused = _try_reuse_built_json_outputs()
-    # if reused is not None:
-    #     for p in reused:
-    #         print(f"Reused: {p}")
-    #     print("=" * 60)
-    #     print("Done! Assignment 1 text website data reused successfully.")
-    #     return reused
-
     eda_data = generate_text_eda_data()
     results_data = generate_text_results_data()
+    bert_ft_data = generate_bert_finetuning_data()
 
     outputs = [
         _save_json(CORE_EDA_JSON, eda_data),
         _save_json(RESULTS_JSON, results_data),
+        _save_json(BERT_FT_JSON, bert_ft_data),
     ]
 
     for p in outputs:
@@ -281,6 +321,8 @@ def generate_assignment1_text_classification_website_data() -> list[Path]:
 
     if results_data.get("status") == "pending":
         print("  Note: No training results found. Run training_pipeline.py first.")
+    if bert_ft_data.get("status") == "pending":
+        print("  Note: No BERT fine-tuning results found. Run bert_finetuning.py first.")
 
     print("=" * 60)
     print("Done! Assignment 1 text website data generated successfully.")

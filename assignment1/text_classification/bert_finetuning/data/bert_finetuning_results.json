@@ -1,0 +1,56 @@
+{
+  "experiments": {},
+  "learning_curves": {},
+  "status": "pending",
+  "metadata": {
+    "dataset": "Yahoo Answers",
+    "num_classes": 10,
+    "class_names": [
+      "Society & Culture",
+      "Science & Mathematics",
+      "Health",
+      "Education & Reference",
+      "Computers & Internet",
+      "Sports",
+      "Business & Finance",
+      "Entertainment & Music",
+      "Family & Relationships",
+      "Politics & Government"
+    ],
+    "training_config": {
+      "max_length": 128,
+      "batch_size": 16,
+      "eval_batch_size": 32,
+      "learning_rate": 2e-5,
+      "num_epochs": 3,
+      "weight_decay": 0.01,
+      "warmup_ratio": 0.1,
+      "seed": 42
+    },
+    "models": {
+      "bert_base": {
+        "name": "BERT-base",
+        "model_name": "bert-base-uncased",
+        "params_millions": 110,
+        "has_pooler": true
+      },
+      "distilbert": {
+        "name": "DistilBERT",
+        "model_name": "distilbert-base-uncased",
+        "params_millions": 66,
+        "has_pooler": false
+      },
+      "tinybert": {
+        "name": "TinyBERT",
+        "model_name": "prajjwal1/bert-tiny",
+        "params_millions": 14,
+        "has_pooler": true
+      }
+    },
+    "pooling_strategies": {
+      "cls_token": "[CLS] Token",
+      "mean_pooling": "Mean Pooling",
+      "pooler_output": "Pooler Output"
+    }
+  }
+}
