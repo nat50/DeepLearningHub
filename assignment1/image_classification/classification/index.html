@@ -1763,7 +1763,7 @@
     }
 
     .arch-layer-block {
-      --arch-color: #4f46e5;
+      --arch-color: #c45f8f;
       --arch-width: 88px;
       --arch-height: 70px;
       --arch-depth: 14px;
@@ -1940,6 +1940,120 @@
 
     .info-table td strong {
       color: #0f172a;
+    }
+
+    /* Pastel palette overlay: primary #F9B2D7 with supporting soft tones */
+    .results-scope-note {
+      background: var(--pastel-rose);
+      border-color: #efc8dc;
+      color: #6b3550;
+    }
+
+    .tutorial-nav-btn.active {
+      background: #f9b2d7;
+      color: #4a2f3e;
+      border-color: #d886af;
+    }
+
+    .pipeline-detail-grid h4,
+    .pipeline-node-card h3,
+    .pipeline-node-card h4,
+    .input-subsection-title,
+    .dataloader-config-card h6,
+    .preprocess-section-title,
+    .backbone-section-title,
+    .head-section-title,
+    .formula-section-title,
+    .tensor-shape-title,
+    .input-main-title,
+    .preprocess-main-title,
+    .backbone-main-title,
+    .head-main-title {
+      color: #a54f79;
+    }
+
+    .tensor-format-board,
+    .input-key-principles,
+    .preprocess-layout,
+    .input-layout,
+    .backbone-layout,
+    .head-layout,
+    .formula-layout,
+    .config-layout,
+    .arch-flow {
+      background: #fff4fa;
+      border-color: #efc8dc;
+    }
+
+    .tensor-dimension-card {
+      background: #fceaf4;
+      border-left-color: #d987b0;
+    }
+
+    .tensor-dimension-badge,
+    .preprocess-step-num,
+    .backbone-step-num,
+    .head-step-num,
+    .formula-step-num {
+      background: #c45f8f;
+      color: #3b2732;
+    }
+
+    .dataloader-config-card,
+    .preprocess-step-card,
+    .backbone-step-card,
+    .head-step-card,
+    .formula-entry-card,
+    .arch-layer-detail,
+    .arch-detail-item {
+      background: #fff8fc;
+      border-color: #e9d2df;
+    }
+
+    .tensor-format-note,
+    .tensor-dimension-text p,
+    .input-key-principles li,
+    .pipeline-detail-grid li,
+    .dataloader-config-card p,
+    .preprocess-step-caption,
+    .preprocess-note-list li,
+    .preprocess-footnote,
+    .backbone-step-caption,
+    .head-step-caption,
+    .formula-entry-note,
+    .arch-layer-shape,
+    .arch-layer-step-index,
+    .viz-hint,
+    .arch-detail-item span {
+      color: #614b5a;
+    }
+
+    .arch-layer-block {
+      --arch-color: #c45f8f;
+      color: #4a3040;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 229, 241, 0.96) 100%);
+    }
+
+    .arch-layer-block::before {
+      background: linear-gradient(180deg, rgba(236, 190, 213, 0.6) 0%, rgba(219, 151, 186, 0.62) 100%);
+    }
+
+    .arch-layer-block::after {
+      background: linear-gradient(180deg, rgba(252, 232, 242, 0.78) 0%, rgba(238, 193, 218, 0.68) 100%);
+    }
+
+    .arch-layer-block:hover {
+      box-shadow: 0 10px 22px rgba(180, 77, 121, 0.24);
+    }
+
+    .arch-layer-block.active {
+      box-shadow: 0 0 0 2px rgba(180, 77, 121, 0.35), 0 12px 26px rgba(150, 60, 100, 0.26);
+    }
+
+    .arch-detail-chip {
+      border-color: #e4bfd3;
+      background: #fdf0f7;
+      color: #8a4066;
     }
 
     @media (max-width: 980px) {
@@ -3852,12 +3966,12 @@ val_result = run_epoch(
     };
 
     const ARCHITECTURE_TYPE_COLORS = {
-      input: '#0ea5e9',
-      stem: '#2563eb',
-      stage: '#4f46e5',
-      token: '#7c3aed',
-      merge: '#0f766e',
-      head: '#dc2626',
+      input: '#d88eb7',
+      stem: '#cb7ea8',
+      stage: '#c45f8f',
+      token: '#aa76be',
+      merge: '#8ebea2',
+      head: '#d79a7d',
     };
 
     const ARCHITECTURE_BLUEPRINTS = {
@@ -4437,7 +4551,7 @@ val_result = run_epoch(
         const formatted = `${(numericValue * 100).toFixed(2)}%`;
         const isBest = Math.abs(numericValue - bestValue) <= 1e-12;
         if (isBest) {
-          return `<span class="metric-best" style="display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:0.18rem 0.5rem;border-radius:6px;background:#4caf50;color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(76,175,80,0.28);">${formatted}</span>`;
+          return `<span class="metric-best" style="display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:0.18rem 0.5rem;border-radius:6px;background:#f9b2d7;color:#3b2732;font-weight:700;box-shadow:0 2px 8px rgba(180,77,121,0.24);">${formatted}</span>`;
         }
         return `<span class="metric-value">${formatted}</span>`;
       };
@@ -4476,7 +4590,7 @@ val_result = run_epoch(
         const bestFormatted = toNum(bestValue).toFixed(digits);
         const isBest = formatted === bestFormatted;
         if (!isBest) return formatted;
-        return `<span class="metric-best" style="display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:0.18rem 0.5rem;border-radius:6px;background:#4caf50;color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(76,175,80,0.28);">${formatted}</span>`;
+        return `<span class="metric-best" style="display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:0.18rem 0.5rem;border-radius:6px;background:#f9b2d7;color:#3b2732;font-weight:700;box-shadow:0 2px 8px rgba(180,77,121,0.24);">${formatted}</span>`;
       };
 
       tbody.innerHTML = sorted.map((name) => {
@@ -5676,7 +5790,7 @@ val_result = run_epoch(
 
       const stage = blueprint[selectedIndex];
       const stageType = String(stage.type || 'stage').toUpperCase();
-      const stageColor = ARCHITECTURE_TYPE_COLORS[stage.type] || '#4f46e5';
+      const stageColor = ARCHITECTURE_TYPE_COLORS[stage.type] || '#c45f8f';
       const inputShape = getArchitectureInputShape(blueprint, selectedIndex);
 
       panel.innerHTML = `<div class="arch-detail-head">
@@ -5728,7 +5842,7 @@ val_result = run_epoch(
       ARCHITECTURE_STATE.selectedStageIndex = selectedIndex;
 
       const items = blueprint.map((stage, index) => {
-        const color = ARCHITECTURE_TYPE_COLORS[stage.type] || '#4f46e5';
+        const color = ARCHITECTURE_TYPE_COLORS[stage.type] || '#c45f8f';
         const metrics = getArchitectureBlockMetrics(stage);
         const inputShape = getArchitectureInputShape(blueprint, index);
 
