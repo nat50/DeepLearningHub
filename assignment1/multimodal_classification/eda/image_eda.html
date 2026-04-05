@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Image EDA — Multimodal Classification | DL Hub</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #34495e;
+      --accent: #3498db;
+      --bg-light: #f8f9fa;
+      --text-dark: #333;
+      --text-muted: #6c757d;
+      --border: #dee2e6;
+      --card-bg: #ffffff;
+    }
+
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: var(--text-dark); background-color: var(--bg-light); margin: 0; padding: 0; }
+    .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    .navbar { background-color: var(--primary); color: white; padding: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .navbar .container { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+    .brand { color: white; font-size: 1.5rem; font-weight: bold; text-decoration: none; }
+    .nav-links a { color: #ecf0f1; text-decoration: none; margin-left: 20px; font-weight: 500; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    .page-header { margin: 40px 0 30px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+    .page-title { font-size: 2.2rem; margin: 0 0 10px 0; color: var(--primary); }
+
+    .tab-navigation { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid var(--border); }
+    .tab-btn { padding: 12px 24px; background: transparent; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.2s; border-bottom: 3px solid transparent; }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn:hover { color: var(--primary); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--accent); }
+    .stat-card h3 { font-size: 2.5rem; margin: 0; color: var(--primary); }
+    .stat-card p { margin: 5px 0 0; color: var(--text-muted); font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
+    
+    .section-card { background: var(--card-bg); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 40px; overflow: hidden; }
+    .section-title { font-size: 1.5rem; color: var(--primary); margin-top: 0; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    
+    .chart-container { position: relative; height: 500px; width: 100%; max-width: 100%; }
+    .chart-large { height: 750px; }
+
+    @media (max-width: 768px) { .tab-navigation { flex-wrap: wrap; } }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="../../../index.html" class="brand">DL Hub</a>
+      <div class="nav-links">
+        <a href="../../../index.html">Home</a>
+        <a href="../../index.html">Assignment 1</a>
+        <a href="index.html">Multimodal EDA</a>
+        <a href="../classification/index.html">Classification</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header class="page-header">
+      <h1 class="page-title">🖼️ Image Modality Analysis</h1>
+      <p>Exploratory Data Analysis of image properties and features for multimodal classification</p>
+    </header>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button class="tab-btn active" onclick="switchTab('image', this)">📷 Image Analysis</button>
+      <button class="tab-btn" onclick="switchTab('text', this)">📝 Text Analysis</button>
+    </div>
+
+    <!-- Dataset Overview -->
+    <div class="section-card">
+      <h2 class="section-title">📊 Dataset Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card"><h3>21</h3><p>Categories</p></div>
+        <div class="stat-card"><h3>42,000</h3><p>Total Images</p></div>
+        <div class="stat-card"><h3>100x100</h3><p>Resolution</p></div>
+      </div>
+      <div style="margin-top: 20px;">
+        <h4 style="margin-bottom: 15px;">Category Distribution</h4>
+        <div id="classDistChart" class="chart-container"></div>
+      </div>
+    </div>
+
+    <!-- Aspect Ratio Analysis -->
+    <div class="section-card">
+      <h2 class="section-title">📏 Aspect Ratio Distribution</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Distribution of aspect ratios before preprocessing.</p>
+      <div id="aspectRatioChart" class="chart-container"></div>
+    </div>
+
+    <!-- File Size Distribution -->
+    <div class="section-card">
+      <h2 class="section-title">💾 File Size Distribution</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Analysis of raw image file sizes across the dataset.</p>
+      <div id="fileSizeChart" class="chart-container"></div>
+    </div>
+
+    <!-- Color Space Analysis -->
+    <div class="section-card">
+      <h2 class="section-title">🌈 Color Space Analysis (RGB)</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Distribution of Red, Green, and Blue channels to understand lighting and color characteristics.</p>
+      <div id="colorSpaceChart" class="chart-container"></div>
+    </div>
+
+    <!-- PCA Analysis -->
+    <div class="section-card">
+      <h2 class="section-title">📉 Principal Component Analysis (PCA)</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Cumulative explained variance by principal components to evaluate feature dimensionality reduction.</p>
+      <div id="pcaChart" class="chart-container"></div>
+    </div>
+
+    <!-- t-SNE Visualization -->
+    <div class="section-card">
+      <h2 class="section-title">🧬 t-SNE Feature Visualization</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">t-SNE dimensionality reduction on multimodal embeddings. Colors represent product categories.</p>
+      <div id="tsneChart" class="chart-container"></div>
+    </div>
+
+    <!-- UMAP Visualization -->
+    <div class="section-card">
+      <h2 class="section-title">🗺️ UMAP Feature Visualization</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">UMAP dimensionality reduction on multimodal embeddings. Colors represent product categories.</p>
+      <div id="umapChart" class="chart-container"></div>
+    </div>
+
+    <!-- Similarity Heatmap -->
+    <div class="section-card">
+      <h2 class="section-title">🧩 Category Similarity Heatmap</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Cosine similarity matrix between categories based on visual features. Darker blocks indicate higher visual correlation.</p>
+      <div id="similarityHeatmap" class="chart-container chart-large"></div>
+    </div>
+
+    <!-- Sample Images by Category -->
+    <div class="section-card">
+      <h2 class="section-title">🖼️ Sample Product Images by Category</h2>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Representative product images from each of the 21 categories to visualize the diversity of products.</p>
+      <div id="sampleImagesContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;"></div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025–2026 Deep Learning &amp; Its Applications (CO3133) — <a href="https://hcmut.edu.vn" target="_blank">HCMUT – VNUHCM</a></p>
+  </footer>
+
+  <script>
+    function switchTab(tab, btnElement) {
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+      
+      if (tab === 'text') {
+        window.location.href = 'text_eda.html';
+      }
+    }
+
+    function decodeBdata(bdataString, dtype) {
+      try {
+        const binaryString = window.atob(bdataString);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        if (dtype === 'f8') return new Float64Array(bytes.buffer);
+        if (dtype === 'f4') return new Float32Array(bytes.buffer);
+        if (dtype === 'i4') return new Int32Array(bytes.buffer);
+        if (dtype === 'i2') return new Int16Array(bytes.buffer);
+        return Array.from(bytes);
+      } catch (e) {
+        console.error("Error decoding bdata:", e);
+        return [];
+      }
+    }
+
+    async function renderPlotly(url, divId) {
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("File not found");
+            const jsonData = await res.json();
+
+            if (jsonData.data) {
+                jsonData.data.forEach(trace => {
+                    if (trace.z && trace.z.bdata) {
+                        const flat = decodeBdata(trace.z.bdata, trace.z.dtype);
+                        if (trace.z.shape) {
+                            const cols = trace.z.shape.split(',').map(Number)[1];
+                            const array2D = [];
+                            for (let i = 0; i < flat.length; i += cols) array2D.push(Array.from(flat.slice(i, i + cols)));
+                            trace.z = array2D;
+                        } else trace.z = Array.from(flat);
+                    }
+                    if (trace.x && trace.x.bdata) trace.x = Array.from(decodeBdata(trace.x.bdata, trace.x.dtype));
+                    // ĐÃ FIX LỖI Ở DÒNG DƯỚI NÀY:
+                    if (trace.y && trace.y.bdata) trace.y = Array.from(decodeBdata(trace.y.bdata, trace.y.dtype));
+                });
+
+                // XỬ LÝ MÀU CHO COLOR SPACE
+                // XỬ LÝ MÀU CHO COLOR SPACE (CÓ THANH MÀU)
+// XỬ LÝ MÀU VÀ HIỆN BẢNG BRIGHTNESS (GIỐNG ẢNH MẪU)
+if (divId === 'colorSpaceChart' && jsonData.data[0]) {
+    let trace = jsonData.data[0];
+    if (trace.x && trace.y && trace.z) {
+        let brightness = [];
+        for (let i = 0; i < trace.x.length; i++) {
+            // Tính độ sáng trung bình: (R + G + B) / 3
+            let avg = (trace.x[i] + trace.y[i] + trace.z[i]) / 3;
+            brightness.push(avg);
+        }
+        
+        if (!trace.marker) trace.marker = {};
+        
+        // Cấu hình để hiện bảng màu bên phải
+        trace.marker.color = brightness; // Dùng mảng độ sáng làm thang đo
+        trace.marker.colorscale = 'Viridis'; // Bảng màu xanh -> vàng giống ảnh bạn gửi
+        trace.marker.showscale = true; // Hiện thanh màu (Colorbar)
+        
+        trace.marker.colorbar = {
+            title: 'Brightness',
+            titleside: 'top',
+            thickness: 20,
+            x: 1.1 // Đẩy bảng ra xa biểu đồ một chút cho thoáng
+        };
+        
+        trace.marker.size = 3;
+        trace.marker.opacity = 0.8;
+    }
+}
+
+                let layout = jsonData.layout || {};
+                layout.autosize = true;
+                layout.paper_bgcolor = "rgba(0,0,0,0)";
+                layout.plot_bgcolor = "rgba(0,0,0,0)";
+                layout.margin = { l: 60, r: 40, t: 40, b: 80 };
+
+                Plotly.newPlot(divId, jsonData.data, layout, {responsive: true, displayModeBar: false});
+            }
+        } catch (err) {
+            console.error("Error loading " + url, err);
+            document.getElementById(divId).innerHTML = `<p style="color:red;text-align:center;padding-top:100px;">Data not found: ${url.split('/').pop()}</p>`;
+        }
+    }
+
+    const chartPath = './data/charts/';
+    
+    renderPlotly(chartPath + 'class_dist_bar.json', 'classDistChart');
+    renderPlotly(chartPath + 'aspect_ratio.json', 'aspectRatioChart');
+    renderPlotly(chartPath + 'file_size.json', 'fileSizeChart');
+    renderPlotly(chartPath + 'color_space.json', 'colorSpaceChart');
+    renderPlotly(chartPath + 'pca_variance.json', 'pcaChart');
+    renderPlotly(chartPath + 'tsne_sampled_plot.json', 'tsneChart');
+    renderPlotly(chartPath + 'umap_sampled_plot.json', 'umapChart');
+    renderPlotly(chartPath + 'similarity_heatmap.json', 'similarityHeatmap');
+
+    // Sample Images Data - one representative image per category
+    const sampleImages = {
+      "All Beauty": "B00A2VD7BG",
+      "All Electronics": "B0057V4W9M",
+      "Appliances": "B0052YOI0M",
+      "Arts, Crafts & Sewing": "B0002X7YCM",
+      "Automotive": "B0002MBUPA",
+      "Baby Products": "B001D1BHYI",
+      "Baby": "B000FTD1RA",
+      "Beauty": "B000052Y6V",
+      "Cell Phones & Accessories": "B00063DKVC",
+      "Clothing, Shoes & Jewelry": "B000H8KGZ4",
+      "Electronics": "B00004XOND",
+      "Grocery & Gourmet Food": "B0000E5JLL",
+      "Health & Personal Care": "B00006ISF0",
+      "Industrial & Scientific": "B0006FI8L2",
+      "Musical Instruments": "B0002F4SYM",
+      "Office Products": "B00004TF44",
+      "Patio, Lawn & Garden": "B0000CAQ0S",
+      "Pet Supplies": "B0002APRK6",
+      "Sports & Outdoors": "B0000ATDRF",
+      "Tools & Home Improvement": "B0000225UN",
+      "Toys & Games": "9269808440"
+    };
+
+
+    const imagePath = '../classification/data/train/train/';
+    <!-- const sampleImagesContainer = document.getElementById('sampleImagesContainer'); -->
+
+    Object.entries(sampleImages).forEach(([category, imgId]) => {
+      const imageCard = document.createElement('div');
+      imageCard.style.cssText = `
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+      `;
+      
+      const img = document.createElement('img');
+      img.src = imagePath + imgId + '.jpg';
+      img.alt = category;
+      img.style.cssText = `
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background-color: #f8f9fa;
+      `;
+
+      img.onerror = function() {
+        this.style.display = 'none';
+        const fallback = document.createElement('div');
+        fallback.style.cssText = `
+          width: 100%;
+          height: 200px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #f8f9fa;
+          color: var(--text-muted);
+          font-size: 0.9rem;
+          text-align: center;
+          padding: 10px;
+        `;
+        fallback.textContent = 'Image not available';
+        imageCard.appendChild(fallback);
+      };
+
+      const label = document.createElement('div');
+      label.style.cssText = `
+        padding: 12px;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border);
+      `;
+      label.innerHTML = `
+        <strong style="color: var(--primary); font-size: 0.95rem;">${category}</strong><br>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">ID: ${imgId}</span>
+      `;
+
+      imageCard.appendChild(img);
+      imageCard.appendChild(label);
+
+      imageCard.onmouseenter = function() {
+        this.style.transform = 'translateY(-5px)';
+        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+      };
+      imageCard.onmouseleave = function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)';
+      };
+
+      sampleImagesContainer.appendChild(imageCard);
+    });
+  </script>
+
+</body>
+</html>
