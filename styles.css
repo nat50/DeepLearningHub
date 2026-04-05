@@ -70,7 +70,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   max-width: var(--max-width);
   margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between;
-  height: 56px;
+  min-height: 56px;
 }
 
 .navbar-brand {
@@ -81,7 +81,8 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 }
 .navbar-brand:hover { text-decoration: none; color: var(--accent-hover); }
 
-.navbar-links { list-style: none; display: flex; gap: 0.25rem; align-items: center; }
+.navbar-links { list-style: none; display: flex; gap: 0.25rem; align-items: center; overflow-x: auto; flex-wrap: wrap; }
+.navbar-links li { white-space: nowrap; }
 
 .navbar-links a {
   color: var(--text-secondary); font-size: 0.875rem; font-weight: 500;
