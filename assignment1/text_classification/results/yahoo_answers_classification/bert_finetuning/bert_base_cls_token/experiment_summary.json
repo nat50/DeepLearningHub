@@ -1,0 +1,229 @@
+{
+  "experiment_name": "BERT-base + [CLS] Token",
+  "experiment_slug": "bert_base_cls_token",
+  "model_base": "bert_base",
+  "model_base_name": "BERT-base",
+  "model_checkpoint": "bert-base-uncased",
+  "pooling_strategy": "cls_token",
+  "pooling_display": "[CLS] Token",
+  "display_name": "BERT-base + [CLS] Token",
+  "best_epoch": 1,
+  "training_time_seconds": 945.5683073870001,
+  "training_time_minutes": 15.759471789783335,
+  "test_metrics": {
+    "loss": 0.723088053026525,
+    "accuracy": 0.7631630325569878,
+    "precision": 0.7598821009601749,
+    "recall": 0.7631630325569878,
+    "f1": 0.7581950249983835
+  },
+  "val_metrics": {
+    "loss": 0.7241873125621251,
+    "accuracy": 0.7631809523809524,
+    "precision": 0.7601500344521566,
+    "recall": 0.7631809523809524,
+    "f1": 0.7582687546375191
+  },
+  "resource_metrics": {
+    "parameters": 109489930.0,
+    "trainable_parameters": 109489930.0,
+    "model_size_mb": 417.753870010376,
+    "inference_time_ms": 2.728389240000979
+  },
+  "confusion_matrix": [
+    [
+      13865,
+      506,
+      587,
+      1289,
+      247,
+      168,
+      682,
+      747,
+      1688,
+      1221
+    ],
+    [
+      387,
+      17459,
+      1040,
+      1132,
+      284,
+      96,
+      229,
+      151,
+      86,
+      136
+    ],
+    [
+      474,
+      736,
+      17570,
+      333,
+      98,
+      228,
+      251,
+      183,
+      965,
+      162
+    ],
+    [
+      1438,
+      3560,
+      476,
+      11590,
+      723,
+      262,
+      960,
+      531,
+      328,
+      1132
+    ],
+    [
+      107,
+      183,
+      34,
+      297,
+      19270,
+      76,
+      398,
+      362,
+      170,
+      103
+    ],
+    [
+      151,
+      241,
+      236,
+      160,
+      119,
+      19429,
+      128,
+      267,
+      142,
+      127
+    ],
+    [
+      1423,
+      968,
+      852,
+      1542,
+      1734,
+      362,
+      10493,
+      943,
+      1463,
+      1221
+    ],
+    [
+      1155,
+      316,
+      317,
+      550,
+      776,
+      465,
+      478,
+      15798,
+      820,
+      325
+    ],
+    [
+      1162,
+      64,
+      760,
+      270,
+      242,
+      118,
+      355,
+      489,
+      17286,
+      254
+    ],
+    [
+      915,
+      215,
+      135,
+      720,
+      165,
+      123,
+      801,
+      135,
+      286,
+      17505
+    ]
+  ],
+  "per_class_metrics": [
+    {
+      "class": "Society & Culture",
+      "precision": 0.657826066328225,
+      "recall": 0.6602380952380953,
+      "f1": 0.6590298738027901
+    },
+    {
+      "class": "Science & Mathematics",
+      "precision": 0.72001814582646,
+      "recall": 0.8313809523809523,
+      "f1": 0.7717026166902404
+    },
+    {
+      "class": "Health",
+      "precision": 0.7983823328940791,
+      "recall": 0.8366666666666667,
+      "f1": 0.8170762899062943
+    },
+    {
+      "class": "Education & Reference",
+      "precision": 0.6481015489571101,
+      "recall": 0.5519047619047619,
+      "f1": 0.5961474166088008
+    },
+    {
+      "class": "Computers & Internet",
+      "precision": 0.8145236283709527,
+      "recall": 0.9176190476190477,
+      "f1": 0.8630032692910564
+    },
+    {
+      "class": "Sports",
+      "precision": 0.9110048295587753,
+      "recall": 0.9251904761904762,
+      "f1": 0.9180428568053488
+    },
+    {
+      "class": "Business & Finance",
+      "precision": 0.7101861252115059,
+      "recall": 0.49964287414885006,
+      "f1": 0.5865943649373881
+    },
+    {
+      "class": "Entertainment & Music",
+      "precision": 0.8057737427318168,
+      "recall": 0.7522857142857143,
+      "f1": 0.7781116091218047
+    },
+    {
+      "class": "Family & Relationships",
+      "precision": 0.7439958681243006,
+      "recall": 0.8231428571428572,
+      "f1": 0.7815707374417868
+    },
+    {
+      "class": "Politics & Government",
+      "precision": 0.7890110880735599,
+      "recall": 0.8335714285714285,
+      "f1": 0.8106793868383272
+    }
+  ],
+  "class_names": [
+    "Society & Culture",
+    "Science & Mathematics",
+    "Health",
+    "Education & Reference",
+    "Computers & Internet",
+    "Sports",
+    "Business & Finance",
+    "Entertainment & Music",
+    "Family & Relationships",
+    "Politics & Government"
+  ]
+}

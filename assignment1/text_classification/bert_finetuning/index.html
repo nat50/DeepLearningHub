@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BERT Fine-tuning — Yahoo Answers | DL Hub</title>
+  <meta name="description" content="BERT fine-tuning results for Yahoo Answers: multiple models and pooling strategies comparison.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <style>
+    .bert-hero{background:linear-gradient(135deg,#7c3aed 0%,#6d28d9 40%,#5b21b6 100%);color:#fff;padding:2.5rem 1.5rem 2rem;text-align:center}
+    .bert-hero h1{font-size:1.8rem;font-weight:800;margin-bottom:.4rem}
+    .bert-hero .subtitle{color:rgba(255,255,255,.85);font-size:.95rem;max-width:600px;margin:0 auto 1.2rem}
+    .bert-hero .stat-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+    .bert-hero .stat-card .stat-value,.bert-hero .stat-card .stat-label{color:#fff}
+
+    /* Pipeline diagram */
+    .pipeline-visual{display:flex;align-items:center;justify-content:center;gap:0;padding:1.5rem;flex-wrap:wrap;background:#f5f3ff;border-radius:12px;margin:1rem 0 1.5rem;border:2px dashed #c4b5fd}
+    .pipe-box{border-radius:10px;padding:.85rem 1rem;text-align:center;min-width:110px;font-size:.82rem;font-weight:600;transition:transform .2s;border:1px solid rgba(0,0,0,.08)}
+    .pipe-box:hover{transform:translateY(-2px)}
+    .pipe-box .pipe-icon{font-size:1.4rem;display:block;margin-bottom:.25rem}
+    .pipe-box .pipe-title{display:block;font-weight:700;margin-bottom:.1rem;font-size:.8rem}
+    .pipe-box .pipe-desc{font-size:.68rem;opacity:.8;font-weight:400}
+    .pipe-box.green{background:#d1fae5;color:#065f46}.pipe-box.yellow{background:#fef3c7;color:#92400e}
+    .pipe-box.blue{background:#dbeafe;color:#1e40af}.pipe-box.purple{background:#ede9fe;color:#5b21b6}
+    .pipe-box.indigo{background:#e0e7ff;color:#3730a3}.pipe-box.emerald{background:#d1fae5;color:#047857}
+    .pipe-arr{font-size:1.1rem;color:#9ca3af;margin:0 .4rem}
+
+    /* Method cards */
+    .methods-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem;margin:1rem 0}
+    .method-card{border:2px solid var(--border);border-radius:10px;padding:1rem 1.15rem;cursor:pointer;transition:all .2s;background:var(--bg-card)}
+    .method-card:hover{border-color:#a78bfa;box-shadow:0 4px 12px rgba(124,58,237,.12)}
+    .method-card.selected{border-color:#7c3aed;background:#f5f3ff;box-shadow:0 4px 16px rgba(124,58,237,.18)}
+    .method-card h4{font-size:.92rem;font-weight:700;margin-bottom:.35rem}
+    .method-card .method-stats{display:flex;gap:.8rem;font-size:.78rem;color:var(--text-muted)}
+    .method-card .method-stats span{display:flex;align-items:center;gap:.2rem}
+    .method-card .method-sub{font-size:.72rem;color:var(--text-muted);margin-top:.25rem}
+
+    .select-actions{display:flex;gap:.5rem;margin-bottom:.75rem;align-items:center}
+    .select-actions button{padding:.35rem .8rem;border-radius:6px;font-size:.8rem;font-weight:600;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;transition:.15s}
+    .select-actions button:hover{background:#f5f3ff;border-color:#a78bfa}
+
+    .compare-btn{display:block;margin:1.5rem auto;padding:.65rem 2rem;border:none;border-radius:10px;font-size:.95rem;font-weight:700;color:#fff;background:#7c3aed;cursor:pointer;transition:.2s;font-family:var(--font)}
+    .compare-btn:hover{background:#6d28d9;transform:translateY(-1px)}
+    .compare-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+    /* Results sub-tabs */
+    .sub-tabs{display:flex;gap:.15rem;border-bottom:2px solid var(--border);margin-bottom:1.25rem}
+    .sub-tab{padding:.45rem .9rem;font-size:.82rem;font-weight:500;border:none;background:transparent;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.2s;font-family:var(--font)}
+    .sub-tab:hover{color:var(--text)}.sub-tab.active{color:#7c3aed;border-bottom-color:#7c3aed;font-weight:600;background:rgba(124,58,237,.08);border-radius:6px 6px 0 0}
+    .sub-content{display:none}.sub-content.active{display:block}
+
+    /* Performance table highlight */
+    .perf-table{width:100%;border-collapse:collapse;font-size:.82rem;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .perf-table thead th{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:.6rem .65rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;text-align:left}
+    .perf-table tbody td{padding:.5rem .65rem;border-bottom:1px solid var(--border-light)}
+    .perf-table tbody tr{transition:background .15s}.perf-table tbody tr:hover{background:rgba(124,58,237,.06)}
+    .perf-table .best-cell{background:#fbbf24;color:#78350f;font-weight:700;border-radius:4px;padding:.15rem .4rem;display:inline-block}
+    .perf-table .model-group{color:#7c3aed;font-weight:700;font-size:.78rem;text-transform:uppercase}
+
+    /* Per-class F1 cards */
+    .f1-cards{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0}
+    .f1-card{border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;min-width:100px;text-align:center;flex:1}
+    .f1-card .f1-class{font-size:.72rem;color:var(--text-muted);margin-bottom:.2rem}
+    .f1-card .f1-val{font-size:1.1rem;font-weight:800;color:#7c3aed}
+
+    /* Confusion matrix table */
+    .cm-table{width:100%;border-collapse:collapse;font-size:.72rem}
+    .cm-table th,.cm-table td{padding:.35rem .4rem;text-align:center;border:1px solid #e5e7eb}
+    .cm-table th{background:#7c3aed;color:#fff;font-weight:600;font-size:.68rem}
+    .cm-table td.cm-diag{font-weight:700}
+
+    /* Tutorial cards */
+    .tut-card{border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;background:var(--bg-card);margin-bottom:.75rem;transition:box-shadow .2s}
+    .tut-card:hover{box-shadow:var(--shadow-md)}
+    .tut-card h4{font-size:1rem;font-weight:700;margin-bottom:.3rem}
+    .tut-card .tut-sub{font-size:.85rem;color:var(--text-secondary);margin-bottom:.5rem}
+    .tut-card .arch-mono{font-family:var(--mono);font-size:.78rem;background:#f5f3ff;padding:.4rem .8rem;border-left:3px solid #7c3aed;border-radius:0 6px 6px 0;margin:.5rem 0;color:#5b21b6}
+    .tut-card .tut-links{display:flex;gap:.75rem;margin-top:.6rem;font-size:.8rem}
+    .tut-card .tut-links a{color:#7c3aed;font-weight:600;text-decoration:none}
+    .tut-card .tut-links a:hover{text-decoration:underline}
+    .tut-icon{font-size:1.6rem;margin-right:.6rem;vertical-align:middle}
+
+    /* Code panel */
+    .code-panel-block{background:#1e1e2e;color:#cdd6f4;padding:1.25rem;border-radius:10px;overflow-x:auto;font-family:var(--mono);font-size:.78rem;line-height:1.7;margin:1rem 0;max-height:600px;overflow-y:auto}
+    .code-actions{display:flex;gap:.5rem;margin-bottom:.75rem}
+    .code-actions button{padding:.4rem 1rem;border:1px solid var(--border);border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s;background:var(--bg-card);font-family:var(--font)}
+    .code-actions button:hover{background:#f5f3ff;border-color:#a78bfa}
+
+    /* Pending box */
+    .pending-box{text-align:center;padding:3rem 2rem;background:var(--bg-section);border-radius:var(--radius-lg);border:2px dashed var(--border);margin:1.5rem 0}
+    .pending-box h3{color:var(--text-secondary);margin-bottom:.5rem}.pending-box p{color:var(--text-muted);font-size:.9rem}
+
+    /* Confusion heatmap container */
+    .cm-chart-container{height:550px;margin-top:1rem}
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../../../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Assignment 1</a></li>
+        <li><a href="../eda/index.html">EDA</a></li>
+        <li><a href="../classification/index.html">Classification</a></li>
+        <li><a href="index.html" class="active">BERT Fine-tuning</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="bert-hero">
+    <h1>🤖 BERT for Text Classification</h1>
+    <p class="subtitle">State-of-the-art transformer models with multiple pooling strategies on Yahoo Answers</p>
+    <div class="stat-cards">
+      <div class="stat-card"><span class="stat-value" id="hero-acc">—</span><span class="stat-label">Best Accuracy</span></div>
+      <div class="stat-card"><span class="stat-value" id="hero-models">8</span><span class="stat-label">Configurations</span></div>
+      <div class="stat-card"><span class="stat-value">10</span><span class="stat-label">Classes</span></div>
+      <div class="stat-card"><span class="stat-value">3</span><span class="stat-label">BERT Variants</span></div>
+    </div>
+  </header>
+
+  <section class="section">
+    <!-- Main tabs -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="pipeline" onclick="switchTab('pipeline')">📊 Pipeline</button>
+      <button class="tab-btn" data-tab="tutorials" onclick="switchTab('tutorials')">📚 Tutorials</button>
+      <button class="tab-btn" data-tab="code" onclick="switchTab('code')">💻 Code</button>
+      <button class="tab-btn" data-tab="colab" onclick="switchTab('colab')">🚀 Colab</button>
+    </div>
+
+    <!-- ========== Pipeline Tab ========== -->
+    <div class="tab-content active" id="tab-pipeline">
+      <!-- Pipeline Diagram -->
+      <div class="content-block">
+        <div class="pipeline-visual">
+          <div class="pipe-box green"><span class="pipe-icon">📄</span><span class="pipe-title">Text Input</span><span class="pipe-desc">Yahoo Q&A</span></div>
+          <span class="pipe-arr">→</span>
+          <div style="border:2px dashed #a78bfa;border-radius:12px;padding:.8rem;display:flex;align-items:center;gap:0;background:rgba(124,58,237,.04)">
+            <div style="font-size:.68rem;font-weight:700;color:#7c3aed;text-transform:uppercase;writing-mode:vertical-lr;transform:rotate(180deg);margin-right:.5rem">Feature Extractor</div>
+            <div class="pipe-box yellow"><span class="pipe-icon">🔤</span><span class="pipe-title">Tokenizer</span><span class="pipe-desc">WordPiece</span></div>
+            <span class="pipe-arr">→</span>
+            <div class="pipe-box blue"><span class="pipe-icon">🧠</span><span class="pipe-title">BERT Encoder</span><span class="pipe-desc">3 variants</span></div>
+            <span class="pipe-arr">→</span>
+            <div class="pipe-box purple"><span class="pipe-icon">🎯</span><span class="pipe-title">Pooling</span><span class="pipe-desc">CLS | Mean | Pooler</span></div>
+          </div>
+          <span class="pipe-arr">→</span>
+          <div class="pipe-box indigo"><span class="pipe-icon">📋</span><span class="pipe-title">Task Head</span><span class="pipe-desc">Linear → 10</span></div>
+          <span class="pipe-arr">→</span>
+          <div class="pipe-box emerald"><span class="pipe-icon">⭐</span><span class="pipe-title">Results</span><span class="pipe-desc" id="pipe-acc-range">—</span></div>
+        </div>
+      </div>
+
+      <!-- Method Selection -->
+      <div class="content-block">
+        <h3>Select Methods to Compare</h3>
+        <div class="select-actions">
+          <button onclick="selectAll()">Select All</button>
+          <button onclick="clearAll()">Clear All</button>
+          <span style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem" id="selected-count">0 selected</span>
+        </div>
+        <div class="methods-grid" id="methods-grid"></div>
+        <button class="compare-btn" id="compare-btn" onclick="compareSelected()" disabled>Compare Selected Methods</button>
+        <p style="text-align:center;font-size:.78rem;color:var(--text-muted)">Select at least one method to compare</p>
+      </div>
+
+      <!-- Comparison Results -->
+      <div id="comparison-results" style="display:none">
+        <h3 style="margin-bottom:.75rem">Comparison Results</h3>
+        <div class="sub-tabs">
+          <button class="sub-tab active" onclick="switchSub('perf')">📊 Performance</button>
+          <button class="sub-tab" onclick="switchSub('config')">⚙️ Configuration</button>
+          <button class="sub-tab" onclick="switchSub('curves')">📈 Loss Curves</button>
+          <button class="sub-tab" onclick="switchSub('confusion')">🔍 Confusion</button>
+        </div>
+
+        <div class="sub-content active" id="sub-perf">
+          <div style="overflow-x:auto"><table class="perf-table" id="perf-table"><thead></thead><tbody></tbody></table></div>
+          <!-- Per-class metrics for best model -->
+          <div id="perclass-section" style="margin-top:1.5rem"></div>
+        </div>
+
+        <div class="sub-content" id="sub-config">
+          <div style="overflow-x:auto">
+            <table class="comparison-table">
+              <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Learning Rate</strong></td><td>2e-5</td></tr>
+                <tr><td><strong>Batch Size</strong></td><td>16</td></tr>
+                <tr><td><strong>Max Epochs</strong></td><td>3</td></tr>
+                <tr><td><strong>Max Sequence Length</strong></td><td>128</td></tr>
+                <tr><td><strong>Optimizer</strong></td><td>AdamW (weight_decay=0.01)</td></tr>
+                <tr><td><strong>Loss Function</strong></td><td>CrossEntropyLoss</td></tr>
+                <tr><td><strong>Early Stopping</strong></td><td>Patience=3, monitoring val F1</td></tr>
+                <tr><td><strong>Gradient Clipping</strong></td><td>max_norm=1.0</td></tr>
+                <tr><td><strong>Dropout</strong></td><td>0.1</td></tr>
+                <tr><td><strong>Dataset Split</strong></td><td>70% train / 15% val / 15% test (stratified)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sub-content" id="sub-curves">
+          <h4>📈 Training & Validation Loss Curves</h4>
+          <p style="font-size:.85rem;color:var(--text-muted)">Loss curves show model convergence during training. Lower loss = better fit.</p>
+          <div class="chart-container" id="chart-loss" style="height:400px"></div>
+          <h4 style="margin-top:1.5rem">Validation Accuracy</h4>
+          <div class="chart-container" id="chart-acc" style="height:400px"></div>
+        </div>
+
+        <div class="sub-content" id="sub-confusion">
+          <label for="cm-select" style="font-weight:600;font-size:.9rem;margin-right:.5rem">Select Model:</label>
+          <select id="cm-select" onchange="renderConfusion()" style="padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);font-family:var(--font)"></select>
+          <div id="perclass-cards" style="margin-top:1rem"></div>
+          <div class="chart-container cm-chart-container" id="chart-confusion"></div>
+        </div>
+      </div>
+
+      <!-- Pending state -->
+      <div id="pipeline-pending" style="display:none">
+        <div class="pending-box">
+          <h3>⏳ Training Not Yet Complete</h3>
+          <p>Run the BERT fine-tuning pipeline to generate results:</p>
+          <div class="code-block" style="text-align:left;max-width:600px;margin:1rem auto">
+            <code>cd assignment1/text_classification<br>python bert_finetuning.py</code>
+          </div>
+          <p style="margin-top:.75rem;font-size:.82rem">You can also train specific models:<br>
+          <code>python bert_finetuning.py --model bert_base --pooling cls_token mean_pooling</code></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Tutorials Tab ========== -->
+    <div class="tab-content" id="tab-tutorials">
+      <h3 style="margin-bottom:1rem">🤖 BERT Model Variants</h3>
+
+      <div class="tut-card">
+        <h4><span class="tut-icon">🧠</span>BERT-base (bert-base-uncased)</h4>
+        <p class="tut-sub"><em>Bidirectional Encoder Representations from Transformers</em> — Base version with 12 transformer layers. Pre-trained on massive text corpora using masked language modeling (MLM) and next sentence prediction (NSP).</p>
+        <div class="arch-mono">Architecture: 12 layers, 768 hidden size, 12 attention heads, 109.5M parameters</div>
+        <div class="tut-links">
+          <a href="https://huggingface.co/bert-base-uncased" target="_blank">🤗 Hugging Face</a>
+          <a href="https://arxiv.org/abs/1810.04805" target="_blank">📄 BERT Paper</a>
+        </div>
+      </div>
+
+      <div class="tut-card">
+        <h4><span class="tut-icon">⚡</span>DistilBERT (distilbert-base-uncased)</h4>
+        <p class="tut-sub">Distilled version of BERT — <strong>40% smaller, 60% faster</strong>, retains 97% of BERT's performance. Uses knowledge distillation during pre-training to compress the model.</p>
+        <div class="arch-mono">Architecture: 6 layers, 768 hidden size, 12 attention heads, 66.4M parameters</div>
+        <div class="tut-links">
+          <a href="https://huggingface.co/distilbert-base-uncased" target="_blank">🤗 Hugging Face</a>
+          <a href="https://arxiv.org/abs/1910.01108" target="_blank">📄 DistilBERT Paper</a>
+        </div>
+      </div>
+
+      <div class="tut-card">
+        <h4><span class="tut-icon">🚀</span>TinyBERT (prajjwal1/bert-tiny)</h4>
+        <p class="tut-sub">Ultra-compact BERT — <strong>87% smaller, 7.5x faster inference</strong>. Uses two-stage knowledge distillation for extreme compression.</p>
+        <div class="arch-mono">Architecture: 2 layers, 128 hidden size, 2 attention heads, 4.4M parameters</div>
+        <div class="tut-links">
+          <a href="https://huggingface.co/prajjwal1/bert-tiny" target="_blank">🤗 Hugging Face</a>
+          <a href="https://arxiv.org/abs/1909.10351" target="_blank">📄 TinyBERT Paper</a>
+        </div>
+      </div>
+
+      <h3 style="margin:1.5rem 0 1rem">🎯 Pooling Strategies</h3>
+
+      <div class="tut-card">
+        <h4>[CLS] Token Pooling</h4>
+        <p class="tut-sub">Uses the final hidden state of the special [CLS] token (first token). BERT is pre-trained to encode sentence-level information in this token.</p>
+        <div class="arch-mono">output = last_hidden_state[:, 0, :] → shape: [batch_size, hidden_size]</div>
+      </div>
+
+      <div class="tut-card">
+        <h4>Pooler Output</h4>
+        <p class="tut-sub">Takes [CLS] token hidden state and passes through an additional dense layer + tanh activation. Provides a refined sentence representation optimized during pre-training. <em>Not available for DistilBERT.</em></p>
+        <div class="arch-mono">output = tanh(dense(last_hidden_state[:, 0, :])) → shape: [batch_size, hidden_size]</div>
+      </div>
+
+      <div class="tut-card">
+        <h4>Mean Pooling</h4>
+        <p class="tut-sub">Averages hidden states across all tokens (excluding padding). Captures information from entire sequence, not just [CLS] token.</p>
+        <div class="arch-mono">output = sum(hidden * mask, dim=1) / sum(mask, dim=1) → shape: [batch_size, hidden_size]</div>
+      </div>
+    </div>
+
+    <!-- ========== Code Tab ========== -->
+    <div class="tab-content" id="tab-code">
+      <h3>📝 Training Script</h3>
+      <p style="font-size:.9rem;color:var(--text-secondary);margin-bottom:1rem">Complete code to fine-tune BERT models (BERT-base, DistilBERT, TinyBERT) with different pooling strategies for Yahoo Answers classification.</p>
+      <div class="code-actions">
+        <button onclick="copyCode()">📋 Copy Code</button>
+        <button onclick="downloadCode()">⬇️ Download .py</button>
+      </div>
+      <pre class="code-panel-block" id="code-block"></pre>
+    </div>
+
+    <!-- ========== Colab Tab ========== -->
+    <div class="tab-content" id="tab-colab">
+      <div class="tut-card" style="text-align:center;padding:2.5rem">
+        <h4 style="font-size:1.2rem">🚀 Run in Google Colab</h4>
+        <p class="tut-sub" style="max-width:500px;margin:1rem auto">Open the notebook in Google Colab to experiment with BERT fine-tuning. Includes all 8 configurations (3 models × 3 pooling strategies).</p>
+        <h5 style="margin:1.5rem 0 .5rem">📚 What's included:</h5>
+        <ul style="text-align:left;max-width:400px;margin:0 auto;font-size:.88rem;color:var(--text-secondary)">
+          <li>Dataset loading and preprocessing (Yahoo Answers)</li>
+          <li>Tokenization with BERT tokenizers</li>
+          <li>Model fine-tuning for 8 configurations</li>
+          <li>Training with PyTorch/Transformers</li>
+          <li>Evaluation metrics and confusion matrices</li>
+          <li>Pooling strategy comparisons</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2025–2026 Deep Learning &amp; Its Applications (CO3133) — <a href="https://hcmut.edu.vn" target="_blank">HCMUT – VNUHCM</a></p>
+  </footer>
+
+<script>
+// ===== Tab & Sub-tab Navigation =====
+function switchTab(name){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const p=document.getElementById('tab-'+name);if(p)p.classList.add('active');
+  const b=document.querySelector('.tab-btn[data-tab="'+name+'"]');if(b)b.classList.add('active');
+}
+function switchSub(name){
+  document.querySelectorAll('.sub-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  const p=document.getElementById('sub-'+name);if(p)p.classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ===== Data =====
+let DATA=null;const selectedMethods=new Set();
+const PLOTLY_LAYOUT={font:{family:'Inter,sans-serif'},paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',margin:{l:50,r:20,t:40,b:50}};
+const PLOTLY_CONFIG={responsive:true,displayModeBar:true,displaylogo:false};
+const COLORS=['#7c3aed','#2563eb','#059669','#d97706','#dc2626','#ec4899','#8b5cf6','#0891b2','#65a30d','#e11d48'];
+
+async function loadData(){
+  try{
+    const r=await fetch('data/bert_finetuning_results.json');
+    DATA=await r.json();
+    if(DATA.status==='pending'){showPending();loadCodeBlock();return;}
+    renderMethodCards();updateHeroStats();loadCodeBlock();
+  }catch(e){console.error('Failed to load data:',e);showPending();}
+}
+
+function showPending(){
+  document.getElementById('pipeline-pending').style.display='block';
+  document.querySelectorAll('.content-block').forEach(el=>el.style.display='none');
+  document.getElementById('comparison-results').style.display='none';
+}
+
+function updateHeroStats(){
+  if(!DATA||!DATA.experiments)return;
+  const exps=Object.values(DATA.experiments);
+  if(!exps.length)return;
+  const best=exps.reduce((a,b)=>a.test_metrics.accuracy>b.test_metrics.accuracy?a:b);
+  const worst=exps.reduce((a,b)=>a.test_metrics.accuracy<b.test_metrics.accuracy?a:b);
+  document.getElementById('hero-acc').textContent=(best.test_metrics.accuracy*100).toFixed(1)+'%';
+  document.getElementById('pipe-acc-range').textContent=(worst.test_metrics.accuracy*100).toFixed(0)+'-'+(best.test_metrics.accuracy*100).toFixed(0)+'% acc';
+}
+
+function renderMethodCards(){
+  const grid=document.getElementById('methods-grid');grid.innerHTML='';
+  if(!DATA||!DATA.experiments)return;
+  for(const[name,exp]of Object.entries(DATA.experiments)){
+    const card=document.createElement('div');card.className='method-card';card.dataset.name=name;
+    const acc=(exp.test_metrics.accuracy*100).toFixed(1);
+    const time=exp.training_time_minutes?exp.training_time_minutes.toFixed(1)+'m':exp.training_time_seconds?exp.training_time_seconds.toFixed(0)+'s':'—';
+    card.innerHTML=`<h4>${name}</h4><div class="method-stats"><span>📊 ${acc}%</span><span>⚡ ${time}</span></div><div class="method-sub">${exp.model_base_name} + ${exp.pooling_display}</div>`;
+    card.onclick=()=>toggleMethod(name,card);
+    grid.appendChild(card);
+  }
+}
+
+function toggleMethod(name,card){
+  if(selectedMethods.has(name)){selectedMethods.delete(name);card.classList.remove('selected');}
+  else{selectedMethods.add(name);card.classList.add('selected');}
+  updateSelectionUI();
+}
+function selectAll(){
+  document.querySelectorAll('.method-card').forEach(c=>{selectedMethods.add(c.dataset.name);c.classList.add('selected');});
+  updateSelectionUI();
+}
+function clearAll(){
+  selectedMethods.clear();
+  document.querySelectorAll('.method-card').forEach(c=>c.classList.remove('selected'));
+  updateSelectionUI();
+}
+function updateSelectionUI(){
+  document.getElementById('selected-count').textContent=selectedMethods.size+' selected';
+  const btn=document.getElementById('compare-btn');
+  btn.disabled=selectedMethods.size===0;
+  btn.textContent=selectedMethods.size>0?`Compare ${selectedMethods.size} Methods`:'Compare Selected Methods';
+}
+
+// ===== Comparison =====
+function compareSelected(){
+  if(!selectedMethods.size||!DATA)return;
+  document.getElementById('comparison-results').style.display='block';
+  renderPerfTable();renderLossCurves();populateCMSelect();
+  document.getElementById('comparison-results').scrollIntoView({behavior:'smooth'});
+}
+
+function renderPerfTable(){
+  const thead=document.querySelector('#perf-table thead');
+  const tbody=document.querySelector('#perf-table tbody');
+  thead.innerHTML='<tr><th>Model</th><th>Pooling</th><th>Params</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Train Time</th><th>Inference</th><th>Size</th></tr>';
+  const entries=[...selectedMethods].map(n=>({name:n,...DATA.experiments[n]}));
+  // Find best values
+  const metrics=['accuracy','precision','recall','f1'];
+  const bestVals={};
+  metrics.forEach(m=>{bestVals[m]=Math.max(...entries.map(e=>e.test_metrics[m]));});
+  let bestInf=Math.min(...entries.map(e=>e.resource_metrics.inference_time_ms));
+  let bestSize=Math.min(...entries.map(e=>e.resource_metrics.model_size_mb));
+
+  // Group by model base
+  const grouped={};entries.forEach(e=>{const k=e.model_base_name;if(!grouped[k])grouped[k]=[];grouped[k].push(e);});
+
+  tbody.innerHTML='';
+  for(const[base,exps]of Object.entries(grouped)){
+    exps.sort((a,b)=>b.test_metrics.accuracy-a.test_metrics.accuracy);
+    exps.forEach((e,i)=>{
+      const tm=e.test_metrics,rm=e.resource_metrics;
+      const fmt=(v,best)=>v===best?`<span class="best-cell">${(v*100).toFixed(2)}%</span>`:(v*100).toFixed(2)+'%';
+      const fmtR=(v,best,unit,lower)=>{
+        const s=v.toFixed(2)+unit;
+        return (lower?v===best:false)?`<span class="best-cell">${s}</span>`:s;
+      };
+      const time=e.training_time_minutes?e.training_time_minutes.toFixed(1)+'m':e.training_time_seconds?(e.training_time_seconds/60).toFixed(1)+'m':'—';
+      tbody.innerHTML+=`<tr>
+        <td>${i===0?'<span class="model-group">'+base+'</span>':''}</td>
+        <td>${e.pooling_display}</td>
+        <td>${(rm.parameters/1e6).toFixed(1)}M</td>
+        <td>${fmt(tm.accuracy,bestVals.accuracy)}</td>
+        <td>${fmt(tm.precision,bestVals.precision)}</td>
+        <td>${fmt(tm.recall,bestVals.recall)}</td>
+        <td>${fmt(tm.f1,bestVals.f1)}</td>
+        <td>${time}</td>
+        <td>${rm.inference_time_ms===bestInf?'<span class="best-cell">~'+rm.inference_time_ms.toFixed(2)+'ms</span>':'~'+rm.inference_time_ms.toFixed(2)+'ms'}</td>
+        <td>${rm.model_size_mb===bestSize?'<span class="best-cell">'+rm.model_size_mb.toFixed(1)+'MB</span>':rm.model_size_mb.toFixed(1)+'MB'}</td>
+      </tr>`;
+    });
+  }
+  // Legend
+  const section=document.getElementById('perclass-section');
+  section.innerHTML='<p style="font-size:.75rem;color:var(--text-muted)">🏆 Highlighted = Best performer | ↑ Higher is better | ↓ Lower is better</p>';
+}
+
+function renderLossCurves(){
+  if(!DATA.learning_curves)return;
+  const trainTraces=[],valTraces=[],accTraces=[];let i=0;
+  for(const name of selectedMethods){
+    const lc=DATA.learning_curves[name];if(!lc)continue;
+    const c=COLORS[i%COLORS.length];
+    trainTraces.push({x:lc.epochs,y:lc.train_loss,name:name+' (Train)',mode:'lines+markers',marker:{size:5},line:{color:c,dash:'solid'}});
+    valTraces.push({x:lc.epochs,y:lc.val_loss,name:name+' (Val)',mode:'lines+markers',marker:{size:5},line:{color:c,dash:'dot'}});
+    accTraces.push({x:lc.epochs,y:lc.val_accuracy.map(v=>v*100),name:name,mode:'lines+markers',marker:{size:5},line:{color:c}});
+    i++;
+  }
+  Plotly.newPlot('chart-loss',[...trainTraces,...valTraces],{...PLOTLY_LAYOUT,title:'Training & Validation Loss',xaxis:{title:'Epoch',gridcolor:'#f0f0f0'},yaxis:{title:'Loss',gridcolor:'#f0f0f0'}},PLOTLY_CONFIG);
+  Plotly.newPlot('chart-acc',accTraces,{...PLOTLY_LAYOUT,title:'Validation Accuracy',xaxis:{title:'Epoch',gridcolor:'#f0f0f0'},yaxis:{title:'Accuracy (%)',gridcolor:'#f0f0f0'}},PLOTLY_CONFIG);
+}
+
+function populateCMSelect(){
+  const sel=document.getElementById('cm-select');sel.innerHTML='';
+  for(const name of selectedMethods){sel.add(new Option(name,name));}
+  if(selectedMethods.size>0){sel.value=[...selectedMethods][0];renderConfusion();}
+}
+
+function renderConfusion(){
+  const name=document.getElementById('cm-select').value;
+  if(!name||!DATA.experiments[name])return;
+  const exp=DATA.experiments[name];
+  const cm=exp.confusion_matrix;
+  const classes=exp.class_names||DATA.metadata.class_names;
+
+  // Per-class F1 cards
+  const pcDiv=document.getElementById('perclass-cards');
+  if(exp.per_class_metrics){
+    pcDiv.innerHTML='<h4 style="margin-bottom:.5rem">Per-Class F1-Score</h4><div class="f1-cards">'+
+      exp.per_class_metrics.map(m=>`<div class="f1-card"><div class="f1-class">${m.class}</div><div class="f1-val">${(m.f1*100).toFixed(1)}%</div></div>`).join('')+'</div>';
+  }
+
+  // Plotly heatmap
+  if(cm&&classes){
+    Plotly.newPlot('chart-confusion',[{z:cm,x:classes,y:classes,type:'heatmap',colorscale:[[0,'#f5f3ff'],[0.5,'#a78bfa'],[1,'#5b21b6']],hovertemplate:'True: %{y}<br>Predicted: %{x}<br>Count: %{z}<extra></extra>'}],{
+      ...PLOTLY_LAYOUT,title:name+' — Confusion Matrix',
+      xaxis:{title:'Predicted',tickangle:-45,gridcolor:'#f0f0f0'},
+      yaxis:{title:'True',autorange:'reversed',gridcolor:'#f0f0f0'},
+      margin:{l:140,r:20,t:50,b:140},height:550
+    },PLOTLY_CONFIG);
+  }
+}
+
+// ===== Code Tab =====
+const CODE_URL='../bert_finetuning.py';
+async function loadCodeBlock(){
+  try{const r=await fetch(CODE_URL);const t=await r.text();document.getElementById('code-block').textContent=t;}
+  catch(e){document.getElementById('code-block').textContent='# Failed to load code. See bert_finetuning.py in the repository.';}
+}
+function copyCode(){const b=document.getElementById('code-block');navigator.clipboard.writeText(b.textContent);alert('Code copied!');}
+function downloadCode(){const b=document.getElementById('code-block');const blob=new Blob([b.textContent],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bert_finetuning.py';a.click();}
+
+// ===== Init =====
+loadData();
+</script>
+</body>
+</html>
