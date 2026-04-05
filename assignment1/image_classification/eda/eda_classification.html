@@ -44,11 +44,11 @@
     <div class="navbar-inner">
       <a href="../../../index.html" class="navbar-brand">DL Hub</a>
       <ul class="navbar-links">
-        <li><a href="../../../index.html">Home</a></li>
-        <li><a href="../../index.html">Assignment 1</a></li>
-        <li><a href="index.html">EDA Home</a></li>
-        <li><a href="eda_core.html">Core</a></li>
-        <li><a href="eda_classification.html" class="active">Classification</a></li>
+        <li><a href="../../../index.html" data-nav="home">Home</a></li>
+        <li><a href="../../index.html" data-nav="assignment">Assignment 1</a></li>
+        <li><a href="index.html" data-nav="eda-home">EDA Home</a></li>
+        <li><a href="eda_core.html" data-nav="eda-core">EDA Core</a></li>
+        <li><a href="eda_classification.html" data-nav="eda-classification">EDA Classification</a></li>
       </ul>
     </div>
   </nav>
@@ -745,6 +745,31 @@ print(backbone_df)</code></pre>
       Prism.highlightAllUnder(document);
     }
 
+    function applyNavbarActiveState() {
+      const links = document.querySelectorAll('.navbar-links a[data-nav]');
+      if (!links.length) return;
+
+      links.forEach((link) => link.classList.remove('active'));
+
+      const path = (window.location.pathname || '').toLowerCase();
+      let key = 'home';
+
+      if (path.includes('/assignment1/image_classification/classification/index.html')) {
+        key = 'model-classification';
+      } else if (path.includes('/assignment1/image_classification/eda/eda_classification.html')) {
+        key = 'eda-classification';
+      } else if (path.includes('/assignment1/image_classification/eda/eda_core.html')) {
+        key = 'eda-core';
+      } else if (path.includes('/assignment1/image_classification/eda/index.html')) {
+        key = 'eda-home';
+      } else if (path.includes('/assignment1/')) {
+        key = 'assignment';
+      }
+
+      const activeLink = document.querySelector(`.navbar-links a[data-nav="${key}"]`);
+      if (activeLink) activeLink.classList.add('active');
+    }
+
     const PLOTLY_LAYOUT = {
       font: { family: 'Inter, sans-serif', size: 12 },
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -947,6 +972,7 @@ print(backbone_df)</code></pre>
       }
     }
 
+    applyNavbarActiveState();
     applyEditorStyleHighlighting();
     loadData();
   </script>

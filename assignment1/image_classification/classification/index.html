@@ -2220,10 +2220,10 @@
     <div class="navbar-inner">
       <a href="../../../index.html" class="navbar-brand">DL Hub</a>
       <ul class="navbar-links">
-        <li><a href="../../../index.html">Home</a></li>
-        <li><a href="../../index.html">Assignment 1</a></li>
-        <li><a href="../eda/index.html">EDA</a></li>
-        <li><a href="index.html" class="active">Classification</a></li>
+        <li><a href="../../../index.html" data-nav="home">Home</a></li>
+        <li><a href="../../index.html" data-nav="assignment">Assignment 1</a></li>
+        <li><a href="../eda/index.html" data-nav="eda-home">EDA Home</a></li>
+        <li><a href="index.html" data-nav="model-classification">Model Classification</a></li>
       </ul>
     </div>
   </nav>
@@ -4031,6 +4031,31 @@ val_result = run_epoch(
       });
 
       Prism.highlightAllUnder(document);
+    }
+
+    function applyNavbarActiveState() {
+      const links = document.querySelectorAll('.navbar-links a[data-nav]');
+      if (!links.length) return;
+
+      links.forEach((link) => link.classList.remove('active'));
+
+      const path = (window.location.pathname || '').toLowerCase();
+      let key = 'home';
+
+      if (path.includes('/assignment1/image_classification/classification/index.html')) {
+        key = 'model-classification';
+      } else if (path.includes('/assignment1/image_classification/eda/eda_classification.html')) {
+        key = 'eda-classification';
+      } else if (path.includes('/assignment1/image_classification/eda/eda_core.html')) {
+        key = 'eda-core';
+      } else if (path.includes('/assignment1/image_classification/eda/index.html')) {
+        key = 'eda-home';
+      } else if (path.includes('/assignment1/')) {
+        key = 'assignment';
+      }
+
+      const activeLink = document.querySelector(`.navbar-links a[data-nav="${key}"]`);
+      if (activeLink) activeLink.classList.add('active');
     }
 
     function switchCompareTab(tabName) {
@@ -5913,6 +5938,7 @@ val_result = run_epoch(
       }
     }
 
+    applyNavbarActiveState();
     applyEditorStyleHighlighting();
     selectPipelineStep(getInitialPipelineStep());
     loadAllData();
