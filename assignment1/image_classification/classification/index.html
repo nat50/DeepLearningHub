@@ -169,15 +169,15 @@
       border: 2px solid #4f46e5;
       border-radius: 14px;
       background: #f7f8ff;
-      padding: 1.35rem 1.2rem 1.25rem;
-      margin-bottom: 1.1rem;
+      padding: 1rem 1rem 0.95rem;
+      margin-bottom: 1rem;
     }
 
     .tensor-shape-title {
-      margin: 0 0 1rem;
+      margin: 0 0 0.8rem;
       text-align: center;
       color: #5d5bc4;
-      font-size: 1.72rem;
+      font-size: 1.45rem;
       font-weight: 800;
       font-family: Georgia, 'Times New Roman', serif;
     }
@@ -185,30 +185,30 @@
     .tensor-dimension-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.62rem;
+      gap: 0.5rem;
     }
 
     .tensor-dimension-card {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.38rem;
+      gap: 0.3rem;
       border-left: 5px solid #4f46e5;
       border-radius: 10px;
       background: #eceef4;
-      padding: 0.62rem 0.7rem;
+      padding: 0.5rem 0.55rem;
     }
 
     .tensor-dimension-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 34px;
-      height: 34px;
+      width: 30px;
+      height: 30px;
       border-radius: 999px;
       background: #4f46e5;
       color: #ffffff;
-      font-size: 1.3rem;
+      font-size: 1.05rem;
       font-weight: 800;
       font-family: Georgia, 'Times New Roman', serif;
       flex-shrink: 0;
@@ -224,15 +224,15 @@
     .tensor-dimension-text h6 {
       margin: 0;
       color: #18233c;
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-weight: 800;
     }
 
     .tensor-dimension-text p {
       margin: 0;
-      font-size: 0.73rem;
+      font-size: 0.69rem;
       color: #4e5d75;
-      line-height: 1.35;
+      line-height: 1.3;
     }
 
     .input-key-principles {
@@ -2302,10 +2302,6 @@ val_result = run_epoch(
           </table>
         </div>
 
-        <h3 style="margin-top:1.1rem;">Confusion Matrix</h3>
-        <div class="chart-placeholder" id="chart-confusion-resource-empty">Select a model from the comparison table above to view its confusion matrix.</div>
-        <div class="confusion-container" id="chart-confusion-resource" style="display:none;"></div>
-
         <div class="resource-hardware-grid">
           <div class="resource-hardware-card">
             <h4>LightningAI GPU</h4>
@@ -2321,10 +2317,14 @@ val_result = run_epoch(
           </div>
           <div class="resource-hardware-card">
             <h4>Source</h4>
-            <p>lightning.ai/pricing (RTXP 6000 row)</p>
+            <p><a href="https://lightning.ai/virtual-machines" target="_blank" rel="noopener noreferrer">Lightning AI</a></p>
           </div>
         </div>
         <p class="tiny-note">GPU section intentionally uses LightningAI RTX 6000 machine information instead of local workstation specs.</p>
+
+        <h3 style="margin-top:1.1rem;">Confusion Matrix</h3>
+        <div class="chart-placeholder" id="chart-confusion-resource-empty">Select a model from the comparison table above to view confusion matrix.</div>
+        <div class="confusion-container" id="chart-confusion-resource" style="display:none;"></div>
       </div>
     </div>
 
@@ -2613,6 +2613,55 @@ val_result = run_epoch(
       'vit_b16_no_aug', 'vit_b16_aug',
       'swin_b_no_aug', 'swin_b_aug'
     ];
+
+    const MODEL_RELEASE_RANK = {
+      vgg16: 1,
+      resnet50: 2,
+      xception: 3,
+      efficientnet_b3: 4,
+      mobilenet_v3: 5,
+      vit_b16: 6,
+      swin_b: 7,
+    };
+
+    function normalizeModelBackboneKey(modelName) {
+      const summary = MODEL_SUMMARIES[modelName];
+      const raw = String(
+        (summary && (summary.backbone || (summary.model_config && summary.model_config.key))) || modelName || ''
+      ).toLowerCase();
+
+      if (raw.includes('vgg16')) return 'vgg16';
+      if (raw.includes('resnet50')) return 'resnet50';
+      if (raw.includes('xception')) return 'xception';
+      if (raw.includes('efficientnet')) return 'efficientnet_b3';
+      if (raw.includes('mobilenet')) return 'mobilenet_v3';
+      if (raw.includes('vit')) return 'vit_b16';
+      if (raw.includes('swin')) return 'swin_b';
+      return raw;
+    }
+
+    function getAugmentationRank(modelName) {
+      if (/\(NoAug\)/i.test(modelName)) return 0;
+      if (/\(Aug\)/i.test(modelName)) return 1;
+      return 2;
+    }
+
+    function sortModelsByReleaseDate(modelNames) {
+      return [...modelNames].sort((left, right) => {
+        const leftKey = normalizeModelBackboneKey(left);
+        const rightKey = normalizeModelBackboneKey(right);
+        const leftRank = MODEL_RELEASE_RANK[leftKey] || 999;
+        const rightRank = MODEL_RELEASE_RANK[rightKey] || 999;
+
+        if (leftRank !== rightRank) return leftRank - rightRank;
+
+        const leftAugRank = getAugmentationRank(left);
+        const rightAugRank = getAugmentationRank(right);
+        if (leftAugRank !== rightAugRank) return leftAugRank - rightAugRank;
+
+        return left.localeCompare(right);
+      });
+    }
 
     function applyEditorStyleHighlighting() {
       if (typeof Prism === 'undefined') return;
@@ -2982,35 +3031,74 @@ val_result = run_epoch(
 
     function renderPerformanceTable(modelNames) {
       const tbody = document.getElementById('perf-tbody');
-      const sorted = [...modelNames].sort((a, b) => MODEL_METRICS[b].accuracy - MODEL_METRICS[a].accuracy);
-      tbody.innerHTML = sorted.map((name, idx) => {
+      const sorted = sortModelsByReleaseDate(modelNames);
+      const toMetricNumber = (value) => Number(value);
+      const bestValues = {
+        precision: Math.max(...sorted.map((name) => toMetricNumber(MODEL_METRICS[name].precision))),
+        recall: Math.max(...sorted.map((name) => toMetricNumber(MODEL_METRICS[name].recall))),
+        f1_score: Math.max(...sorted.map((name) => toMetricNumber(MODEL_METRICS[name].f1_score))),
+        accuracy: Math.max(...sorted.map((name) => toMetricNumber(MODEL_METRICS[name].accuracy))),
+        top5_accuracy: Math.max(...sorted.map((name) => toMetricNumber(MODEL_METRICS[name].top5_accuracy))),
+      };
+
+      const renderMetric = (value, bestValue) => {
+        const numericValue = toMetricNumber(value);
+        const formatted = `${(numericValue * 100).toFixed(2)}%`;
+        const isBest = Math.abs(numericValue - bestValue) <= 1e-12;
+        if (isBest) {
+          return `<span class="metric-best" style="display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:0.18rem 0.5rem;border-radius:6px;background:#4caf50;color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(76,175,80,0.28);">${formatted}</span>`;
+        }
+        return `<span class="metric-value">${formatted}</span>`;
+      };
+
+      tbody.innerHTML = sorted.map((name) => {
         const metrics = MODEL_METRICS[name];
-        const rowClass = idx === 0 ? ' class="best-row"' : '';
         const safeName = name.replace(/'/g, '&#39;');
-        return `<tr${rowClass} onclick="selectModelForConfusion('${safeName}', 'performance')">
+        return `<tr onclick="selectModelForConfusion('${safeName}', 'performance')">
           <td><strong>${name}</strong></td>
-          <td>${(metrics.precision * 100).toFixed(2)}%</td>
-          <td>${(metrics.recall * 100).toFixed(2)}%</td>
-          <td>${(metrics.f1_score * 100).toFixed(2)}%</td>
-          <td>${(metrics.accuracy * 100).toFixed(2)}%</td>
-          <td>${(metrics.top5_accuracy * 100).toFixed(2)}%</td>
+          <td>${renderMetric(metrics.precision, bestValues.precision)}</td>
+          <td>${renderMetric(metrics.recall, bestValues.recall)}</td>
+          <td>${renderMetric(metrics.f1_score, bestValues.f1_score)}</td>
+          <td>${renderMetric(metrics.accuracy, bestValues.accuracy)}</td>
+          <td>${renderMetric(metrics.top5_accuracy, bestValues.top5_accuracy)}</td>
         </tr>`;
       }).join('');
     }
 
     function renderResourceTable(modelNames) {
       const tbody = document.getElementById('resource-tbody');
-      const sorted = [...modelNames].sort((a, b) => MODEL_METRICS[a].inference_time - MODEL_METRICS[b].inference_time);
+      const sorted = sortModelsByReleaseDate(modelNames);
+
+      const toNum = (value) => Number(value);
+      const getFlopsB = (name) => toNum(MODEL_METRICS[name].flops) / 1e9;
+      const bestValues = {
+        training_time: Math.min(...sorted.map((name) => toNum(MODEL_METRICS[name].training_time))),
+        inference_time: Math.min(...sorted.map((name) => toNum(MODEL_METRICS[name].inference_time))),
+        flops_b: Math.min(...sorted.map((name) => getFlopsB(name))),
+        parameters: Math.min(...sorted.map((name) => toNum(MODEL_METRICS[name].parameters))),
+        model_size: Math.min(...sorted.map((name) => toNum(MODEL_METRICS[name].model_size))),
+      };
+
+      const renderResourceMetric = (value, bestValue, digits) => {
+        const numericValue = toNum(value);
+        const formatted = numericValue.toFixed(digits);
+        const bestFormatted = toNum(bestValue).toFixed(digits);
+        const isBest = formatted === bestFormatted;
+        if (!isBest) return formatted;
+        return `<span class="metric-best" style="display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:0.18rem 0.5rem;border-radius:6px;background:#4caf50;color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(76,175,80,0.28);">${formatted}</span>`;
+      };
+
       tbody.innerHTML = sorted.map((name) => {
         const metrics = MODEL_METRICS[name];
         const safeName = name.replace(/'/g, '&#39;');
+        const flopsB = toNum(metrics.flops) / 1e9;
         return `<tr>
           <td onclick="selectModelForConfusion('${safeName}', 'resources')"><strong>${name}</strong></td>
-          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${metrics.training_time.toFixed(2)}</td>
-          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${metrics.inference_time.toFixed(3)}</td>
-          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${(metrics.flops / 1e9).toFixed(3)}</td>
-          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${metrics.parameters.toFixed(3)}</td>
-          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${metrics.model_size.toFixed(3)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${renderResourceMetric(metrics.training_time, bestValues.training_time, 2)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${renderResourceMetric(metrics.inference_time, bestValues.inference_time, 3)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${renderResourceMetric(flopsB, bestValues.flops_b, 3)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${renderResourceMetric(metrics.parameters, bestValues.parameters, 3)}</td>
+          <td onclick="selectModelForConfusion('${safeName}', 'resources')">${renderResourceMetric(metrics.model_size, bestValues.model_size, 3)}</td>
         </tr>`;
       }).join('');
     }
@@ -3018,7 +3106,8 @@ val_result = run_epoch(
     function renderArchitectureTable(modelNames) {
       const seen = new Set();
       const tbody = document.getElementById('arch-tbody');
-      tbody.innerHTML = modelNames.filter((name) => {
+      const sorted = sortModelsByReleaseDate(modelNames);
+      tbody.innerHTML = sorted.filter((name) => {
         const summary = MODEL_SUMMARIES[name];
         if (!summary) return false;
         if (seen.has(summary.backbone)) return false;
@@ -3075,7 +3164,8 @@ val_result = run_epoch(
       const lcSelect = document.getElementById('lc-model-select');
       lcSelect.innerHTML = '<option value="">- Select Model -</option>';
 
-      modelNames.forEach((name) => {
+      const sorted = sortModelsByReleaseDate(modelNames);
+      sorted.forEach((name) => {
         lcSelect.add(new Option(name, name));
       });
 
@@ -3236,6 +3326,7 @@ val_result = run_epoch(
         renderConfiguration(best);
         renderSelectedLC();
         renderConfusionMatrices();
+        switchCompareTab('performance');
       } catch (error) {
         console.error('Failed to load classification data:', error);
       }

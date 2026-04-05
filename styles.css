@@ -521,6 +521,22 @@ code {
 .comparison-table tbody tr:hover { background: rgba(91, 106, 191, 0.04); }
 .comparison-table tbody tr.best-row { background: rgba(16, 185, 129, 0.06); }
 .comparison-table tbody tr.best-row td:first-child { font-weight: 700; }
+.comparison-table .metric-value {
+  color: #0ea85b;
+  font-weight: 700;
+}
+.comparison-table .metric-best {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: 0.18rem 0.5rem;
+  border-radius: 6px;
+  background: #4caf50;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.28);
+}
 
 /* ===== About Box ===== */
 .about-box {
