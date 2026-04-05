@@ -1,0 +1,52 @@
+{
+  "experiment_name": "Bidirectional LSTM",
+  "experiment_slug": "lstm_default",
+  "backbone": "lstm",
+  "best_epoch": 3,
+  "split_sizes": {
+    "train": 979999,
+    "val": 210000,
+    "test": 210001
+  },
+  "class_names": [
+    "Society & Culture",
+    "Science & Mathematics",
+    "Health",
+    "Education & Reference",
+    "Computers & Internet",
+    "Sports",
+    "Business & Finance",
+    "Entertainment & Music",
+    "Family & Relationships",
+    "Politics & Government"
+  ],
+  "model_config": {
+    "key": "lstm",
+    "display_name": "Bidirectional LSTM",
+    "family": "rnn",
+    "pretrained_source": "Random (embedding trained from scratch)",
+    "description": "2-layer Bi-LSTM with 256 hidden units, 128-dim embeddings"
+  },
+  "training_time_minutes": 80.27356713500049,
+  "val_metrics": {
+    "loss": 0.8087912776606424,
+    "accuracy": 0.7385380952380952,
+    "precision": 0.7347231481997448,
+    "recall": 0.7385380952380952,
+    "f1": 0.7327583586981532
+  },
+  "test_metrics": {
+    "loss": 0.806598241823932,
+    "accuracy": 0.7385869591097185,
+    "precision": 0.7346466930638466,
+    "recall": 0.7385869591097185,
+    "f1": 0.7329293020150935
+  },
+  "resource_metrics": {
+    "parameters": 8772874.0,
+    "trainable_parameters": 8772874.0,
+    "model_size_mb": 33.469215393066406,
+    "inference_time_ms": 21.29153999965638
+  },
+  "checkpoint_path": "results\\yahoo_answers_classification\\lstm_default\\best_model.pth"
+}

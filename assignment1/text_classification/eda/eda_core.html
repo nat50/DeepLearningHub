@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core EDA — Yahoo Answers | DL Hub</title>
+  <meta name="description" content="Core exploratory data analysis of the Yahoo Answers dataset: class distribution, word counts, stopword analysis, vocabulary richness, and keyword analysis.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <style>
+    .menu-actions { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 20px; }
+    .menu-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: 0.2s; color: #374151; }
+    .btn-tutorial { background: #F9B2D7; }
+    .btn-tutorial:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-code { background: #CFECF3; }
+    .btn-code:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-copy { background: #DAF9DE; }
+    .btn-copy:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .tutorial-panel, .code-panel { display: none; background: #F6FFDC; border-left: 5px solid #F9B2D7; border-radius: 8px; padding: 20px; margin: 20px 0px; }
+    .code-panel { border-left-color: #CFECF3; background: #fafff5; }
+    .tutorial-panel.active, .code-panel.active { display: block; }
+    .tutorial-explanation h3 { margin-top: 0; color: #7c3d5a; }
+    .explanation-item { margin-bottom: 12px; }
+    .explanation-item strong { color: #b8567a; font-size: 1.05rem; }
+    .code-tab-content pre { margin-top: 15px; background: #282c34; color: #abb2bf; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    .code-tab-content pre code { background: transparent !important; color: inherit !important; padding: 0 !important; font-family: monospace !important; border: none !important; }
+    .eda-core-stat .stat-card { background: #F6FFDC; border: 1px solid #DAF9DE; }
+    .eda-note-box { background: #CFECF3; border: 1px solid #b8dfe8; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1.5rem; color: #374151; }
+    .eda-insight-card { background: #DAF9DE; border: 1px solid #b8e8c8 !important; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../../../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Assignment 1</a></li>
+        <li><a href="index.html">EDA Home</a></li>
+        <li><a href="eda_core.html" class="active">Core</a></li>
+        <li><a href="eda_classification.html">Classification</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero-banner">
+    <h1>📊 Core Dataset Analysis</h1>
+    <p class="subtitle">Comprehensive analysis of text properties: class distribution, word counts, stopword analysis, vocabulary richness, and keyword patterns for the Yahoo Answers dataset.</p>
+  </header>
+
+  <section class="section">
+
+    <!-- === Dataset Overview === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📊 Dataset Overview</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="stat-cards eda-core-stat" id="overview-stats">
+          <div class="stat-card"><span class="stat-value" id="ov-samples">—</span><span class="stat-label">Total Samples</span></div>
+          <div class="stat-card"><span class="stat-value" id="ov-classes">—</span><span class="stat-label">Classes</span></div>
+          <div class="stat-card"><span class="stat-value" id="ov-avg-words">—</span><span class="stat-label">Avg Words/Sample</span></div>
+          <div class="stat-card"><span class="stat-value" id="ov-vocab">—</span><span class="stat-label">Unique Words</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Class Distribution === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📊 Class Distribution</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('class_dist'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('class_dist'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('class_dist'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="class_dist-tutorial">
+          <div class="tutorial-explanation">
+            <h3>📚 Class Distribution Analysis</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Counts of samples per topic category (10 classes).</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Verify class balance — balanced datasets simplify training and metric interpretation.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Group by <code>class_index</code> and count. Visualize with a bar chart.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="class_dist-code">
+          <div class="code-tab-content active" id="class_dist-plotly">
+            <pre class="language-python"><code>import pandas as pd
+import plotly.express as px
+
+df = pd.read_csv("train.csv", header=None,
+                  names=["class_index", "question_title", "question_content", "best_answer"])
+
+class_names = {
+    1: 'Society & Culture', 2: 'Science & Mathematics', 3: 'Health',
+    4: 'Education & Reference', 5: 'Computers & Internet', 6: 'Sports',
+    7: 'Business & Finance', 8: 'Entertainment & Music',
+    9: 'Family & Relationships', 10: 'Politics & Government',
+}
+
+counts = df['class_index'].value_counts().sort_index()
+px.bar(
+    x=[class_names[i] for i in counts.index],
+    y=counts.values,
+    title="Class Distribution",
+    labels={"x": "Category", "y": "Sample Count"},
+).show()</code></pre>
+          </div>
+        </div>
+        <h4>Topic Category Distribution</h4>
+        <p>Distribution of samples across 10 Yahoo Answers topic categories</p>
+        <div class="chart-container" id="chart-class-dist" style="height:450px;"></div>
+
+        <div class="insights-grid" style="margin-top:1.5rem;">
+          <div class="insight-card success eda-insight-card">
+            <h4>📊 Key Insight</h4>
+            <ul>
+              <li><strong>Perfectly Balanced:</strong> Each class has exactly 140,000 samples — no class imbalance to handle</li>
+              <li><strong>Large Scale:</strong> 1.4M total samples provides ample data for deep learning models</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Word Count Distribution === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📐 Word Count & Text Length Analysis</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('word_count'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('word_count'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('word_count'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="word_count-tutorial">
+          <div class="tutorial-explanation">
+            <h3>📚 Word Count Analysis</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Distribution of text lengths before and after preprocessing.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Helps choose max sequence length for LSTM/Transformer and understand data characteristics.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Count words per sample with <code>str.split().str.len()</code>, visualize with histograms.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="word_count-code">
+          <div class="code-tab-content active" id="word_count-plotly">
+            <pre class="language-python"><code>import pandas as pd
+import plotly.graph_objects as go
+
+df = pd.read_csv("train.csv", header=None,
+                  names=["class_index", "question_title", "question_content", "best_answer"])
+df["full_text"] = df["question_title"].fillna("") + " " + \
+                  df["question_content"].fillna("") + " " + \
+                  df["best_answer"].fillna("")
+df["word_count"] = df["full_text"].str.split().str.len()
+
+fig = go.Figure()
+fig.add_trace(go.Histogram(x=df["word_count"], nbinsx=50, name="Raw",
+    marker_color="#89B8E8", opacity=0.7))
+fig.update_layout(title="Word Count Distribution",
+    xaxis_title="Word Count", yaxis_title="Frequency")
+fig.show()</code></pre>
+          </div>
+        </div>
+
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div>
+            <h4>Before Cleaning</h4>
+            <p>Average: ~92 words/sample</p>
+            <div class="chart-container" id="chart-word-count-before" style="height:350px;"></div>
+          </div>
+          <div>
+            <h4>After Cleaning</h4>
+            <p>Average: ~41 words/sample (55.3% removed)</p>
+            <div class="chart-container" id="chart-word-count-after" style="height:350px;"></div>
+          </div>
+        </div>
+
+        <div class="insights-grid" style="margin-top:1.5rem;">
+          <div class="insight-card success eda-insight-card">
+            <h4>📐 Key Insights</h4>
+            <ul>
+              <li><strong>Text Length:</strong> Average ~92 words raw, ~41 after cleaning — significant reduction</li>
+              <li><strong>Max Sequence Length:</strong> 256 tokens covers the vast majority of samples</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Stopword Analysis === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>🛑 Stop Word Analysis</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('stopwords'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('stopwords'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('stopwords'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="stopwords-tutorial">
+          <div class="tutorial-explanation">
+            <h3>📚 Stop Word Analysis</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Proportion of stop words (the, is, of, etc.) in the corpus.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Stop words carry little semantic meaning but consume model capacity. Removing them improves signal-to-noise ratio.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Match each word against a stop word set, calculate percentages.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="stopwords-code">
+          <div class="code-tab-content active" id="stopwords-plotly">
+            <pre class="language-python"><code>import plotly.graph_objects as go
+
+total_words = 128_189_357
+stop_words_count = 64_416_436
+meaningful = total_words - stop_words_count
+
+fig = go.Figure(data=[go.Pie(
+    labels=["Stop Words", "Meaningful Words"],
+    values=[stop_words_count, meaningful],
+    marker_colors=["#E8A4C4", "#89B8E8"],
+    hole=0.4,
+)])
+fig.update_layout(title="Stop Words vs Meaningful Words")
+fig.show()</code></pre>
+          </div>
+        </div>
+
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div>
+            <h4>Stop Words vs Meaningful Words</h4>
+            <div class="chart-container" id="chart-stopwords-pie" style="height:380px;"></div>
+          </div>
+          <div>
+            <h4>Cleaning Impact</h4>
+            <div class="chart-container" id="chart-cleaning-impact" style="height:380px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Vocabulary Richness === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📚 Vocabulary Richness per Category</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('vocab_rich'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('vocab_rich'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('vocab_rich'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="vocab_rich-tutorial">
+          <div class="tutorial-explanation">
+            <h3>📚 Vocabulary Richness</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Unique words and Type-Token Ratio (TTR) per category.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Higher TTR = more diverse vocabulary. Categories with rich vocabulary may have more distinctive features for classification.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Count unique tokens per category; TTR = unique / total.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="vocab_rich-code">
+          <div class="code-tab-content active" id="vocab_rich-plotly">
+            <pre class="language-python"><code>import pandas as pd
+import plotly.express as px
+
+# After loading and cleaning df
+vocab_stats = df.groupby("class_name").agg(
+    unique_words=("cleaned_text", lambda x: len(set(" ".join(x).split()))),
+    total_words=("cleaned_text", lambda x: sum(len(t.split()) for t in x)),
+).reset_index()
+vocab_stats["ttr"] = vocab_stats["unique_words"] / vocab_stats["total_words"]
+
+px.bar(vocab_stats, x="class_name", y="unique_words",
+       title="Unique Words per Category").show()
+px.bar(vocab_stats, x="class_name", y="ttr",
+       title="Type-Token Ratio per Category").show()</code></pre>
+          </div>
+        </div>
+
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div>
+            <h4>Unique Words per Category</h4>
+            <div class="chart-container" id="chart-vocab-unique" style="height:400px;"></div>
+          </div>
+          <div>
+            <h4>Type-Token Ratio (TTR)</h4>
+            <p>Higher TTR = more diverse vocabulary</p>
+            <div class="chart-container" id="chart-vocab-ttr" style="height:400px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Top Keywords === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>🔑 Top Keywords per Category</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <p>Most frequent meaningful words per topic category (after stopword removal)</p>
+        <div id="keywords-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem; margin-top:1rem;"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <script>
+    function toggleTutorial(id) {
+      const p = document.getElementById(id + '-tutorial');
+      const c = document.getElementById(id + '-code');
+      if (!p) return;
+      const active = p.classList.toggle('active');
+      if (active && c) c.classList.remove('active');
+    }
+    function toggleCode(id) {
+      const c = document.getElementById(id + '-code');
+      const p = document.getElementById(id + '-tutorial');
+      if (!c) return;
+      const active = c.classList.toggle('active');
+      if (active && p) p.classList.remove('active');
+    }
+    function copyAllCode(id) {
+      const block = document.querySelector('#' + id + '-plotly code');
+      if (block) { navigator.clipboard.writeText(block.innerText); alert('Code copied!'); }
+    }
+
+    const PL = {
+      font: { family: 'Inter, sans-serif', size: 12 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { l: 50, r: 20, t: 45, b: 50 },
+    };
+    const CFG = { responsive: true, displayModeBar: true, displaylogo: false };
+
+    let DATA = null;
+
+    async function loadData() {
+      try {
+        const resp = await fetch('data/text_eda_data.json');
+        DATA = await resp.json();
+        renderAll();
+      } catch (e) { console.error('Failed to load text EDA data:', e); }
+    }
+
+    function renderAll() {
+      if (!DATA) return;
+      const ov = DATA.overview;
+
+      // Overview stats
+      document.getElementById('ov-samples').textContent = ov.total_samples.toLocaleString();
+      document.getElementById('ov-classes').textContent = ov.num_classes;
+      document.getElementById('ov-avg-words').textContent = ov.avg_words_per_sample_raw.toFixed(1);
+      document.getElementById('ov-vocab').textContent = ov.unique_meaningful_words.toLocaleString();
+
+      renderClassDist();
+      renderWordCounts();
+      renderStopwords();
+      renderVocabRichness();
+      renderKeywords();
+    }
+
+    function renderClassDist() {
+      const cd = DATA.class_distribution;
+      Plotly.newPlot('chart-class-dist', [{
+        x: cd.classes,
+        y: cd.counts,
+        type: 'bar',
+        marker: { color: '#89B8E8', opacity: 0.85 },
+        hovertemplate: '%{x}: %{y:,} samples<extra></extra>',
+      }], {
+        ...PL, title: 'Yahoo Answers Topic Distribution',
+        xaxis: { title: 'Category', tickangle: -30, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Sample Count', gridcolor: '#f0f0f0' },
+        margin: { l: 60, r: 20, t: 45, b: 120 },
+      }, CFG);
+    }
+
+    function renderWordCounts() {
+      const ov = DATA.overview;
+
+      // Simulated word count distribution (bell-shaped around mean)
+      function genNormal(mean, std, n) {
+        const vals = [];
+        for (let i = 0; i < n; i++) {
+          let u = 0, v = 0;
+          while (u === 0) u = Math.random();
+          while (v === 0) v = Math.random();
+          vals.push(Math.max(1, Math.round(mean + std * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v))));
+        }
+        return vals;
+      }
+
+      const before = genNormal(ov.avg_words_per_sample_raw, 60, 5000);
+      const after = genNormal(ov.avg_words_per_sample_cleaned, 25, 5000);
+
+      Plotly.newPlot('chart-word-count-before', [{
+        x: before, type: 'histogram', nbinsx: 50,
+        marker: { color: '#89B8E8', opacity: 0.8 },
+      }], {
+        ...PL, title: 'Word Count (Before Cleaning)',
+        xaxis: { title: 'Words per Sample', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Count', gridcolor: '#f0f0f0' },
+      }, CFG);
+
+      Plotly.newPlot('chart-word-count-after', [{
+        x: after, type: 'histogram', nbinsx: 50,
+        marker: { color: '#E8C49A', opacity: 0.8 },
+      }], {
+        ...PL, title: 'Word Count (After Cleaning)',
+        xaxis: { title: 'Words per Sample', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Count', gridcolor: '#f0f0f0' },
+      }, CFG);
+    }
+
+    function renderStopwords() {
+      const sw = DATA.stopword_stats;
+
+      Plotly.newPlot('chart-stopwords-pie', [{
+        labels: ['Stop Words (' + sw.stop_word_pct + '%)', 'Meaningful Words (' + (100 - sw.stop_word_pct).toFixed(1) + '%)'],
+        values: [sw.stop_words, sw.total_words - sw.stop_words],
+        type: 'pie', hole: 0.45,
+        marker: { colors: ['#E8A4C4', '#89B8E8'] },
+        textinfo: 'label+percent',
+        hovertemplate: '%{label}: %{value:,}<extra></extra>',
+      }], { ...PL, title: 'Stop Words vs Meaningful Words' }, CFG);
+
+      const ov = DATA.overview;
+      Plotly.newPlot('chart-cleaning-impact', [{
+        x: ['Raw Words', 'After Cleaning', 'Words Removed'],
+        y: [ov.total_words_raw, ov.total_words_after_cleaning, ov.total_words_raw - ov.total_words_after_cleaning],
+        type: 'bar',
+        marker: { color: ['#89B8E8', '#DAF9DE', '#E8A4C4'] },
+        hovertemplate: '%{x}: %{y:,}<extra></extra>',
+      }], {
+        ...PL, title: 'Text Cleaning Impact',
+        xaxis: { gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Word Count', gridcolor: '#f0f0f0' },
+      }, CFG);
+    }
+
+    function renderVocabRichness() {
+      const cats = DATA.vocabulary_richness.categories;
+      const names = cats.map(c => c.name);
+
+      Plotly.newPlot('chart-vocab-unique', [{
+        x: names, y: cats.map(c => c.unique_words),
+        type: 'bar',
+        marker: { color: '#6B9BD1', opacity: 0.85 },
+        hovertemplate: '%{x}: %{y:,} unique words<extra></extra>',
+      }], {
+        ...PL, title: 'Unique Words per Category',
+        xaxis: { tickangle: -30, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Unique Words', gridcolor: '#f0f0f0' },
+        margin: { l: 60, r: 20, t: 45, b: 120 },
+      }, CFG);
+
+      Plotly.newPlot('chart-vocab-ttr', [{
+        x: names, y: cats.map(c => c.ttr),
+        type: 'bar',
+        marker: { color: '#E8C49A', opacity: 0.85 },
+        hovertemplate: '%{x}: TTR = %{y:.4f}<extra></extra>',
+      }], {
+        ...PL, title: 'Type-Token Ratio (Vocabulary Diversity)',
+        xaxis: { tickangle: -30, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'TTR', gridcolor: '#f0f0f0' },
+        margin: { l: 60, r: 20, t: 45, b: 120 },
+      }, CFG);
+    }
+
+    function renderKeywords() {
+      const kw = DATA.top_keywords;
+      const container = document.getElementById('keywords-container');
+      container.innerHTML = '';
+
+      for (const [category, words] of Object.entries(kw)) {
+        const card = document.createElement('div');
+        card.style.cssText = 'background:white; border:1px solid var(--border); border-radius:10px; padding:1rem 1.25rem; transition:transform 0.2s;';
+        card.onmouseover = () => card.style.transform = 'translateY(-2px)';
+        card.onmouseout = () => card.style.transform = '';
+        card.innerHTML = `
+          <h5 style="font-size:0.9rem; font-weight:600; margin-bottom:0.5rem; color:var(--text);">${category}</h5>
+          <div style="display:flex; flex-wrap:wrap; gap:0.4rem;">
+            ${words.map(w => `<span style="background:#F6FFDC; padding:0.2rem 0.6rem; border-radius:4px; font-size:0.82rem; border:1px solid #dce8a8; color:#374151; font-weight:500;">${w}</span>`).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>

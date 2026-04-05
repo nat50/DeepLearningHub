@@ -1,0 +1,52 @@
+{
+  "experiment_name": "BERT Base Uncased",
+  "experiment_slug": "bert_default",
+  "backbone": "bert",
+  "best_epoch": 1,
+  "split_sizes": {
+    "train": 979999,
+    "val": 210000,
+    "test": 210001
+  },
+  "class_names": [
+    "Society & Culture",
+    "Science & Mathematics",
+    "Health",
+    "Education & Reference",
+    "Computers & Internet",
+    "Sports",
+    "Business & Finance",
+    "Entertainment & Music",
+    "Family & Relationships",
+    "Politics & Government"
+  ],
+  "model_config": {
+    "key": "bert",
+    "display_name": "BERT Base Uncased",
+    "family": "transformer",
+    "pretrained_source": "HuggingFace / bert-base-uncased",
+    "description": "12-layer Transformer, 768 hidden, ~110M params"
+  },
+  "training_time_minutes": 84.35550962141666,
+  "val_metrics": {
+    "loss": 0.8193825499943325,
+    "accuracy": 0.7381714285714286,
+    "precision": 0.7349767709077517,
+    "recall": 0.7381714285714286,
+    "f1": 0.7325836254899654
+  },
+  "test_metrics": {
+    "loss": 0.8210749068577902,
+    "accuracy": 0.7367393488602435,
+    "precision": 0.733818602899776,
+    "recall": 0.7367393488602435,
+    "f1": 0.7314062291615914
+  },
+  "resource_metrics": {
+    "parameters": 109489930.0,
+    "trainable_parameters": 109489930.0,
+    "model_size_mb": 417.749719619751,
+    "inference_time_ms": 3.6546133599949826
+  },
+  "checkpoint_path": "results/yahoo_answers_classification/bert_default/best_model.pth"
+}

@@ -1,9 +1,33 @@
 {
-  "status": "template",
-  "assignment": "assignment1",
-  "pipeline": "text_classification",
-  "message": "TODO: replace this template with text classification experiment summaries.",
   "experiments": {},
   "learning_curves": {},
-  "evaluation": {}
+  "status": "pending",
+  "model_info": {
+    "lstm": {
+      "display_name": "Bidirectional LSTM",
+      "family": "rnn",
+      "pretrained_source": "Random (embedding trained from scratch)",
+      "architecture": "Embedding(50K, 128) → Bi-LSTM(256, 2 layers) → FC(512→10)",
+      "hyperparameters": {
+        "batch_size": 64,
+        "learning_rate": "1e-3",
+        "max_epochs": 3,
+        "max_seq_len": 256,
+        "optimizer": "Adam"
+      }
+    },
+    "bert": {
+      "display_name": "BERT Base Uncased",
+      "family": "transformer",
+      "pretrained_source": "HuggingFace / bert-base-uncased",
+      "architecture": "BERT(12 layers, 768 hidden) → Dropout(0.3) → FC(768→10)",
+      "hyperparameters": {
+        "batch_size": 16,
+        "learning_rate": "2e-5",
+        "max_epochs": 2,
+        "max_len": 256,
+        "optimizer": "AdamW"
+      }
+    }
+  }
 }

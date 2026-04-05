@@ -1,10 +1,229 @@
 {
-  "status": "template",
-  "assignment": "assignment1",
-  "pipeline": "text_classification",
-  "message": "TODO: replace this template with text EDA outputs.",
-  "overview": {},
-  "distributions": {},
-  "embeddings": {},
-  "samples": []
+  "overview": {
+    "dataset_name": "Yahoo Answers Topic Classification",
+    "total_samples": 1400000,
+    "num_classes": 10,
+    "num_columns": 4,
+    "columns": [
+      "class_index",
+      "question_title",
+      "question_content",
+      "best_answer"
+    ],
+    "missing_values": {
+      "class_index": 0,
+      "question_title": 0,
+      "question_content": 631689,
+      "best_answer": 24596
+    },
+    "total_words_raw": 128189357,
+    "avg_words_per_sample_raw": 91.56,
+    "avg_words_per_sample_cleaned": 40.9,
+    "total_words_after_cleaning": 57258160,
+    "words_removed_pct": 55.3,
+    "unique_meaningful_words": 2162990
+  },
+  "class_distribution": {
+    "classes": [
+      "Society & Culture",
+      "Science & Mathematics",
+      "Health",
+      "Education & Reference",
+      "Computers & Internet",
+      "Sports",
+      "Business & Finance",
+      "Entertainment & Music",
+      "Family & Relationships",
+      "Politics & Government"
+    ],
+    "counts": [
+      140000,
+      140000,
+      140000,
+      140000,
+      140000,
+      140000,
+      140000,
+      140000,
+      140000,
+      140000
+    ]
+  },
+  "stopword_stats": {
+    "total_words": 128189357,
+    "stop_words": 64416436,
+    "stop_word_pct": 50.25,
+    "unique_stop_words_found": 316
+  },
+  "word_count_distribution": {
+    "before_cleaning": {
+      "mean": 91.56,
+      "description": "Average words per sample before cleaning"
+    },
+    "after_cleaning": {
+      "mean": 40.9,
+      "description": "Average words per sample after stopword removal and cleaning"
+    }
+  },
+  "vocabulary_richness": {
+    "categories": [
+      {
+        "name": "Society & Culture",
+        "unique_words": 179621,
+        "total_words": 6765800,
+        "ttr": 0.0265,
+        "samples": 140000
+      },
+      {
+        "name": "Science & Mathematics",
+        "unique_words": 182383,
+        "total_words": 6365025,
+        "ttr": 0.0287,
+        "samples": 140000
+      },
+      {
+        "name": "Health",
+        "unique_words": 147638,
+        "total_words": 6825650,
+        "ttr": 0.0216,
+        "samples": 140000
+      },
+      {
+        "name": "Education & Reference",
+        "unique_words": 206346,
+        "total_words": 5612358,
+        "ttr": 0.0368,
+        "samples": 140000
+      },
+      {
+        "name": "Computers & Internet",
+        "unique_words": 131064,
+        "total_words": 5576682,
+        "ttr": 0.0235,
+        "samples": 140000
+      },
+      {
+        "name": "Sports",
+        "unique_words": 153819,
+        "total_words": 4761439,
+        "ttr": 0.0323,
+        "samples": 140000
+      },
+      {
+        "name": "Business & Finance",
+        "unique_words": 151676,
+        "total_words": 5333581,
+        "ttr": 0.0284,
+        "samples": 140000
+      },
+      {
+        "name": "Entertainment & Music",
+        "unique_words": 155283,
+        "total_words": 4920750,
+        "ttr": 0.0316,
+        "samples": 140000
+      },
+      {
+        "name": "Family & Relationships",
+        "unique_words": 119282,
+        "total_words": 5888342,
+        "ttr": 0.0203,
+        "samples": 140000
+      },
+      {
+        "name": "Politics & Government",
+        "unique_words": 175574,
+        "total_words": 6192530,
+        "ttr": 0.0284,
+        "samples": 140000
+      }
+    ]
+  },
+  "top_keywords": {
+    "Society & Culture": [
+      "people",
+      "god",
+      "like",
+      "just",
+      "dont"
+    ],
+    "Science & Mathematics": [
+      "water",
+      "like",
+      "know",
+      "does",
+      "time"
+    ],
+    "Health": [
+      "like",
+      "just",
+      "dont",
+      "know",
+      "help"
+    ],
+    "Education & Reference": [
+      "school",
+      "know",
+      "like",
+      "help",
+      "need"
+    ],
+    "Computers & Internet": [
+      "computer",
+      "use",
+      "need",
+      "want",
+      "like"
+    ],
+    "Sports": [
+      "team",
+      "game",
+      "best",
+      "year",
+      "play"
+    ],
+    "Business & Finance": [
+      "money",
+      "pay",
+      "work",
+      "tax",
+      "business"
+    ],
+    "Entertainment & Music": [
+      "song",
+      "like",
+      "movie",
+      "best",
+      "know"
+    ],
+    "Family & Relationships": [
+      "like",
+      "just",
+      "dont",
+      "know",
+      "love"
+    ],
+    "Politics & Government": [
+      "people",
+      "like",
+      "think",
+      "government",
+      "war"
+    ]
+  },
+  "tokenization": {
+    "lstm": {
+      "vocab_size": 50002,
+      "special_tokens": {
+        "PAD": 0,
+        "UNK": 1
+      },
+      "max_seq_len": 256
+    },
+    "transformer": {
+      "model": "bert-base-uncased",
+      "vocab_size": 30522,
+      "max_len": 256
+    }
+  }
 }

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classification EDA — Yahoo Answers | DL Hub</title>
+  <meta name="description" content="Classification-focused EDA for Yahoo Answers: class balance, train/val/test splits, and vocabulary analysis for ML classification.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <style>
+    .menu-actions { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 20px; }
+    .menu-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: 0.2s; color: #374151; }
+    .btn-tutorial { background: #F9B2D7; }
+    .btn-tutorial:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-code { background: #CFECF3; }
+    .btn-code:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .btn-copy { background: #DAF9DE; }
+    .btn-copy:hover { filter: brightness(0.97); transform: translateY(-1px); }
+    .tutorial-panel, .code-panel { display: none; background: #F6FFDC; border-left: 5px solid #F9B2D7; border-radius: 8px; padding: 20px; margin: 20px 0px; }
+    .code-panel { border-left-color: #CFECF3; background: #fafff5; }
+    .tutorial-panel.active, .code-panel.active { display: block; }
+    .tutorial-explanation h3 { margin-top: 0; color: #7c3d5a; }
+    .explanation-item { margin-bottom: 12px; }
+    .explanation-item strong { color: #b8567a; font-size: 1.05rem; }
+    .code-tab-content pre { margin-top: 15px; background: #282c34; color: #abb2bf; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    .code-tab-content pre code { background: transparent !important; color: inherit !important; padding: 0 !important; font-family: monospace !important; border: none !important; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../../../index.html" class="navbar-brand">DL Hub</a>
+      <ul class="navbar-links">
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Assignment 1</a></li>
+        <li><a href="index.html">EDA Home</a></li>
+        <li><a href="eda_core.html">Core</a></li>
+        <li><a href="eda_classification.html" class="active">Classification</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero-banner">
+    <h1>📊 Classification EDA</h1>
+    <p class="subtitle">Class distribution analysis, train/val/test splits, and vocabulary richness for machine learning classification</p>
+    <div class="stat-cards">
+      <div class="stat-card"><span class="stat-value">10</span><span class="stat-label">Classes</span></div>
+      <div class="stat-card"><span class="stat-value">Balanced</span><span class="stat-label">Distribution</span></div>
+      <div class="stat-card"><span class="stat-value">70/15/15</span><span class="stat-label">Split Ratio</span></div>
+    </div>
+  </header>
+
+  <section class="section">
+
+    <!-- === Class Distribution & Balance === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📊 Class Distribution & Balance</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('class_bal'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('class_bal'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('class_bal'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="class_bal-tutorial">
+          <div class="tutorial-explanation">
+            <h3>📚 Class Balance Analysis</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Check if classes are evenly represented in the dataset.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Imbalanced classes cause models to favor majority classes. Balanced data simplifies evaluation — accuracy is meaningful.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Sort classes by sample count. A flat balance curve means perfect balance. Compute imbalance ratio = max_count / min_count.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="class_bal-code">
+          <div class="code-tab-content active" id="class_bal-plotly">
+            <pre class="language-python"><code>import pandas as pd
+import plotly.graph_objects as go
+
+counts = df["class_index"].value_counts().sort_values(ascending=False)
+fig = go.Figure(go.Bar(
+    x=list(range(1, len(counts) + 1)),
+    y=counts.values,
+    marker_color="#6B9BD1",
+))
+fig.update_layout(title="Class Balance Curve (Sorted by Count)",
+    xaxis_title="Class Rank", yaxis_title="Sample Count")
+fig.show()</code></pre>
+          </div>
+        </div>
+
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div>
+            <h4>Class Distribution</h4>
+            <div class="chart-container" id="chart-class-dist" style="height:400px;"></div>
+          </div>
+          <div>
+            <h4>Class Balance Curve</h4>
+            <p>A flat line = perfect balance</p>
+            <div class="chart-container" id="chart-balance-curve" style="height:400px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Train/Val/Test Split === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📊 Train / Validation / Test Split</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="menu-actions">
+          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('splits'); event.stopPropagation();">📚 Tutorial</button>
+          <button class="menu-btn btn-code" onclick="toggleCode('splits'); event.stopPropagation();">💻 Code</button>
+          <button class="menu-btn btn-copy" onclick="copyAllCode('splits'); event.stopPropagation();">📋 Copy All</button>
+        </div>
+        <div class="tutorial-panel" id="splits-tutorial">
+          <div class="tutorial-explanation">
+            <h3>📚 Data Splits</h3>
+            <div class="explanation-item"><strong>What:</strong> <p>Partition data into training (70%), validation (15%), and test (15%) sets using stratified splitting.</p></div>
+            <div class="explanation-item"><strong>Why:</strong> <p>Train on one subset, tune hyperparameters on another, and evaluate final performance on a held-out test set. Stratification ensures class proportions are preserved.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p>Use <code>sklearn.model_selection.train_test_split</code> with <code>stratify=</code> parameter.</p></div>
+          </div>
+        </div>
+        <div class="code-panel" id="splits-code">
+          <div class="code-tab-content active" id="splits-plotly">
+            <pre class="language-python"><code>from sklearn.model_selection import train_test_split
+
+train_df, temp_df = train_test_split(
+    df, test_size=0.3, random_state=42, stratify=df["label"])
+val_df, test_df = train_test_split(
+    temp_df, test_size=0.5, random_state=42, stratify=temp_df["label"])
+
+print(f"Train: {len(train_df):,}  Val: {len(val_df):,}  Test: {len(test_df):,}")</code></pre>
+          </div>
+        </div>
+
+        <div class="split-cards" id="split-summary">
+          <div class="split-card">
+            <span class="split-label">Train</span>
+            <span class="split-value" id="split-train">980,000</span>
+            <span class="split-percent">70%</span>
+          </div>
+          <div class="split-card">
+            <span class="split-label">Validation</span>
+            <span class="split-value" id="split-val">210,000</span>
+            <span class="split-percent">15%</span>
+          </div>
+          <div class="split-card">
+            <span class="split-label">Test</span>
+            <span class="split-value" id="split-test">210,000</span>
+            <span class="split-percent">15%</span>
+          </div>
+        </div>
+
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div>
+            <h4>Overall Split Distribution</h4>
+            <div class="chart-container" id="chart-split-overall" style="height:350px;"></div>
+          </div>
+          <div>
+            <h4>Per-Class Split (Stacked)</h4>
+            <div class="chart-container" id="chart-class-split" style="height:350px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Vocabulary Analysis for Classification === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>📚 Vocabulary Analysis for Classification</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div>
+            <h4>Total Words per Category</h4>
+            <p>Categories with more text may have richer context for classification</p>
+            <div class="chart-container" id="chart-total-words" style="height:400px;"></div>
+          </div>
+          <div>
+            <h4>Vocabulary Diversity (TTR)</h4>
+            <p>Higher TTR = more lexically diverse → potentially easier to distinguish</p>
+            <div class="chart-container" id="chart-ttr-comparison" style="height:400px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Key Insights === -->
+    <div class="accordion open">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+        <h3>💡 Key Insights & Recommendations</h3>
+        <span class="accordion-toggle">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="insights-grid">
+          <div class="insight-card success">
+            <h4>✅ Strengths</h4>
+            <ul>
+              <li>Perfectly balanced classes (140K each) — no resampling needed</li>
+              <li>Large dataset (1.4M samples) — ample for deep learning</li>
+              <li>Stratified splits preserve class distribution</li>
+              <li>Rich vocabulary diversity across categories</li>
+            </ul>
+          </div>
+          <div class="insight-card warning">
+            <h4>⚠️ Challenges</h4>
+            <ul>
+              <li>Noisy user-generated text (typos, slang, abbreviations)</li>
+              <li>Overlapping topics (e.g., Politics vs Society & Culture)</li>
+              <li>Missing content: 45% of question_content is null</li>
+              <li>Large vocabulary (2.16M unique words) requires truncation</li>
+            </ul>
+          </div>
+          <div class="insight-card">
+            <h4>💡 Recommendations</h4>
+            <ul>
+              <li>Use 256 token max length — covers most samples well</li>
+              <li>LSTM with 50K vocab balances coverage vs. embedding size</li>
+              <li>BERT tokenizer handles OOV via subword tokenization</li>
+              <li>Weighted metrics (precision, recall, F1) preferred for evaluation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <script>
+    function toggleTutorial(id) {
+      const p = document.getElementById(id + '-tutorial');
+      const c = document.getElementById(id + '-code');
+      if (!p) return;
+      const active = p.classList.toggle('active');
+      if (active && c) c.classList.remove('active');
+    }
+    function toggleCode(id) {
+      const c = document.getElementById(id + '-code');
+      const p = document.getElementById(id + '-tutorial');
+      if (!c) return;
+      const active = c.classList.toggle('active');
+      if (active && p) p.classList.remove('active');
+    }
+    function copyAllCode(id) {
+      const block = document.querySelector('#' + id + '-plotly code');
+      if (block) { navigator.clipboard.writeText(block.innerText); alert('Code copied!'); }
+    }
+
+    const PL = {
+      font: { family: 'Inter, sans-serif', size: 12 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { l: 50, r: 20, t: 45, b: 50 },
+    };
+    const CFG = { responsive: true, displayModeBar: true, displaylogo: false };
+    const COLORS = { train: '#6B9BD1', val: '#E8C49A', test: '#E8A4C4' };
+
+    let DATA = null;
+
+    async function loadData() {
+      try {
+        const resp = await fetch('data/text_eda_data.json');
+        DATA = await resp.json();
+        renderAll();
+      } catch (e) { console.error('Failed to load data:', e); }
+    }
+
+    function renderAll() {
+      if (!DATA) return;
+      renderClassDist();
+      renderSplits();
+      renderVocabAnalysis();
+    }
+
+    function renderClassDist() {
+      const cd = DATA.class_distribution;
+
+      Plotly.newPlot('chart-class-dist', [{
+        x: cd.classes, y: cd.counts, type: 'bar',
+        marker: { color: '#6B9BD1', opacity: 0.85 },
+        hovertemplate: '%{x}: %{y:,}<extra></extra>',
+      }], {
+        ...PL, title: 'Topic Category Distribution',
+        xaxis: { title: 'Category', tickangle: -30, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Count', gridcolor: '#f0f0f0' },
+        margin: { l: 60, r: 20, t: 45, b: 120 },
+      }, CFG);
+
+      // Balance curve (sorted)
+      const sortedCounts = [...cd.counts].sort((a, b) => b - a);
+      Plotly.newPlot('chart-balance-curve', [{
+        x: Array.from({ length: sortedCounts.length }, (_, i) => i + 1),
+        y: sortedCounts,
+        mode: 'lines+markers',
+        marker: { size: 7, color: '#6B9BD1' },
+        line: { color: '#6B9BD1' },
+        hovertemplate: 'Rank %{x}: %{y:,} samples<extra></extra>',
+      }], {
+        ...PL, title: 'Class Balance Curve',
+        xaxis: { title: 'Class Rank', gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Sample Count', gridcolor: '#f0f0f0' },
+      }, CFG);
+    }
+
+    function renderSplits() {
+      const total = DATA.overview.total_samples;
+      const train = Math.round(total * 0.7);
+      const val = Math.round(total * 0.15);
+      const test = total - train - val;
+
+      document.getElementById('split-train').textContent = train.toLocaleString();
+      document.getElementById('split-val').textContent = val.toLocaleString();
+      document.getElementById('split-test').textContent = test.toLocaleString();
+
+      Plotly.newPlot('chart-split-overall', [{
+        x: ['Train', 'Validation', 'Test'],
+        y: [train, val, test],
+        type: 'bar',
+        marker: { color: [COLORS.train, COLORS.val, COLORS.test] },
+        hovertemplate: '%{x}: %{y:,}<extra></extra>',
+      }], {
+        ...PL, title: 'Overall Split Distribution',
+        xaxis: { gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Samples', gridcolor: '#f0f0f0' },
+      }, CFG);
+
+      // Per-class stacked split
+      const classes = DATA.class_distribution.classes;
+      const perClass = 140000;
+      const trainPer = Math.round(perClass * 0.7);
+      const valPer = Math.round(perClass * 0.15);
+      const testPer = perClass - trainPer - valPer;
+
+      Plotly.newPlot('chart-class-split', [
+        { name: 'Train', x: classes, y: classes.map(() => trainPer), type: 'bar', marker: { color: COLORS.train } },
+        { name: 'Val', x: classes, y: classes.map(() => valPer), type: 'bar', marker: { color: COLORS.val } },
+        { name: 'Test', x: classes, y: classes.map(() => testPer), type: 'bar', marker: { color: COLORS.test } },
+      ], {
+        ...PL, title: 'Per-Class Split Distribution',
+        barmode: 'stack',
+        xaxis: { title: 'Class', tickangle: -30, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Samples', gridcolor: '#f0f0f0' },
+        margin: { l: 60, r: 20, t: 45, b: 120 },
+      }, CFG);
+    }
+
+    function renderVocabAnalysis() {
+      const cats = DATA.vocabulary_richness.categories;
+      const names = cats.map(c => c.name);
+
+      Plotly.newPlot('chart-total-words', [{
+        x: names, y: cats.map(c => c.total_words), type: 'bar',
+        marker: { color: '#89B8E8', opacity: 0.85 },
+        hovertemplate: '%{x}: %{y:,} words<extra></extra>',
+      }], {
+        ...PL, title: 'Total Words per Category',
+        xaxis: { tickangle: -30, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'Total Words', gridcolor: '#f0f0f0' },
+        margin: { l: 70, r: 20, t: 45, b: 120 },
+      }, CFG);
+
+      Plotly.newPlot('chart-ttr-comparison', [{
+        x: names, y: cats.map(c => c.ttr), type: 'bar',
+        marker: { color: '#E8C49A', opacity: 0.85 },
+        hovertemplate: '%{x}: TTR = %{y:.4f}<extra></extra>',
+      }], {
+        ...PL, title: 'Type-Token Ratio Comparison',
+        xaxis: { tickangle: -30, gridcolor: '#f0f0f0' },
+        yaxis: { title: 'TTR (Higher = More Diverse)', gridcolor: '#f0f0f0' },
+        margin: { l: 70, r: 20, t: 45, b: 120 },
+      }, CFG);
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>
