@@ -36,6 +36,8 @@
     .eda-cls-split .stat-card-color.blue { background: #CFECF3 !important; border: 1px solid #b8dfe8; }
     .eda-cls-split .stat-card-color.teal { background: #DAF9DE !important; border: 1px solid #b8e8c8; }
     .eda-cls-split .stat-card-color.purple { background: #F6FFDC !important; border: 1px solid #dce8a8; }
+    .eda-cls-split .stat-card-color .stat-value { color: #0f172a !important; text-shadow: none !important; }
+    .eda-cls-split .stat-card-color .stat-label { color: #334155 !important; }
   </style>
 </head>
 <body>
@@ -163,9 +165,9 @@ print(f"Imbalance ratio: {summary['imbalance_ratio']:.2f}x")</code></pre>
         <div class="tutorial-panel" id="class_dist-tutorial">
           <div class="tutorial-explanation">
             <h3>Class distribution</h3>
-            <div class="explanation-item"><strong>What:</strong> <p>Per-class image counts and a rank curve for balance.</p></div>
+            <div class="explanation-item"><strong>What:</strong> <p>Per-class image counts and a compact balance summary table.</p></div>
             <div class="explanation-item"><strong>Why:</strong> <p>Detect imbalance and plan sampling or loss weighting.</p></div>
-            <div class="explanation-item"><strong>How:</strong> <p><code>plot_classification_distribution(records)</code> builds the bar chart and balance curve from grouped class counts.</p></div>
+            <div class="explanation-item"><strong>How:</strong> <p><code>plot_classification_distribution(records)</code> builds the bar chart and balance summary from grouped class counts.</p></div>
           </div>
         </div>
         <div class="code-panel" id="class_dist-code">
@@ -199,16 +201,13 @@ px.bar(
     labels={"x": "Class", "y": "Image count"},
 ).update_layout(xaxis_tickangle=-45).show()
 
-imbalance = class_counts.to_frame(name="image_count")
-imbalance["rank"] = np.arange(1, len(imbalance) + 1)
-px.line(
-    imbalance,
-    x="rank",
-    y="image_count",
-    markers=True,
-    title="Class Balance Curve",
-    labels={"rank": "Class rank", "image_count": "Image count"},
-).show()</code></pre>
+summary = {
+    "max_count": int(class_counts.max()),
+    "min_count": int(class_counts.min()),
+    "imbalance_ratio": round(float(class_counts.max() / max(class_counts.min(), 1)), 2),
+    "balance_level": "Balanced" if class_counts.max() / max(class_counts.min(), 1) <= 1.2 else "Imbalanced",
+}
+print(summary)</code></pre>
           </div>
         </div>
         <p>Analysis of food class distribution and class balance</p>
@@ -216,9 +215,18 @@ px.line(
         <h4>Class Distribution</h4>
         <div class="chart-container" id="chart-class-dist" style="height:500px;"></div>
 
-        <h4 style="margin-top:2rem;">Class Balance Curve</h4>
-        <p>Shows how evenly distributed images are across classes</p>
-        <div class="chart-container" id="chart-balance-curve" style="height:350px;"></div>
+        <h4 style="margin-top:2rem;">Class Balance Analysis</h4>
+        <p>A compact summary of class balance instead of a separate curve.</p>
+        <div id="class-balance-summary" style="max-width:420px; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+            <tbody>
+              <tr><td style="padding:0.85rem 1rem; border-bottom:1px solid #eef2f7; color:#475569; width:55%;">Max Count</td><td id="cls-max-count" style="padding:0.85rem 1rem; border-bottom:1px solid #eef2f7; font-weight:600; text-align:right;">—</td></tr>
+              <tr><td style="padding:0.85rem 1rem; border-bottom:1px solid #eef2f7; color:#475569;">Min Count</td><td id="cls-min-count" style="padding:0.85rem 1rem; border-bottom:1px solid #eef2f7; font-weight:600; text-align:right;">—</td></tr>
+              <tr><td style="padding:0.85rem 1rem; border-bottom:1px solid #eef2f7; color:#475569;">Imbalance Ratio</td><td id="cls-imbalance-ratio" style="padding:0.85rem 1rem; border-bottom:1px solid #eef2f7; font-weight:600; text-align:right;">—</td></tr>
+              <tr><td style="padding:0.85rem 1rem; color:#475569;">Balance Level</td><td id="cls-balance-level" style="padding:0.85rem 1rem; font-weight:700; text-align:right;">—</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -645,46 +653,6 @@ print(cluster_df.groupby("cluster")["class_name"].apply(list).reset_index(name="
         <span class="accordion-toggle">▼</span>
       </div>
       <div class="accordion-body">
-        <div class="menu-actions">
-          <button class="menu-btn btn-tutorial" onclick="toggleTutorial('key_insights'); event.stopPropagation();">📚 Tutorial</button>
-          <button class="menu-btn btn-code" onclick="toggleCode('key_insights'); event.stopPropagation();">💻 Code</button>
-          <button class="menu-btn btn-copy" onclick="copyAllCode('key_insights'); event.stopPropagation();">📋 Copy All</button>
-        </div>
-        <div class="tutorial-panel" id="key_insights-tutorial">
-          <div class="tutorial-explanation">
-            <h3>Key insights</h3>
-            <div class="explanation-item"><strong>What:</strong> <p>Summary of dataset traits and practical modeling recommendations.</p></div>
-            <div class="explanation-item"><strong>Why:</strong> <p>Connect EDA conclusions to architecture and augmentation choices.</p></div>
-            <div class="explanation-item"><strong>How:</strong> <p>Summarize the EDA findings, compare backbone families, and use those observations to choose augmentation and model capacity.</p></div>
-          </div>
-        </div>
-        <div class="code-panel" id="key_insights-code">
-          <div class="code-tab-content active" id="key_insights-plotly">
-            <pre class="language-python"><code>import pandas as pd
-import plotly.express as px
-
-backbone_df = pd.DataFrame(
-    [
-        {"backbone": "resnet50", "display_name": "ResNet50", "family": "cnn", "pretrained_source": "BiT / ImageNet-21k"},
-        {"backbone": "mobilenet_v3", "display_name": "MobileNetV3 Large 100", "family": "cnn", "pretrained_source": "MIIL / ImageNet-21k"},
-        {"backbone": "vit_b16", "display_name": "ViT-B/16", "family": "transformer", "pretrained_source": "ImageNet-21k"},
-        {"backbone": "swin_b", "display_name": "Swin-B", "family": "transformer", "pretrained_source": "ImageNet-22k"},
-    ]
-)
-
-family_counts = backbone_df.groupby("family").size().reset_index(name="num_backbones")
-px.bar(
-    family_counts,
-    x="family",
-    y="num_backbones",
-    color="family",
-    title="Backbone Families Used in This Project",
-    labels={"family": "Model family", "num_backbones": "Number of backbones"},
-).show()
-
-print(backbone_df)</code></pre>
-          </div>
-        </div>
         <div class="insights-grid">
           <div class="insight-card success eda-cls-insight">
             <h4>Dataset Characteristics</h4>
@@ -824,6 +792,11 @@ print(backbone_df)</code></pre>
 
     function renderDistribution() {
       const cd = DATA.class_distribution;
+      const ov = DATA.overview || {};
+      const maxCount = Number(ov.max_count ?? Math.max(...cd.counts));
+      const minCount = Number(ov.min_count ?? Math.min(...cd.counts));
+      const imbalanceRatio = Number(ov.imbalance_ratio ?? (maxCount / Math.max(minCount, 1)));
+      const balanceLevel = imbalanceRatio <= 1.2 ? 'Balanced' : 'Imbalanced';
 
       // Class distribution bar
       Plotly.newPlot('chart-class-dist', [{
@@ -839,19 +812,17 @@ print(backbone_df)</code></pre>
         margin: { l: 50, r: 20, t: 45, b: 120 },
       }, PL_CFG);
 
-      // Balance curve
-      Plotly.newPlot('chart-balance-curve', [{
-        x: Array.from({ length: cd.counts.length }, (_, i) => i + 1),
-        y: cd.counts,
-        mode: 'lines+markers',
-        marker: { size: 4, color: '#6B9BD1' },
-        line: { color: '#6B9BD1' },
-        hovertemplate: 'Rank %{x}: %{y} images<extra></extra>',
-      }], {
-        ...PLOTLY_LAYOUT, title: 'Class Balance Curve',
-        xaxis: { title: 'Class Rank', gridcolor: '#f0f0f0' },
-        yaxis: { title: 'Image Count', gridcolor: '#f0f0f0' },
-      }, PL_CFG);
+      const maxCountEl = document.getElementById('cls-max-count');
+      const minCountEl = document.getElementById('cls-min-count');
+      const imbalanceRatioEl = document.getElementById('cls-imbalance-ratio');
+      const balanceLevelEl = document.getElementById('cls-balance-level');
+      if (maxCountEl) maxCountEl.textContent = maxCount.toLocaleString();
+      if (minCountEl) minCountEl.textContent = minCount.toLocaleString();
+      if (imbalanceRatioEl) imbalanceRatioEl.textContent = `${imbalanceRatio.toFixed(2)}x`;
+      if (balanceLevelEl) {
+        balanceLevelEl.textContent = balanceLevel;
+        balanceLevelEl.style.color = balanceLevel === 'Balanced' ? '#15803d' : '#b91c1c';
+      }
     }
 
     function renderSplits() {
