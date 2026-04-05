@@ -216,22 +216,29 @@ def lstm_collate_fn(batch):
     return padded, lengths, labels
 
 
-def make_transformer_collate_fn(tokenizer, max_length: int = 256):
-    """Return a collate function bound to a specific tokenizer."""
+class TransformerCollateFn:
+    """Pickle-safe collate callable for tokenizer-based models."""
 
-    def collate_fn(batch):
+    def __init__(self, tokenizer, max_length: int = 256):
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+
+    def __call__(self, batch):
         texts, labels = zip(*batch)
-        encoded = tokenizer(
+        encoded = self.tokenizer(
             list(texts),
             padding=True,
             truncation=True,
-            max_length=max_length,
+            max_length=self.max_length,
             return_tensors="pt",
         )
         labels = torch.tensor(labels, dtype=torch.long)
         return encoded["input_ids"], encoded["attention_mask"], labels
 
-    return collate_fn
+
+def make_transformer_collate_fn(tokenizer, max_length: int = 256):
+    """Return a pickle-safe collate callable bound to a tokenizer."""
+    return TransformerCollateFn(tokenizer=tokenizer, max_length=max_length)
 
 
 # ── splits & dataloaders ─────────────────────────────────────────────────────
@@ -264,7 +271,7 @@ def make_stratified_split_indices(
 def create_dataloaders(
     model_type: str = "lstm",
     batch_size: int = 64,
-    num_workers: int = 2,
+    num_workers: int = 0,
     max_seq_len: int = 256,
     vocab_size: int = DEFAULT_VOCAB_SIZE,
     train_size: float = 0.7,
