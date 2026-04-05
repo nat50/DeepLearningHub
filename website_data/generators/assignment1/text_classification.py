@@ -260,13 +260,13 @@ def generate_assignment1_text_classification_website_data() -> list[Path]:
     print("Generating website data for Assignment 1 / Text Classification")
     print("=" * 60)
 
-    reused = _try_reuse_built_json_outputs()
-    if reused is not None:
-        for p in reused:
-            print(f"Reused: {p}")
-        print("=" * 60)
-        print("Done! Assignment 1 text website data reused successfully.")
-        return reused
+    # reused = _try_reuse_built_json_outputs()
+    # if reused is not None:
+    #     for p in reused:
+    #         print(f"Reused: {p}")
+    #     print("=" * 60)
+    #     print("Done! Assignment 1 text website data reused successfully.")
+    #     return reused
 
     eda_data = generate_text_eda_data()
     results_data = generate_text_results_data()

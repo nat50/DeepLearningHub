@@ -1,33 +1,179 @@
 {
-  "experiments": {},
-  "learning_curves": {},
-  "status": "pending",
-  "model_info": {
-    "lstm": {
-      "display_name": "Bidirectional LSTM",
-      "family": "rnn",
-      "pretrained_source": "Random (embedding trained from scratch)",
-      "architecture": "Embedding(50K, 128) → Bi-LSTM(256, 2 layers) → FC(512→10)",
-      "hyperparameters": {
-        "batch_size": 64,
-        "learning_rate": "1e-3",
-        "max_epochs": 3,
-        "max_seq_len": 256,
-        "optimizer": "Adam"
-      }
+  "experiments": {
+    "BERT Base Uncased": {
+      "backbone": "bert",
+      "best_epoch": 1,
+      "training_time_minutes": 84.36,
+      "test_metrics": {
+        "loss": 0.8210749068577902,
+        "accuracy": 0.7367393488602435,
+        "precision": 0.733818602899776,
+        "recall": 0.7367393488602435,
+        "f1": 0.7314062291615914
+      },
+      "val_metrics": {
+        "loss": 0.8193825499943325,
+        "accuracy": 0.7381714285714286,
+        "precision": 0.7349767709077517,
+        "recall": 0.7381714285714286,
+        "f1": 0.7325836254899654
+      },
+      "resource_metrics": {
+        "parameters": 109489930.0,
+        "trainable_parameters": 109489930.0,
+        "model_size_mb": 417.749719619751,
+        "inference_time_ms": 3.6546133599949826
+      },
+      "model_config": {
+        "key": "bert",
+        "display_name": "BERT Base Uncased",
+        "family": "transformer",
+        "pretrained_source": "HuggingFace / bert-base-uncased",
+        "description": "12-layer Transformer, 768 hidden, ~110M params"
+      },
+      "split_sizes": {
+        "train": 979999,
+        "val": 210000,
+        "test": 210001
+      },
+      "class_names": [
+        "Society & Culture",
+        "Science & Mathematics",
+        "Health",
+        "Education & Reference",
+        "Computers & Internet",
+        "Sports",
+        "Business & Finance",
+        "Entertainment & Music",
+        "Family & Relationships",
+        "Politics & Government"
+      ]
     },
-    "bert": {
-      "display_name": "BERT Base Uncased",
-      "family": "transformer",
-      "pretrained_source": "HuggingFace / bert-base-uncased",
-      "architecture": "BERT(12 layers, 768 hidden) → Dropout(0.3) → FC(768→10)",
-      "hyperparameters": {
-        "batch_size": 16,
-        "learning_rate": "2e-5",
-        "max_epochs": 2,
-        "max_len": 256,
-        "optimizer": "AdamW"
-      }
+    "Bidirectional LSTM": {
+      "backbone": "lstm",
+      "best_epoch": 3,
+      "training_time_minutes": 80.27,
+      "test_metrics": {
+        "loss": 0.806598241823932,
+        "accuracy": 0.7385869591097185,
+        "precision": 0.7346466930638466,
+        "recall": 0.7385869591097185,
+        "f1": 0.7329293020150935
+      },
+      "val_metrics": {
+        "loss": 0.8087912776606424,
+        "accuracy": 0.7385380952380952,
+        "precision": 0.7347231481997448,
+        "recall": 0.7385380952380952,
+        "f1": 0.7327583586981532
+      },
+      "resource_metrics": {
+        "parameters": 8772874.0,
+        "trainable_parameters": 8772874.0,
+        "model_size_mb": 33.469215393066406,
+        "inference_time_ms": 21.29153999965638
+      },
+      "model_config": {
+        "key": "lstm",
+        "display_name": "Bidirectional LSTM",
+        "family": "rnn",
+        "pretrained_source": "Random (embedding trained from scratch)",
+        "description": "2-layer Bi-LSTM with 256 hidden units, 128-dim embeddings"
+      },
+      "split_sizes": {
+        "train": 979999,
+        "val": 210000,
+        "test": 210001
+      },
+      "class_names": [
+        "Society & Culture",
+        "Science & Mathematics",
+        "Health",
+        "Education & Reference",
+        "Computers & Internet",
+        "Sports",
+        "Business & Finance",
+        "Entertainment & Music",
+        "Family & Relationships",
+        "Politics & Government"
+      ]
     }
-  }
+  },
+  "learning_curves": {
+    "BERT Base Uncased": {
+      "epochs": [
+        1,
+        2,
+        3
+      ],
+      "train_loss": [
+        0.817227066734921,
+        0.7596713074028256,
+        0.7426320040024993
+      ],
+      "train_accuracy": [
+        0.736647690456827,
+        0.7543242391063665,
+        0.7595068974560178
+      ],
+      "train_f1": [
+        0.7320468643965585,
+        0.750020261991297,
+        0.7553122794358214
+      ],
+      "val_loss": [
+        0.8193825499943325,
+        0.8245117837633406,
+        0.8617403339658465
+      ],
+      "val_accuracy": [
+        0.7381714285714286,
+        0.7367380952380952,
+        0.7238714285714286
+      ],
+      "val_f1": [
+        0.7325836254899654,
+        0.7322864476868731,
+        0.721239896436718
+      ]
+    },
+    "Bidirectional LSTM": {
+      "epochs": [
+        1,
+        2,
+        3
+      ],
+      "train_loss": [
+        1.0739092799510246,
+        0.8695727134305142,
+        0.8274533121857076
+      ],
+      "train_accuracy": [
+        0.6529027070435787,
+        0.7213119605224086,
+        0.7338874835586567
+      ],
+      "train_f1": [
+        0.647552269618703,
+        0.7167364630655223,
+        0.7294938229158242
+      ],
+      "val_loss": [
+        0.8618866756530035,
+        0.8269745413689387,
+        0.8087912776606424
+      ],
+      "val_accuracy": [
+        0.7225285714285714,
+        0.7332809523809524,
+        0.7385380952380952
+      ],
+      "val_f1": [
+        0.71935922559565,
+        0.7278681555719406,
+        0.7327583586981532
+      ]
+    }
+  },
+  "status": "ready"
 }
