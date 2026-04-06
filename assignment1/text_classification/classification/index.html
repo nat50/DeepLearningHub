@@ -451,6 +451,13 @@ python training_pipeline.py --backbone lstm bert</code>
       if (pane) pane.classList.add('active');
       const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
       if (btn) btn.classList.add('active');
+      
+      if (tabName === 'results' && typeof RESULTS_DATA !== 'undefined' && RESULTS_DATA && RESULTS_DATA.status !== 'pending') {
+        setTimeout(() => {
+          renderSelectedLC();
+          renderConfusionMatrix();
+        }, 10);
+      }
     }
 
     function toggleTutorial(id) {
@@ -569,7 +576,9 @@ python training_pipeline.py --backbone lstm bert</code>
       });
       if (sorted.length > 0) {
         lcSelect.value = sorted[0];
+        cmSelect.value = sorted[0];
         renderSelectedLC();
+        renderConfusionMatrix();
       }
     }
 
