@@ -5,7 +5,7 @@ from utils import encode_long_text_wrapper
 
 
 class ZeroShotClassifier(nn.Module):
-    def __init__(self, clip_model, feature_dim=512, projection_dim=256):
+    def __init__(self, clip_model):
         super(ZeroShotClassifier, self).__init__()
         self.clip = clip_model
         
@@ -14,7 +14,7 @@ class ZeroShotClassifier(nn.Module):
             param.requires_grad = False
     
         
-    def predict(self, image, text, class_names):
+    def forward(self, image, text, class_names):
         """
         Args:
             image: Preprocessed image tensor [Batch, 3, 224, 224]
@@ -33,29 +33,37 @@ class ZeroShotClassifier(nn.Module):
             cls_feats = [encode_long_text_wrapper(self.clip, cls, desc, image.device) 
                          for cls in class_names]
             
-            # Stack into shape: [Num_Classes, 512]
+            # Stack into shape: [Num_Classes, 768]
             feat = torch.stack(cls_feats).squeeze(1) 
             
             all_text_features.append(feat)
 
-        # text_features shape: [Batch, Num_Classes, 512]
+        # text_features shape: [Batch, Num_Classes, 768]
         text_features = torch.stack(all_text_features)
             
         # --- STEP 1: Extract features ---
         with torch.no_grad():
-            image_features = self.clip.encode_image(image).float() # [Batch, 512]
+            image_features = self.clip.encode_image(image).float() # [Batch, 768]
             
             # --- STEP 2: L2 Normalization (Crucial before BMM) ---
             image_features = image_features / image_features.norm(dim=-1, keepdim=True)
         
         
         # Calculate similarity scores using Batch Matrix Multiplication (BMM)
-        # image_features shape: [Batch, 1, 512]
-        # text_features transposed shape: [Batch, 512, Num_Classes]
+        # image_features shape: [Batch, 1, 768]
+        # text_features transposed shape: [Batch, 768, Num_Classes]
         # Resulting logits shape: [Batch, Num_Classes]
-        logits = torch.bmm(image_features.unsqueeze(1), text_features.transpose(1, 2)).squeeze(1)
+        value = torch.bmm(image_features.unsqueeze(1), text_features.transpose(1, 2)).squeeze(1)
         
-        # Apply the standalone softmax function to get probabilities
-        probabilities = torch.softmax(logits, dim=-1)
+       
         
-        return probabilities
+        return value
+    
+    def predict(self, value, class_names):
+        """
+        Wrapper function to return predicted class labels instead of probabilities.
+        """
+        probabilities = F.softmax(value, dim=-1)
+        preds = torch.argmax(probabilities, dim=-1)
+        preds = [class_names[idx] for idx in preds.cpu().numpy()]
+        return probabilities, preds

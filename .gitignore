@@ -20,5 +20,9 @@ venv/
 .DS_Store
 Thumbs.db
 
+# data
+/assignment1/multimodal_classification/classification/data/train/
 
-assignment1/multimodal_classification/classification/data/train/
+
+# Training artifacts (large binaries)
+/assignment1/multimodal_classification/classification/model/

@@ -9,11 +9,11 @@ CURRENT_DIR = Path(__file__).resolve().parent
 # 1. PATH CONFIGURATION
 # ==========================================
 # Use absolute paths based on current directory
+NUM_SHOTS = 1
 DATASET_CSV = str(CURRENT_DIR / "data" /"train" /"train.csv")
 IMAGES_DIR = str(CURRENT_DIR / "data" / "train"/"train")
-SAVE_MODEL_PATH = str(CURRENT_DIR / "model" / "fewshot_clip.pth")
+SAVE_MODEL_PATH = str(CURRENT_DIR / "model" / f"fewshot_clip_shots{NUM_SHOTS}.pth")
 PLOT_SAVE_PATH = str(CURRENT_DIR / "evaluate" / "config" / "training_charts.png")
-
 # ==========================================
 # 2. HARDWARE & MODEL CONFIGURATION
 # ==========================================
@@ -37,7 +37,6 @@ PATIENCE = 5            # Number of epochs for early stopping
 TRAIN_SIZE = 0.6
 VAL_SIZE = 0.2
 TEST_SIZE = 0.2
-NUM_SHOTS = 5
 RANDOM_STATE = 42
 
 # ==========================================
