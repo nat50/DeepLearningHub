@@ -41,34 +41,19 @@
     <h2 class="section-title">EDA Reports</h2>
     <p class="section-subtitle">Click each card to explore detailed analysis</p>
 
-    <div class="model-info-grid" style="margin-top:1.5rem;">
+    <div class="model-info-grid" style="margin-top:1.5rem; grid-template-columns:minmax(280px, 780px); justify-content:center;">
 
-      <!-- Core EDA Card -->
-      <a href="eda_core.html" class="model-info-card" style="text-decoration:none; cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
-        <h5 style="font-size:1.1rem; margin-bottom:0.8rem;">📊 Core Dataset Analysis</h5>
-        <p style="margin-bottom:0.5rem;">Comprehensive analysis of text properties and vocabulary</p>
-        <ul style="font-size:0.82rem; text-align:left; margin-top:0.5rem;">
-          <li>10-class distribution & balance</li>
-          <li>Word count distributions (raw & cleaned)</li>
-          <li>Stop word analysis (50.25% removed)</li>
-          <li>Vocabulary richness per category</li>
-          <li>Top keywords per class</li>
-        </ul>
-        <span style="display:inline-block; margin-top:0.8rem; color:var(--primary); font-weight:600; font-size:0.85rem;">View Report →</span>
-      </a>
-
-      <!-- Classification EDA Card -->
+      <!-- Combined EDA Card -->
       <a href="eda_classification.html" class="model-info-card" style="text-decoration:none; cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">
-        <h5 style="font-size:1.1rem; margin-bottom:0.8rem;">📊 Classification Analysis</h5>
-        <p style="margin-bottom:0.5rem;">Class balance, splits, and cross-class analysis</p>
+        <h5 style="font-size:1.1rem; margin-bottom:0.8rem;">📊 Core + Classification Analysis</h5>
+        <p style="margin-bottom:0.5rem;">Unified EDA view combining dataset characteristics and classification-focused diagnostics.</p>
         <ul style="font-size:0.82rem; text-align:left; margin-top:0.5rem;">
-          <li>10-class distribution & balance curve</li>
-          <li>Train/Val/Test split analysis (70/15/15)</li>
-          <li>Vocabulary richness comparison</li>
-          <li>Text length statistics per class</li>
-          <li>Preprocessing impact analysis</li>
+          <li>Core statistics: class distribution, text length, stopword impact</li>
+          <li>Classification readiness: split strategy, balance curve, vocabulary richness</li>
+          <li>Cross-analysis snapshot linking EDA findings with model outcomes</li>
+          <li>Class samples section with 2 examples per class</li>
         </ul>
-        <span style="display:inline-block; margin-top:0.8rem; color:var(--primary); font-weight:600; font-size:0.85rem;">View Report →</span>
+        <span style="display:inline-block; margin-top:0.8rem; color:var(--primary); font-weight:600; font-size:0.85rem;">View Combined Report →</span>
       </a>
 
     </div>
