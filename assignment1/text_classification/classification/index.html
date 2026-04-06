@@ -30,6 +30,27 @@
     .pending-box { text-align:center; padding:3rem 2rem; background:var(--bg-section); border-radius:var(--radius-lg); border:2px dashed var(--border); margin:1.5rem 0; }
     .pending-box h3 { color:var(--text-secondary); margin-bottom:0.5rem; }
     .pending-box p { color:var(--text-muted); font-size:0.9rem; }
+    .panel-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+    .analysis-panel { background: var(--bg-section); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; }
+    .analysis-panel h4 { margin: 0 0 0.25rem 0; }
+    .panel-note { margin: 0 0 1rem 0; color: var(--text-muted); font-size: 0.9rem; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    .mini-table th, .mini-table td { padding: 0.5rem; border-bottom: 1px solid var(--border); text-align: left; }
+    .mini-table th { font-weight: 700; color: var(--text-secondary); background: rgba(148, 163, 184, 0.08); }
+    .source-pill { display:inline-block; font-size:0.75rem; border-radius:999px; padding:0.15rem 0.5rem; font-weight:600; }
+    .source-pill.pipeline { background:#dbeafe; color:#1d4ed8; }
+    .source-pill.finetune { background:#dcfce7; color:#166534; }
+    .snapshot-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:0.75rem; }
+    .snapshot-card { border:1px solid var(--border); border-radius: var(--radius-sm); padding:0.75rem; background:white; }
+    .snapshot-card h5 { margin:0 0 0.35rem 0; font-size:0.9rem; }
+    .snapshot-card p { margin:0.15rem 0; font-size:0.83rem; color:var(--text-secondary); }
+    .sample-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.9rem; }
+    .sample-card { border:1px solid var(--border); border-radius: var(--radius-sm); padding:0.85rem; background:white; }
+    .sample-card h5 { margin:0 0 0.5rem 0; font-size:0.95rem; }
+    .sample-item { border-top:1px dashed var(--border); padding-top:0.55rem; margin-top:0.55rem; }
+    .sample-item:first-of-type { border-top:none; padding-top:0; margin-top:0; }
+    .sample-item p { margin:0.2rem 0; font-size:0.82rem; line-height:1.35; color:var(--text-secondary); }
+    .sample-item strong { color:var(--text-primary); }
   </style>
 </head>
 <body>
@@ -42,7 +63,6 @@
         <li><a href="../../index.html">Assignment 1</a></li>
         <li><a href="../eda/index.html">EDA</a></li>
         <li><a href="index.html" class="active">Classification</a></li>
-        <li><a href="../bert_finetuning/index.html">BERT Fine-tuning</a></li>
       </ul>
     </div>
   </nav>
@@ -278,6 +298,57 @@ class myTransformer(nn.Module):
     <div class="tab-content" id="tab-results">
 
       <div id="results-ready" style="display:none;">
+        <div class="panel-grid">
+          <div class="analysis-panel">
+            <h4>Pipeline Comparison Panel</h4>
+            <p class="panel-note">Compare LSTM with all available BERT variants from base pipeline + fine-tuning runs.</p>
+            <div style="overflow-x:auto;">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Model</th>
+                    <th>Source</th>
+                    <th>Accuracy</th>
+                    <th>F1</th>
+                  </tr>
+                </thead>
+                <tbody id="pipeline-compare-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="analysis-panel">
+            <h4>BERT Fine-tuning Panel</h4>
+            <p class="panel-note" id="bert-ft-panel-note">Fine-tuning experiments across checkpoints and pooling strategies.</p>
+            <div class="snapshot-grid" style="margin-bottom:0.9rem;">
+              <div class="snapshot-card">
+                <h5>Best Fine-tuned BERT</h5>
+                <p id="bert-ft-best-model">-</p>
+              </div>
+              <div class="snapshot-card">
+                <h5>Best Accuracy</h5>
+                <p id="bert-ft-best-acc">-</p>
+              </div>
+              <div class="snapshot-card">
+                <h5>Fastest Inference</h5>
+                <p id="bert-ft-fastest">-</p>
+              </div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Experiment</th>
+                    <th>Pooling</th>
+                    <th>Accuracy</th>
+                    <th>F1</th>
+                  </tr>
+                </thead>
+                <tbody id="bert-ft-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- Summary Cards -->
         <div class="stat-cards-colored" style="margin-bottom:2rem;">
           <div class="stat-card-color blue"><span class="stat-value" id="best-model-name">—</span><span class="stat-label">Best Model</span></div>
@@ -289,7 +360,7 @@ class myTransformer(nn.Module):
         <!-- Performance Table -->
         <div class="accordion open">
           <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
-            <h3>📊 Performance Comparison</h3>
+            <h3>📊 Base Pipeline Comparison</h3>
             <span class="accordion-toggle">▼</span>
           </div>
           <div class="accordion-body">
@@ -351,6 +422,7 @@ class myTransformer(nn.Module):
             <div class="chart-container confusion-container" id="chart-confusion" style="height:600px; margin-top:1rem;"></div>
           </div>
         </div>
+
       </div>
 
       <!-- Pending State -->
@@ -489,11 +561,19 @@ python training_pipeline.py --backbone lstm bert</code>
 
     let RESULTS_DATA = null;
     let COMPARISON_DATA = null;
+    let BERT_FT_DATA = null;
 
     async function loadAllData() {
       try {
         const resp1 = await fetch('data/results_data.json');
         RESULTS_DATA = await resp1.json();
+
+        try {
+          const resp3 = await fetch('../bert_finetuning/data/bert_finetuning_results.json');
+          BERT_FT_DATA = await resp3.json();
+        } catch (e) {
+          console.log('No BERT fine-tuning data available yet.');
+        }
 
         // Try loading comparison data
         try {
@@ -523,6 +603,9 @@ python training_pipeline.py --backbone lstm bert</code>
       const names = Object.keys(exps);
       if (names.length === 0) return;
 
+      renderPipelineComparisonPanel();
+      renderBertFineTuningPanel();
+
       // Find best model
       let bestName = names[0], bestAcc = 0, fastestName = names[0], fastestTime = Infinity;
       for (const name of names) {
@@ -533,6 +616,7 @@ python training_pipeline.py --backbone lstm bert</code>
       }
 
       document.getElementById('hero-acc').textContent = (bestAcc * 100).toFixed(1) + '%';
+      document.getElementById('hero-models').textContent = String(getPipelineComparisonModels().length);
       document.getElementById('best-model-name').textContent = bestName;
       document.getElementById('best-acc').textContent = (bestAcc * 100).toFixed(1) + '%';
       document.getElementById('best-f1').textContent = (exps[bestName].test_metrics.f1 * 100).toFixed(1) + '%';
@@ -580,6 +664,91 @@ python training_pipeline.py --backbone lstm bert</code>
         renderSelectedLC();
         renderConfusionMatrix();
       }
+    }
+
+    function getPipelineComparisonModels() {
+      const items = [];
+
+      if (RESULTS_DATA?.experiments) {
+        Object.entries(RESULTS_DATA.experiments).forEach(([name, exp]) => {
+          const lowered = name.toLowerCase();
+          const backbone = (exp.backbone || '').toLowerCase();
+          if (backbone === 'lstm' || lowered.includes('lstm') || backbone === 'bert' || lowered.includes('bert')) {
+            items.push({ name, source: 'pipeline', exp, pooling: exp.pooling_display || '-' });
+          }
+        });
+      }
+
+      if (BERT_FT_DATA?.experiments) {
+        Object.entries(BERT_FT_DATA.experiments).forEach(([name, exp]) => {
+          items.push({ name, source: 'finetune', exp, pooling: exp.pooling_display || '-' });
+        });
+      }
+
+      return items;
+    }
+
+    function renderPipelineComparisonPanel() {
+      const tbody = document.getElementById('pipeline-compare-tbody');
+      if (!tbody) return;
+
+      const models = getPipelineComparisonModels().sort((a, b) => {
+        const accA = a.exp?.test_metrics?.accuracy ?? -1;
+        const accB = b.exp?.test_metrics?.accuracy ?? -1;
+        return accB - accA;
+      });
+
+      if (models.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">No pipeline/fine-tuning comparison data available yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = models.map(model => {
+        const test = model.exp?.test_metrics || {};
+        const sourceLabel = model.source === 'pipeline'
+          ? '<span class="source-pill pipeline">Pipeline</span>'
+          : '<span class="source-pill finetune">Fine-tuning</span>';
+        return `<tr>
+          <td><strong>${model.name}</strong></td>
+          <td>${sourceLabel}</td>
+          <td>${typeof test.accuracy === 'number' ? (test.accuracy * 100).toFixed(2) + '%' : '-'}</td>
+          <td>${typeof test.f1 === 'number' ? (test.f1 * 100).toFixed(2) + '%' : '-'}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderBertFineTuningPanel() {
+      const tbody = document.getElementById('bert-ft-tbody');
+      const note = document.getElementById('bert-ft-panel-note');
+      if (!tbody) return;
+
+      const experiments = BERT_FT_DATA?.experiments ? Object.values(BERT_FT_DATA.experiments) : [];
+      if (experiments.length === 0) {
+        note.textContent = 'No fine-tuning experiments available. Run bert_finetuning.py and regenerate website data.';
+        tbody.innerHTML = '<tr><td colspan="4">No fine-tuning data yet.</td></tr>';
+        return;
+      }
+
+      const sorted = [...experiments].sort((a, b) => (b.test_metrics?.accuracy ?? -1) - (a.test_metrics?.accuracy ?? -1));
+      const fastest = [...experiments].sort((a, b) => (a.resource_metrics?.inference_time_ms ?? Infinity) - (b.resource_metrics?.inference_time_ms ?? Infinity))[0];
+      const best = sorted[0];
+
+      document.getElementById('bert-ft-best-model').textContent = best.display_name || best.experiment_name || '-';
+      document.getElementById('bert-ft-best-acc').textContent = typeof best.test_metrics?.accuracy === 'number' ? (best.test_metrics.accuracy * 100).toFixed(2) + '%' : '-';
+      document.getElementById('bert-ft-fastest').textContent = fastest?.display_name || fastest?.experiment_name || '-';
+
+      tbody.innerHTML = sorted.map(exp => {
+        const name = exp.display_name || exp.experiment_name || '-';
+        const pooling = exp.pooling_display || exp.pooling_strategy || '-';
+        const accuracy = typeof exp.test_metrics?.accuracy === 'number' ? (exp.test_metrics.accuracy * 100).toFixed(2) + '%' : '-';
+        const f1 = typeof exp.test_metrics?.f1 === 'number' ? (exp.test_metrics.f1 * 100).toFixed(2) + '%' : '-';
+        return `<tr>
+          <td><strong>${name}</strong></td>
+          <td>${pooling}</td>
+          <td>${accuracy}</td>
+          <td>${f1}</td>
+        </tr>`;
+      }).join('');
     }
 
     function renderSelectedLC() {
