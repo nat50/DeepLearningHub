@@ -15,7 +15,7 @@ from sklearn.metrics import (
 )
 
 from dataset import get_dataloaders
-from config import DEVICE, DATASET_CSV, IMAGES_DIR, MODEL_NAME, EVAL_BATCH_SIZE, NUM_SHOTS
+from config import *
 import clip
 
 
@@ -84,19 +84,6 @@ def evaluate_model(model, dataloader, device, class_names, model_path=None, save
 
     print(f"\n--- Starting evaluation on {len(dataloader.dataset)} samples ---")
 
-    # Light GPU warm-up
-    if device == "cuda":
-        with torch.no_grad():
-            for i, (images, texts, labels) in enumerate(dataloader):
-                images = images.to(device)
-                # Xác định class names từ model hoặc từ input
-                if hasattr(model, 'predict'):
-                    _ = model.predict(images, texts, class_names)
-                else:
-                    _ = model(images, texts, class_names)
-                torch.cuda.synchronize()
-                if i >= 1:
-                    break
 
     start_time = time.time()
 
@@ -110,13 +97,13 @@ def evaluate_model(model, dataloader, device, class_names, model_path=None, save
             if device == "cuda":
                 torch.cuda.synchronize()
 
-            # Forward pass - hỗ trợ cả predict method và forward method
-            if hasattr(model, 'predict'):
-                logits = model.predict(images, texts, class_names)
-            else:
-                logits = model(images, texts, class_names)
+            # Forward pass first to get logits
+            logits = model(images, texts, class_names)
             
-            preds = torch.argmax(logits, dim=-1)
+            # Then use predict to get probabilities and predicted labels
+            probabilities, predicted_labels = model.predict(logits, class_names)
+            # Convert predicted labels (class names) back to indices
+            preds = torch.tensor([class_names.index(label) for label in predicted_labels], device=device)
 
             if device == "cuda":
                 torch.cuda.synchronize()
@@ -225,8 +212,7 @@ if __name__ == "__main__":
     # =========================================================
     # 1. MAIN CONFIGURATION
     # =========================================================
-    BATCH_SIZE = EVAL_BATCH_SIZE
-    MODEL_PATH = None  # If you have a checkpoint, put the path here
+    BATCH_SIZE = TRAIN_BATCH_SIZE
     # Example: MODEL_PATH = "model/zeroshot_clip.pth"
     # Example: MODEL_PATH = "model/fewshot_clip.pth"
 
@@ -267,7 +253,7 @@ if __name__ == "__main__":
     clip_model, _ = clip.load(MODEL_NAME, device=DEVICE)
 
     # =========================================================
-    # 4. INITIALIZE MODEL
+    # 4. INITIALIZE/LOAD MODEL
     # =========================================================
     print(f"\n--- 3. Initializing model ({'Zero-shot' if NUM_SHOTS == 0 else f'{NUM_SHOTS}-shot Few-shot'}) ---")
     
@@ -276,9 +262,7 @@ if __name__ == "__main__":
         print("Using: ZeroShotClassifier")
         from src.zero_shot_classifier import ZeroShotClassifier
         model = ZeroShotClassifier(
-            clip_model=clip_model,
-            feature_dim=768,  # ViT-L/14 embedding dim
-            projection_dim=256
+            clip_model=clip_model
         ).to(DEVICE)
     else:
         # FEW-SHOT MODEL
@@ -286,15 +270,13 @@ if __name__ == "__main__":
         from src.few_shot_classifier import FewshotClassifier
         model = FewshotClassifier(
             model=clip_model,
-            num_classes=num_classes,
-            feature_dim=768,  # ViT-L/14 embedding dim
-            projection_dim=256
+            num_classes=num_classes
         ).to(DEVICE)
 
     # Load checkpoint if available
-    if MODEL_PATH is not None and os.path.exists(MODEL_PATH):
-        print(f"Loading checkpoint from: {MODEL_PATH}")
-        checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
+    if SAVE_MODEL_PATH is not None and os.path.exists(SAVE_MODEL_PATH):
+        print(f"Loading checkpoint from: {SAVE_MODEL_PATH}")
+        checkpoint = torch.load(SAVE_MODEL_PATH, map_location=DEVICE)
         model.load_state_dict(checkpoint)
         print("✓ Checkpoint loaded successfully")
     
@@ -307,7 +289,7 @@ if __name__ == "__main__":
         dataloader=test_loader,
         device=DEVICE,
         class_names=class_names,
-        model_path=MODEL_PATH,
+        model_path=SAVE_MODEL_PATH,
         save_cm_path="evaluate/config/test_confusion_matrix.png"
     )
 

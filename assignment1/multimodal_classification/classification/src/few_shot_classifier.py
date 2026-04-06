@@ -40,7 +40,7 @@ class FewshotClassifier(nn.Module):
             nn.Linear(512, num_classes)
         )
 
-    def forward(self, image, text):
+    def forward(self, image, text,class_names=None):
         # 1. Feature Extraction (Frozen)
         with torch.no_grad():
             image_features = self.model.encode_image(image).float()
@@ -61,6 +61,27 @@ class FewshotClassifier(nn.Module):
         logits = self.classifier(combined)
         return logits
 
+    def _evaluate_loader(self, loader, criterion, device):
+        """Validation / eval loop (batched)."""
+        self.eval()
+        total_loss = 0.0
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for images, texts, labels in loader:
+                images = images.to(device)
+                texts = texts.to(device)
+                labels = labels.to(device)
+                outputs = self(images, texts)
+                loss = criterion(outputs, labels)
+                total_loss += loss.item()
+                _, predicted = torch.max(outputs, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+        n = max(len(loader), 1)
+        avg_loss = total_loss / n
+        avg_acc = 100.0 * correct / max(total, 1)
+        return avg_loss, avg_acc, None
 
     def fit(self, train_loader, val_loader):
         """
@@ -112,7 +133,7 @@ class FewshotClassifier(nn.Module):
             avg_train_acc = 100 * correct_train / total_train
 
             # --- VALIDATION PHASE ---
-            val_loss, val_acc, _ = self.predict(val_loader, criterion, DEVICE)
+            val_loss, val_acc, _ = self._evaluate_loader(val_loader, criterion, DEVICE)
             
             print(f"Epoch {epoch+1} Summary: Train Loss: {avg_train_loss:.4f} | Train Acc: {avg_train_acc:.2f}% | Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}%")
 
@@ -171,63 +192,23 @@ class FewshotClassifier(nn.Module):
         plt.close() # Close plot to free up memory
         print(f"--> Saved training charts to: {PLOT_SAVE_PATH}")
 
-    def predict(self, image_path, text_description, clip_preprocess, class_names=None):
+    def predict(self,logits, class_names):
         """
-        Inference Pipeline cho 1 mẫu dữ liệu duy nhất.
-        Nhận vào dữ liệu thô (Raw Image, Raw Text) -> Xử lý -> Trả về kết quả dự đoán.
+        Predict method to convert logits to class probabilities and predicted labels.
+        This is a standalone method that can be used for both Few-shot and Zero-shot models.
+        Args:
+            logits: Raw output from the model (before softmax)
+            class_names: Optional list of class names corresponding to the logits
+        Returns:
+            probabilities: Softmax probabilities for each class
+            predicted_labels: Predicted class labels
         """
-        self.eval() # Chuyển model sang chế độ đánh giá
+        probabilities = F.softmax(logits, dim=-1)
+        predicted_indices = torch.argmax(probabilities, dim=-1)
         
-        # Lấy device hiện tại của model
-        device = next(self.parameters()).device 
+        predicted_labels = [class_names[idx] for idx in predicted_indices.cpu().numpy()]
         
-        # ==========================================
-        # BƯỚC 1: XỬ LÝ ẢNH (Image Preprocessing)
-        # ==========================================
-        try:
-            image = Image.open(image_path).convert("RGB")
-            # Xử lý ảnh và thêm chiều Batch (shape: [1, 3, 224, 224])
-            image_tensor = clip_preprocess(image).unsqueeze(0).to(device) 
-        except Exception as e:
-            raise ValueError(f"Không thể đọc hoặc xử lý ảnh tại {image_path}. Lỗi: {e}")
-
-        # ==========================================
-        # BƯỚC 2: XỬ LÝ TEXT (Text Preprocessing)
-        # ==========================================
-        # Đảm bảo text không bị quá 77 tokens của CLIP
-        # (Nếu bạn có hàm clean_text riêng, hãy gọi nó ở đây trước khi tokenize)
-        clean_text = str(text_description).lower() if text_description else "product"
-        text_tensor = clip.tokenize(clean_text, truncate=True).to(device)
-
-        # ==========================================
-        # BƯỚC 3: DỰ ĐOÁN (Model Inference)
-        # ==========================================
-        with torch.no_grad():
-            logits = self(image_tensor, text_tensor)
-            
-            # Áp dụng softmax để chuyển logit thành phần trăm xác suất (0-1)
-            probs = F.softmax(logits, dim=1).squeeze(0)
-            
-            # Lấy index và xác suất cao nhất
-            top_prob, top_idx = torch.max(probs, dim=0)
-
-        # ==========================================
-        # BƯỚC 4: HẬU XỬ LÝ KẾT QUẢ (Post-processing)
-        # ==========================================
-        predicted_idx = top_idx.item()
-        confidence = top_prob.item() * 100 # Đổi ra %
-        
-        result = {
-            "predicted_idx": predicted_idx,
-            "confidence": f"{confidence:.2f}%",
-        }
-        
-        # Nếu truyền vào danh sách tên class, tự động map index sang tên class
-        if class_names:
-            result["predicted_class"] = class_names[predicted_idx]
-            
-        return result
-    
+        return probabilities, predicted_labels
 if __name__ == "__main__":
     """
     Main training script for FewshotClassifier model.
