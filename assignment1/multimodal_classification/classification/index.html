@@ -140,7 +140,58 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       position: relative;
     }
+    /* --- New Configuration Layout Styles --- */
+.config-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 25px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
 
+.config-panel-header {
+  background: rgba(52, 152, 219, 0.1); /* Light accent background */
+  color: var(--primary);
+  padding: 15px 20px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.05rem;
+}
+
+.config-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.config-table tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.config-table tr:last-child {
+  border-bottom: none;
+}
+
+.config-table td {
+  padding: 16px 20px;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  vertical-align: top;
+}
+
+.config-table td:first-child {
+  width: 25%;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.config-table td strong {
+  color: var(--secondary);
+}
     .pipeline-box.box-1 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
     .pipeline-box.box-2 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
     .pipeline-box.box-3 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
@@ -209,8 +260,8 @@
         <p style="color: var(--text-muted); margin-bottom: 15px;">Zero-shot learning is a learning paradigm in which a model predicts classes that were not observed during task-specific training by transferring knowledge from previously learned semantic representations.</p>
         <div class="stats-grid">
           <div class="stat-card"><h3>21</h3><p>Categories</p></div>
-          <div class="stat-card"><h3>CLIP</h3><p>Encoder Model</p></div>
-          <div class="stat-card"><h3>Image + Text</h3><p>Modalities</p></div>
+          <div class="stat-card"><h3>33.28%</h3><p>Accuracy</p></div>
+          <div class="stat-card"><h3>42,000</h3><p>Samples</p></div>
         </div>
       </div>
 
@@ -788,31 +839,69 @@ for cat_idx, category in enumerate(categories):
         </div>
 
         <div id="dash-config" class="dash-content">
-          <div class="config-grid">
-            
-            <div class="config-group">
-              <h4>⚙️ Training Hyperparameters</h4>
-              <div class="code-example">
-                <pre><code class="language-python">EPOCHS = 10
-TRAIN_BATCH_SIZE = 32
-OPTIMIZER = 'Adam'
-LEARNING_RATE = 1e-3
-PATIENCE = 5</code></pre>
-              </div>
-            </div>
+  
+  <div class="config-panel">
+    <div class="config-panel-header">
+      <span>📐 Training Configuration</span>
+      <span>▲</span>
+    </div>
+    <table class="config-table">
+      <tbody>
+        <tr>
+          <td>Dataset</td>
+          <td>42,000 samples (Image + Text)</td>
+        </tr>
+        <tr>
+          <td>Classes</td>
+          <td>21 categories</td>
+        </tr>
+        <tr>
+          <td>Preprocessing</td>
+          <td style="line-height: 1.8;">
+            <strong>IMAGE:</strong> Resize &rarr; CenterCrop &rarr; Normalize <br>
+            <strong>TEXT:</strong> Lowercase &rarr; Remove URLs/HTML &rarr; Remove stopword, punctuation &rarr; Normalize
+          </td>
+        </tr>
+        <tr>
+          <td>Early Stopping</td>
+          <td>Patience</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-            <div class="config-group">
-              <h4>📦 DataLoader Setup</h4>
-              <div class="code-example">
-                <pre><code class="language-python">TRAIN_SIZE = 0.6
-VAL_SIZE = 0.2
-TEST_SIZE = 0.2
-RANDOM_STATE = 42
-NUM_SHOTS = 5  # default</code></pre>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div class="config-panel">
+    <div class="config-panel-header">
+      <span>⚙️ Model Architectures & Hyperparameters</span>
+      <span>▲</span>
+    </div>
+    <table class="config-table">
+      <tbody>
+        <tr>
+          <td>Model Architecture</td>
+          <td>CLIP (ViT-L14)</td>
+        </tr>
+        <tr>
+          <td>Learning Rate</td>
+          <td>1e-3</td>
+        </tr>
+        <tr>
+          <td>Max Epochs</td>
+          <td>30</td>
+        </tr>
+        <tr>
+          <td>Optimizer</td>
+          <td>Adam</td>
+        </tr>
+        <tr>
+          <td>Loss Function</td>
+          <td>CrossEntropyLoss</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
 
       </div>
     </div>
@@ -826,8 +915,7 @@ NUM_SHOTS = 5  # default</code></pre>
         <div class="stats-grid">
           <div class="stat-card"><h3>21</h3><p>Categories</p></div>
           <div class="stat-card"><h3>1-64</h3><p>Shots per Category</p></div>
-          <div class="stat-card"><h3>CLIP</h3><p>Frozen Backbone</p></div>
-          <div class="stat-card"><h3>MLP</h3><p>Trainable Classifier Head</p></div>
+          <div class="stat-card"><h3>68.65%</h3><p>Best Accuracy</p></div>
         </div>
       </div>
 
@@ -1210,26 +1298,69 @@ self.classifier = nn.Sequential(
             <p style="font-size: 0.85rem; color: #888; margin-top: 15px; font-style: italic;">📝 Note: Parameters count reflects trainable parameters (MLP head for Few-shot).</p>
           </div>
 
-          <div id="dash-few-config" class="dash-content">
-            
-              <div class="config-group">
-                <h4>⚙️ Training Hyperparameters</h4>
-                <div class="code-example"><pre><code class="language-python">EPOCHS = 10
-TRAIN_BATCH_SIZE = 32
-OPTIMIZER = 'Adam'
-LEARNING_RATE = 1e-3
-PATIENCE = 5</code></pre></div>
-              </div>
-              <div class="config-group">
-                <h4>📦 DataLoader Setup</h4>
-                <div class="code-example"><pre><code class="language-python">TRAIN_SIZE = 0.6
-VAL_SIZE = 0.2
-TEST_SIZE = 0.2
-RANDOM_STATE = 42
-NUM_SHOTS = 5  # Default</code></pre></div>
-              </div>
-            </div>
-          </div>
+<div id="dash-few-config" class="dash-content">   
+  <div class="config-panel">
+    <div class="config-panel-header">
+      <span>📐 Training Configuration</span>
+      <span>▲</span>
+    </div>
+    <table class="config-table">
+      <tbody>
+        <tr>
+          <td>Dataset</td>
+          <td>42,000 samples (Image + Text)</td>
+        </tr>
+        <tr>
+          <td>Classes</td>
+          <td>21 categories</td>
+        </tr>
+        <tr>
+          <td>Preprocessing</td>
+          <td style="line-height: 1.8;">
+            <strong>IMAGE:</strong> Resize &rarr; CenterCrop &rarr; Normalize <br>
+            <strong>TEXT:</strong> Lowercase &rarr; Remove URLs/HTML &rarr; Remove stopword, punctuation &rarr; Normalize
+          </td>
+        </tr>
+        <tr>
+          <td>Early Stopping</td>
+          <td>Patience</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="config-panel">
+    <div class="config-panel-header">
+      <span>⚙️ Model Architectures & Hyperparameters</span>
+      <span>▲</span>
+    </div>
+    <table class="config-table">
+      <tbody>
+        <tr>
+          <td>Model Architecture</td>
+          <td>CLIP (ViT-L14)</td>
+        </tr>
+        <tr>
+          <td>Learning Rate</td>
+          <td>1e-3</td>
+        </tr>
+        <tr>
+          <td>Max Epochs</td>
+          <td>30</td>
+        </tr>
+        <tr>
+          <td>Optimizer</td>
+          <td>Adam</td>
+        </tr>
+        <tr>
+          <td>Loss Function</td>
+          <td>CrossEntropyLoss</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
 
         </div>
       </div>
