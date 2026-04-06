@@ -225,5 +225,127 @@
       "vocab_size": 30522,
       "max_len": 256
     }
+  },
+  "samples": {
+    "Society & Culture": [
+      {
+        "title": "Why do people say 'bless you'?",
+        "content": "When someone sneezes, it's polite to say bless you. Why is this?",
+        "best_answer": "It comes from ancient times when people thought sneezing expelled evil spirits."
+      },
+      {
+        "title": "What is the meaning of life?",
+        "content": "Philosophical question about the purpose of human existence.",
+        "best_answer": "42."
+      }
+    ],
+    "Science & Mathematics": [
+      {
+        "title": "What is the square root of -1?",
+        "content": "I am having trouble with complex numbers in my math class.",
+        "best_answer": "It is denoted by the imaginary unit 'i'."
+      },
+      {
+        "title": "How do black holes form?",
+        "content": "What happens when a massive star collapses?",
+        "best_answer": "They form when a massive star undergoes gravitational collapse at the end of its life cycle."
+      }
+    ],
+    "Health": [
+      {
+        "title": "What are symptoms of a sinus infection?",
+        "content": "I have a headache and facial pain, could it be my sinuses?",
+        "best_answer": "Yes, common symptoms include nasal congestion, facial pain, and a headache."
+      },
+      {
+        "title": "How many calories in a banana?",
+        "content": "I am trying to track my macros for my diet.",
+        "best_answer": "A medium-sized banana typically contains around 105 calories."
+      }
+    ],
+    "Education & Reference": [
+      {
+        "title": "How to cite a website in APA?",
+        "content": "I need to put a website source in my essay bibliography.",
+        "best_answer": "Author, A. A. (Year, Month Date). Title of page. Site name. URL"
+      },
+      {
+        "title": "What are good colleges for engineering?",
+        "content": "Looking for universities with strong mechanical engineering programs.",
+        "best_answer": "MIT, Stanford, and Caltech are widely regarded as top engineering schools."
+      }
+    ],
+    "Computers & Internet": [
+      {
+        "title": "How to reinstall Windows 10?",
+        "content": "My PC is running slow and I want to do a clean install.",
+        "best_answer": "Use the Windows Media Creation tool to create a bootable USB drive."
+      },
+      {
+        "title": "Why is my internet so slow?",
+        "content": "My Wi-Fi keeps disconnecting and speeds are very low.",
+        "best_answer": "Could be interference, distance from router, or issues with your ISP."
+      }
+    ],
+    "Sports": [
+      {
+        "title": "Who won the Super Bowl last year?",
+        "content": "I missed the game and want to know the final score.",
+        "best_answer": "You can check the NFL official website for recent championship results."
+      },
+      {
+        "title": "What is the offside rule in soccer?",
+        "content": "Can someone explain offside simply?",
+        "best_answer": "A player is offside if they are nearer to the opponents' goal line than both the ball and the second-last opponent."
+      }
+    ],
+    "Business & Finance": [
+      {
+        "title": "How to invest in stocks?",
+        "content": "I have some savings and want to start trading in the stock market.",
+        "best_answer": "Open a brokerage account, research index funds, and start small."
+      },
+      {
+        "title": "What happens if I file taxes late?",
+        "content": "Missed the deadline, what are the penalties?",
+        "best_answer": "You may face failure-to-file and failure-to-pay penalties from the IRS."
+      }
+    ],
+    "Entertainment & Music": [
+      {
+        "title": "What is the best movie of 2010?",
+        "content": "Looking for good film recommendations from that year.",
+        "best_answer": "Inception and The Social Network are highly acclaimed movies from 2010."
+      },
+      {
+        "title": "How to play guitar chords?",
+        "content": "Just got a guitar and want to learn basic strumming.",
+        "best_answer": "Start with basic open chords like G, C, D, and E minor."
+      }
+    ],
+    "Family & Relationships": [
+      {
+        "title": "How to deal with a stubborn teenager?",
+        "content": "My son won't listen to my advice, need parenting tips.",
+        "best_answer": "Keep communication open, pick your battles, and listen without judgment."
+      },
+      {
+        "title": "What are good wedding gifts?",
+        "content": "Going to a friend's wedding and don't know what to buy.",
+        "best_answer": "Check their wedding registry, or cash is always a practical and appreciated gift."
+      }
+    ],
+    "Politics & Government": [
+      {
+        "title": "How does the electoral college work?",
+        "content": "Can someone explain the US voting system for presidency?",
+        "best_answer": "States are allocated electors based on their Congressional representation; a candidate needs 270 to win."
+      },
+      {
+        "title": "What is a filibuster?",
+        "content": "Hearing this term on the news a lot regarding the Senate.",
+        "best_answer": "It's a tactic used in the Senate to delay or block a vote on a bill by extending debate."
+      }
+    ]
   }
 }
