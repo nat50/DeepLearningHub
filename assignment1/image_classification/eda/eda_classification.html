@@ -475,6 +475,7 @@ px.line(
           </div>
         </div>
         <p>Dimensionality reduction for feature space visualization</p>
+        <p id="feature-sample-note" style="margin-top:-0.2rem; color:#6b7280; font-size:0.9rem;"></p>
 
         <h4>PCA Explained Variance</h4>
         <p>Cumulative variance explained by principal components — shows feature space complexity</p>
@@ -865,6 +866,17 @@ print(cluster_df.groupby("cluster")["class_name"].apply(list).reset_index(name="
 
     function renderFeatures() {
       const pca = DATA.pca;
+      const emb = DATA.embeddings;
+
+      const featureNoteEl = document.getElementById('feature-sample-note');
+      if (featureNoteEl) {
+        const embCount = emb && Array.isArray(emb.labels)
+          ? emb.labels.length
+          : (emb && Array.isArray(emb.pca_x) ? emb.pca_x.length : 0);
+        featureNoteEl.textContent = embCount > 0
+          ? `Sample note: embeddings (PCA / t-SNE / UMAP) use ${embCount.toLocaleString()} sampled images.`
+          : 'Sample note: embeddings data is unavailable.';
+      }
 
       Plotly.newPlot('chart-pca-variance', [{
         x: pca.components,
@@ -889,7 +901,6 @@ print(cluster_df.groupby("cluster")["class_name"].apply(list).reset_index(name="
         }],
       }, PL_CFG);
       
-      const emb = DATA.embeddings;
       if (emb) {
         const scatterConfig = (x, y, title) => ({
           x: x, y: y, text: emb.labels,

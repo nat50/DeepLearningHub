@@ -160,6 +160,7 @@ px.histogram(
         </div>
         <h4>Size Marginal Distribution</h4>
         <p>Width vs Height scatter plot with marginal histograms showing distribution along each axis</p>
+        <p id="size-sample-note" style="margin-top:-0.2rem; color:#6b7280; font-size:0.9rem;"></p>
         <div class="chart-container" id="chart-size-scatter" style="height:500px;"></div>
 
         <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
@@ -512,6 +513,15 @@ fig.show()</code></pre>
 
     function renderSizeCharts() {
       const s = DATA.image_sizes;
+
+      const sizeNoteEl = document.getElementById('size-sample-note');
+      if (sizeNoteEl) {
+        const scatterCount = Array.isArray(s.widths) ? s.widths.length : 0;
+        const fullCount = DATA.overview && Number.isFinite(DATA.overview.total_images)
+          ? DATA.overview.total_images
+          : (Array.isArray(s.file_sizes_kb) ? s.file_sizes_kb.length : 0);
+        sizeNoteEl.textContent = `Sample note: scatter uses ${scatterCount.toLocaleString()} sampled images; file-size and aspect-ratio histograms use all images.`;
+      }
 
       // Size scatter with marginals
       Plotly.newPlot('chart-size-scatter', [{
